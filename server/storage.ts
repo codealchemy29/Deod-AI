@@ -1,22 +1,154 @@
-import { type User, type InsertUser } from "@shared/schema";
+import { 
+  type User, 
+  type InsertUser,
+  type AiTool,
+  type InsertAiTool,
+  type Course,
+  type InsertCourse,
+  type NewsArticle,
+  type InsertNewsArticle,
+  type NewsletterSubscription,
+  type InsertNewsletterSubscription,
+  type MarketplaceProduct,
+  type InsertMarketplaceProduct,
+  type ToolSubmission,
+  type InsertToolSubmission,
+} from "@shared/schema";
 import { randomUUID } from "crypto";
 
-// modify the interface with any CRUD methods
-// you might need
-
 export interface IStorage {
+  // Users
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // AI Tools
+  getAiTools(): Promise<AiTool[]>;
+  getAiToolById(id: string): Promise<AiTool | undefined>;
+  getAiToolsByCategory(category: string): Promise<AiTool[]>;
+  createAiTool(tool: InsertAiTool): Promise<AiTool>;
+  
+  // Courses
+  getCourses(): Promise<Course[]>;
+  getCourseById(id: string): Promise<Course | undefined>;
+  getCoursesByLevel(level: string): Promise<Course[]>;
+  createCourse(course: InsertCourse): Promise<Course>;
+  
+  // News Articles
+  getNewsArticles(): Promise<NewsArticle[]>;
+  getNewsArticleById(id: string): Promise<NewsArticle | undefined>;
+  getNewsArticlesByCategory(category: string): Promise<NewsArticle[]>;
+  createNewsArticle(article: InsertNewsArticle): Promise<NewsArticle>;
+  
+  // Newsletter Subscriptions
+  getNewsletterSubscriptions(): Promise<NewsletterSubscription[]>;
+  createNewsletterSubscription(subscription: InsertNewsletterSubscription): Promise<NewsletterSubscription>;
+  getNewsletterSubscriptionByEmail(email: string): Promise<NewsletterSubscription | undefined>;
+  
+  // Marketplace Products
+  getMarketplaceProducts(): Promise<MarketplaceProduct[]>;
+  getMarketplaceProductById(id: string): Promise<MarketplaceProduct | undefined>;
+  getMarketplaceProductsByCategory(category: string): Promise<MarketplaceProduct[]>;
+  createMarketplaceProduct(product: InsertMarketplaceProduct): Promise<MarketplaceProduct>;
+  
+  // Tool Submissions
+  getToolSubmissions(): Promise<ToolSubmission[]>;
+  getToolSubmissionById(id: string): Promise<ToolSubmission | undefined>;
+  createToolSubmission(submission: InsertToolSubmission): Promise<ToolSubmission>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
+  private aiTools: Map<string, AiTool>;
+  private courses: Map<string, Course>;
+  private newsArticles: Map<string, NewsArticle>;
+  private newsletterSubscriptions: Map<string, NewsletterSubscription>;
+  private marketplaceProducts: Map<string, MarketplaceProduct>;
+  private toolSubmissions: Map<string, ToolSubmission>;
 
   constructor() {
     this.users = new Map();
+    this.aiTools = new Map();
+    this.courses = new Map();
+    this.newsArticles = new Map();
+    this.newsletterSubscriptions = new Map();
+    this.marketplaceProducts = new Map();
+    this.toolSubmissions = new Map();
+    
+    this.seedData();
   }
 
+  private seedData() {
+    // Seed AI Tools
+    const toolsData: InsertAiTool[] = [
+      { name: "ChatGPT", description: "Advanced conversational AI assistant powered by GPT-4.", category: "text", useCase: "Conversation, Writing, Analysis", pricing: "Free / $20/mo", creatorName: "OpenAI", verified: true },
+      { name: "Midjourney", description: "Create stunning AI-generated art and images from text prompts.", category: "image", useCase: "Art Generation, Design", pricing: "$10/mo", creatorName: "Midjourney Inc", verified: true },
+      { name: "Runway ML", description: "Professional AI video editing and generation tools.", category: "video", useCase: "Video Generation, Editing", pricing: "$12/mo", creatorName: "Runway", verified: true },
+      { name: "ElevenLabs", description: "Realistic AI voice synthesis and cloning.", category: "audio", useCase: "Voice Synthesis, Dubbing", pricing: "Free / $5/mo", creatorName: "ElevenLabs", verified: true },
+      { name: "GitHub Copilot", description: "AI pair programmer that helps you write code faster.", category: "code", useCase: "Code Completion, Generation", pricing: "$10/mo", creatorName: "GitHub", verified: true },
+      { name: "Zapier AI", description: "Automate workflows with AI-powered integrations.", category: "automation", useCase: "Workflow Automation", pricing: "Free / $19/mo", creatorName: "Zapier", verified: true },
+      { name: "Claude", description: "Helpful, harmless, and honest AI assistant by Anthropic.", category: "text", useCase: "Conversation, Analysis, Coding", pricing: "Free / $20/mo", creatorName: "Anthropic", verified: true },
+      { name: "DALL-E 3", description: "Create realistic images and art from natural language.", category: "image", useCase: "Image Generation", pricing: "Pay per use", creatorName: "OpenAI", verified: true },
+      { name: "Cursor", description: "AI-first code editor built for pair programming with AI.", category: "code", useCase: "Code Editor, AI Assistance", pricing: "Free / $20/mo", creatorName: "Cursor Inc", verified: true },
+      { name: "Suno AI", description: "Generate original music and songs with AI.", category: "audio", useCase: "Music Generation", pricing: "Free / $8/mo", creatorName: "Suno", verified: true },
+      { name: "Pika Labs", description: "Create and edit videos with AI-powered tools.", category: "video", useCase: "Video Creation", pricing: "Free / $8/mo", creatorName: "Pika", verified: true },
+      { name: "Make.com", description: "Visual platform to design and automate anything.", category: "automation", useCase: "Visual Automation", pricing: "Free / $9/mo", creatorName: "Make", verified: true },
+    ];
+    
+    toolsData.forEach(tool => {
+      const id = randomUUID();
+      this.aiTools.set(id, { ...tool, id, verified: tool.verified ?? false, imageUrl: tool.imageUrl ?? null, websiteUrl: tool.websiteUrl ?? null });
+    });
+    
+    // Seed Courses
+    const coursesData: InsertCourse[] = [
+      { title: "AI Fundamentals", description: "Start your AI journey with core concepts and terminology.", level: "Beginner", category: "fundamentals", duration: "4 weeks", lessons: 24 },
+      { title: "Machine Learning Mastery", description: "Deep dive into ML algorithms and practical applications.", level: "Intermediate", category: "machine-learning", duration: "8 weeks", lessons: 48 },
+      { title: "Large Language Models", description: "Understand and work with LLMs like GPT, Claude, and more.", level: "Intermediate", category: "llm", duration: "6 weeks", lessons: 36 },
+      { title: "AI Agents & Automation", description: "Build intelligent agents that can reason and take actions.", level: "Advanced", category: "agents", duration: "8 weeks", lessons: 42 },
+      { title: "AI Application Development", description: "Create production-ready AI applications from scratch.", level: "Advanced", category: "development", duration: "10 weeks", lessons: 56 },
+      { title: "AI Business & Monetization", description: "Turn your AI skills into a profitable business.", level: "All Levels", category: "business", duration: "4 weeks", lessons: 20 },
+    ];
+    
+    coursesData.forEach(course => {
+      const id = randomUUID();
+      this.courses.set(id, { ...course, id, imageUrl: course.imageUrl ?? null });
+    });
+    
+    // Seed News Articles
+    const newsData: InsertNewsArticle[] = [
+      { title: "GPT-5 Rumors: What We Know About OpenAI's Next Frontier Model", excerpt: "Industry insiders are buzzing with speculation about OpenAI's next-generation model.", content: "Full article content here...", category: "Industry", author: "Sarah Chen", publishedAt: "December 15, 2024" },
+      { title: "Google Gemini 2.0: A Deep Dive Into Multimodal Reasoning", excerpt: "Google's latest AI model brings unprecedented multimodal capabilities.", content: "Full article content here...", category: "Research", author: "Mike Johnson", publishedAt: "December 14, 2024" },
+      { title: "10 AI Startups That Raised $100M+ in 2024", excerpt: "From AI agents to enterprise automation, these startups are reshaping the landscape.", content: "Full article content here...", category: "Startups", author: "Emily Davis", publishedAt: "December 13, 2024" },
+      { title: "Anthropic Releases Claude 3.5: Faster, Smarter, Safer", excerpt: "Claude's latest update brings significant improvements in speed and reasoning.", content: "Full article content here...", category: "Tool Launches", author: "James Wilson", publishedAt: "December 12, 2024" },
+      { title: "How to Build a RAG System from Scratch", excerpt: "A comprehensive guide to building Retrieval-Augmented Generation systems.", content: "Full article content here...", category: "Tutorials", author: "Alex Kumar", publishedAt: "December 11, 2024" },
+      { title: "The Rise of AI Agents: Why 2025 Will Be the Year of Autonomous AI", excerpt: "Industry experts predict a major shift towards AI agents.", content: "Full article content here...", category: "Industry", author: "Sarah Chen", publishedAt: "December 10, 2024" },
+    ];
+    
+    newsData.forEach(article => {
+      const id = randomUUID();
+      this.newsArticles.set(id, { ...article, id, imageUrl: article.imageUrl ?? null });
+    });
+    
+    // Seed Marketplace Products
+    const productsData: InsertMarketplaceProduct[] = [
+      { name: "Ultimate ChatGPT Prompt Pack", description: "500+ expertly crafted prompts for productivity, writing, coding, and more.", price: 29, category: "prompts", creatorName: "Sarah Chen", rating: 49, reviewCount: 245 },
+      { name: "AI Content Writer Pro", description: "A powerful content generation tool with SEO optimization built-in.", price: 49, category: "tools", creatorName: "Mike Johnson", rating: 48, reviewCount: 189 },
+      { name: "Customer Support Agent", description: "Autonomous AI agent that handles customer inquiries 24/7.", price: 99, category: "agents", creatorName: "Emily Davis", rating: 47, reviewCount: 156 },
+      { name: "Midjourney Prompt Templates", description: "100+ tested prompts for stunning AI art generation.", price: 19, category: "prompts", creatorName: "Alex Kumar", rating: 49, reviewCount: 312 },
+      { name: "AI Landing Page Builder", description: "Generate beautiful landing pages with AI in minutes.", price: 79, category: "tools", creatorName: "James Wilson", rating: 46, reviewCount: 98 },
+      { name: "Research Assistant Agent", description: "AI agent that searches, summarizes, and synthesizes research.", price: 59, category: "agents", creatorName: "Lisa Park", rating: 48, reviewCount: 178 },
+      { name: "SaaS Dashboard Template", description: "Complete React dashboard template with AI features built-in.", price: 149, category: "templates", creatorName: "David Brown", rating: 47, reviewCount: 67 },
+      { name: "OpenAI API Wrapper", description: "Production-ready API wrapper with rate limiting and caching.", price: 39, category: "code", creatorName: "Chris Lee", rating: 49, reviewCount: 134 },
+    ];
+    
+    productsData.forEach(product => {
+      const id = randomUUID();
+      this.marketplaceProducts.set(id, { ...product, id, rating: product.rating ?? 0, reviewCount: product.reviewCount ?? 0, imageUrl: product.imageUrl ?? null });
+    });
+  }
+
+  // Users
   async getUser(id: string): Promise<User | undefined> {
     return this.users.get(id);
   }
@@ -32,6 +164,157 @@ export class MemStorage implements IStorage {
     const user: User = { ...insertUser, id };
     this.users.set(id, user);
     return user;
+  }
+
+  // AI Tools
+  async getAiTools(): Promise<AiTool[]> {
+    return Array.from(this.aiTools.values());
+  }
+
+  async getAiToolById(id: string): Promise<AiTool | undefined> {
+    return this.aiTools.get(id);
+  }
+
+  async getAiToolsByCategory(category: string): Promise<AiTool[]> {
+    return Array.from(this.aiTools.values()).filter(
+      (tool) => tool.category === category
+    );
+  }
+
+  async createAiTool(insertTool: InsertAiTool): Promise<AiTool> {
+    const id = randomUUID();
+    const tool: AiTool = { 
+      ...insertTool, 
+      id, 
+      verified: insertTool.verified ?? false,
+      imageUrl: insertTool.imageUrl ?? null,
+      websiteUrl: insertTool.websiteUrl ?? null
+    };
+    this.aiTools.set(id, tool);
+    return tool;
+  }
+
+  // Courses
+  async getCourses(): Promise<Course[]> {
+    return Array.from(this.courses.values());
+  }
+
+  async getCourseById(id: string): Promise<Course | undefined> {
+    return this.courses.get(id);
+  }
+
+  async getCoursesByLevel(level: string): Promise<Course[]> {
+    return Array.from(this.courses.values()).filter(
+      (course) => course.level === level
+    );
+  }
+
+  async createCourse(insertCourse: InsertCourse): Promise<Course> {
+    const id = randomUUID();
+    const course: Course = { 
+      ...insertCourse, 
+      id,
+      imageUrl: insertCourse.imageUrl ?? null
+    };
+    this.courses.set(id, course);
+    return course;
+  }
+
+  // News Articles
+  async getNewsArticles(): Promise<NewsArticle[]> {
+    return Array.from(this.newsArticles.values());
+  }
+
+  async getNewsArticleById(id: string): Promise<NewsArticle | undefined> {
+    return this.newsArticles.get(id);
+  }
+
+  async getNewsArticlesByCategory(category: string): Promise<NewsArticle[]> {
+    return Array.from(this.newsArticles.values()).filter(
+      (article) => article.category === category
+    );
+  }
+
+  async createNewsArticle(insertArticle: InsertNewsArticle): Promise<NewsArticle> {
+    const id = randomUUID();
+    const article: NewsArticle = { 
+      ...insertArticle, 
+      id,
+      imageUrl: insertArticle.imageUrl ?? null
+    };
+    this.newsArticles.set(id, article);
+    return article;
+  }
+
+  // Newsletter Subscriptions
+  async getNewsletterSubscriptions(): Promise<NewsletterSubscription[]> {
+    return Array.from(this.newsletterSubscriptions.values());
+  }
+
+  async getNewsletterSubscriptionByEmail(email: string): Promise<NewsletterSubscription | undefined> {
+    return Array.from(this.newsletterSubscriptions.values()).find(
+      (sub) => sub.email === email
+    );
+  }
+
+  async createNewsletterSubscription(insertSubscription: InsertNewsletterSubscription): Promise<NewsletterSubscription> {
+    const id = randomUUID();
+    const subscription: NewsletterSubscription = { 
+      ...insertSubscription, 
+      id,
+      subscribedAt: new Date().toISOString()
+    };
+    this.newsletterSubscriptions.set(id, subscription);
+    return subscription;
+  }
+
+  // Marketplace Products
+  async getMarketplaceProducts(): Promise<MarketplaceProduct[]> {
+    return Array.from(this.marketplaceProducts.values());
+  }
+
+  async getMarketplaceProductById(id: string): Promise<MarketplaceProduct | undefined> {
+    return this.marketplaceProducts.get(id);
+  }
+
+  async getMarketplaceProductsByCategory(category: string): Promise<MarketplaceProduct[]> {
+    return Array.from(this.marketplaceProducts.values()).filter(
+      (product) => product.category === category
+    );
+  }
+
+  async createMarketplaceProduct(insertProduct: InsertMarketplaceProduct): Promise<MarketplaceProduct> {
+    const id = randomUUID();
+    const product: MarketplaceProduct = { 
+      ...insertProduct, 
+      id,
+      rating: insertProduct.rating ?? 0,
+      reviewCount: insertProduct.reviewCount ?? 0,
+      imageUrl: insertProduct.imageUrl ?? null
+    };
+    this.marketplaceProducts.set(id, product);
+    return product;
+  }
+
+  // Tool Submissions
+  async getToolSubmissions(): Promise<ToolSubmission[]> {
+    return Array.from(this.toolSubmissions.values());
+  }
+
+  async getToolSubmissionById(id: string): Promise<ToolSubmission | undefined> {
+    return this.toolSubmissions.get(id);
+  }
+
+  async createToolSubmission(insertSubmission: InsertToolSubmission): Promise<ToolSubmission> {
+    const id = randomUUID();
+    const submission: ToolSubmission = { 
+      ...insertSubmission, 
+      id,
+      status: "pending",
+      submittedAt: new Date().toISOString()
+    };
+    this.toolSubmissions.set(id, submission);
+    return submission;
   }
 }
 
