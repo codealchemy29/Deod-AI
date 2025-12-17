@@ -1,0 +1,154 @@
+DEOD AI
+:dart: Core Purpose
+DEOD AI is a next-generation AI learning, discovery, creation, and monetization platform where users can:
+Learn AI skills
+Discover & explore AI tools
+Build and launch their own AI tools
+Submit AI tools and earn 90% revenue share
+Stay updated with AI news
+Buy & sell AI products in a marketplace
+Join a powerful AI community via newsletter
+:brain: BRAND POSITIONING
+Position DEOD AI as:
+“The AI ecosystem where builders learn, create, and earn.”
+Premium, futuristic, trustworthy, creator-first, and scalable.
+:trophy: HOMEPAGE STRUCTURE (SEO OPTIMIZED)
+:white_check_mark: HERO SECTION
+H1 (Primary SEO Headline)
+DEOD AI – Learn, Build, Discover & Monetize Artificial Intelligence
+H2 (Supporting Subheadline)
+The all-in-one AI platform to master skills, explore powerful tools, create your own AI products, and earn 90% revenue as a creator.
+CTA Buttons
+Get Started Free
+Submit Your AI Tool
+Explore AI Tools
+:rocket: FEATURE HIGHLIGHTS (Grid)
+:small_blue_diamond: Learn AI from beginner to advanced
+:small_blue_diamond: Explore verified AI tools & agents
+:small_blue_diamond: Create and launch AI tools without friction
+:small_blue_diamond: Earn 90% revenue share on approved submissions
+:small_blue_diamond: AI marketplace for tools, prompts & agents
+:small_blue_diamond: Real-time AI news & insights
+:pushpin: NAVIGATION MENU (Required)
+Learn AI
+Explore AI Tools
+Create AI Tools
+Submit AI Tools
+News
+Newsletter
+Marketplace
+About
+Sticky navbar with smooth scroll and mobile hamburger menu.
+:books: PAGE-WISE CONTENT & FUNCTIONALITY
+:one: LEARN AI PAGE
+H1:
+Learn AI Skills That Actually Matter
+Features:
+Beginner → Advanced learning paths
+AI, ML, LLMs, Agents, Automation
+Course cards with progress tracking
+Future-ready placeholder for:
+Video lessons
+Interactive labs
+Certifications
+:two: EXPLORE AI TOOLS
+H1:
+Explore the Best AI Tools & Agents
+Features:
+Tool categories (Text, Image, Video, Audio, Code, Automation)
+Search + filter system
+Tool cards:
+Description
+Use case
+Creator profile
+Pricing / Free / Paid
+Verified badge system
+:three: CREATE AI TOOLS
+H1:
+Create & Launch Your Own AI Tools
+Features:
+Tool creation dashboard
+No-code & low-code friendly UI
+API & model placeholders
+Future integration-ready (OpenAI, Claude, Gemini, custom models)
+Draft → Publish workflow
+:four: SUBMIT AI TOOLS (REVENUE CORE)
+H1:
+Submit Your AI Tool & Earn 90% Revenue
+Revenue Highlight Section:
+Creators keep 90%. We take only 10%. No hidden fees.
+Features:
+Submission form
+Review & approval flow
+Revenue tracking dashboard
+Creator earnings panel
+Transparent payout logic (future blockchain/fiat ready)
+:five: NEWS PAGE
+H1:
+Latest AI News, Trends & Breakthroughs
+Features:
+AI industry updates
+Research highlights
+Startup & tool launches
+Clean blog layout
+SEO-friendly article structure
+:six: NEWSLETTER PAGE
+H1:
+Join the DEOD AI Insider Newsletter
+Features:
+Email signup
+Weekly AI insights
+Creator opportunities
+Product updates
+GDPR-ready email handling
+:seven: MARKETPLACE
+H1:
+AI Marketplace for Tools, Agents & Prompts
+Features:
+Buy & sell AI products
+Secure checkout (future payment integration ready)
+Ratings & reviews
+Creator storefronts
+:eight: ABOUT PAGE
+H1:
+About DEOD AI
+Content:
+DEOD AI is built to empower the next generation of AI creators, developers, and entrepreneurs by giving them tools, education, visibility, and real monetization.
+Mission-driven, creator-first, future-ready.
+:hammer_and_wrench: TECHNICAL REQUIREMENTS
+Clean, modular, scalable code
+Fully responsive (mobile, tablet, desktop)
+SEO optimized:
+Proper H1–H6 usage
+Meta tags
+Fast load time
+Bug-free navigation & routing
+Reusable components
+Authentication-ready (future)
+Dashboard-ready architecture
+Secure forms & validation
+No broken links or placeholders
+Dark + Light mode ready
+:art: DESIGN STYLE
+Modern futuristic UI
+Web3 + AI aesthetic
+Soft gradients, glassmorphism accents
+Clean typography
+Minimal yet powerful visuals
+High trust & premium feel
+:closed_lock_with_key: FUTURE-READY (IMPORTANT)
+Architect the site so it can later support:
+User accounts
+Creator dashboards
+Payments & subscriptions
+AI model integrations
+Token / Web3 monetization
+APIs & SDKs
+:white_check_mark: FINAL OUTPUT EXPECTATION
+Deliver:
+Fully functional website
+No errors
+No console bugs
+Clean UX
+Production-ready structure
+Easily extendable for future AI features
