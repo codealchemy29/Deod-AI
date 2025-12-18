@@ -99,15 +99,20 @@ export default function Home() {
               The Future of AI Creation
             </Badge>
             
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6" data-testid="text-hero-title">
-              <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                DEOD AI
-              </span>
-              <br />
-              <span className="text-foreground">
-                Learn, Build, Discover & Monetize
-              </span>
-            </h1>
+           <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6" data-testid="text-hero-title">
+  <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent text-6xl md:text-7xl lg:text-8xl">
+    DEOD AI
+  </span>
+  <br />
+ <span className="text-foreground text-lg md:text-xl lg:text-5xl leading-tight">
+  <span className="block mb-1">AI Evolving Everyday, Don't Fall Back,</span>
+  {/* <span className="block mb-1">Don't Fall Back,</span> */}
+  <span className="block">Learn To Use AI & Explore The Top AI Tools</span>
+</span>
+
+
+</h1>
+
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed" data-testid="text-hero-subtitle">
               The all-in-one AI platform to master skills, explore powerful tools, 

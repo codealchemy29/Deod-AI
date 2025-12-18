@@ -39,15 +39,25 @@ export function Navigation() {
       <nav className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 group" data-testid="link-home">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-cyan-500 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity" />
-              <div className="relative bg-background rounded-lg p-1.5">
-                <Brain className="h-6 w-6 text-purple-500" />
-              </div>
-            </div>
-            <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
+           <div className="relative w-max">
+  {/* Blurred background */}
+  <div className="absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity" />
+  
+  {/* Container for the logo */}
+  <div className="relative rounded-lg p-4 flex items-center justify-center">
+    <img 
+      src="/image-removebg-preview.png"  
+      alt="Logo" 
+      className="h-32 w-[200px] md:h-40 md:w-[250px] object-contain" 
+    />
+  </div>
+</div>
+
+
+
+            {/* <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
               DEOD AI
-            </span>
+            </span> */}
           </Link>
 
           <div className="hidden lg:flex items-center gap-1">

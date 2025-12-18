@@ -81,19 +81,26 @@ export class MemStorage implements IStorage {
   private seedData() {
     // Seed AI Tools
     const toolsData: InsertAiTool[] = [
-      { name: "ChatGPT", description: "Advanced conversational AI assistant powered by GPT-4.", category: "text", useCase: "Conversation, Writing, Analysis", pricing: "Free / $20/mo", creatorName: "OpenAI", verified: true },
-      { name: "Midjourney", description: "Create stunning AI-generated art and images from text prompts.", category: "image", useCase: "Art Generation, Design", pricing: "$10/mo", creatorName: "Midjourney Inc", verified: true },
-      { name: "Runway ML", description: "Professional AI video editing and generation tools.", category: "video", useCase: "Video Generation, Editing", pricing: "$12/mo", creatorName: "Runway", verified: true },
-      { name: "ElevenLabs", description: "Realistic AI voice synthesis and cloning.", category: "audio", useCase: "Voice Synthesis, Dubbing", pricing: "Free / $5/mo", creatorName: "ElevenLabs", verified: true },
-      { name: "GitHub Copilot", description: "AI pair programmer that helps you write code faster.", category: "code", useCase: "Code Completion, Generation", pricing: "$10/mo", creatorName: "GitHub", verified: true },
-      { name: "Zapier AI", description: "Automate workflows with AI-powered integrations.", category: "automation", useCase: "Workflow Automation", pricing: "Free / $19/mo", creatorName: "Zapier", verified: true },
-      { name: "Claude", description: "Helpful, harmless, and honest AI assistant by Anthropic.", category: "text", useCase: "Conversation, Analysis, Coding", pricing: "Free / $20/mo", creatorName: "Anthropic", verified: true },
-      { name: "DALL-E 3", description: "Create realistic images and art from natural language.", category: "image", useCase: "Image Generation", pricing: "Pay per use", creatorName: "OpenAI", verified: true },
-      { name: "Cursor", description: "AI-first code editor built for pair programming with AI.", category: "code", useCase: "Code Editor, AI Assistance", pricing: "Free / $20/mo", creatorName: "Cursor Inc", verified: true },
-      { name: "Suno AI", description: "Generate original music and songs with AI.", category: "audio", useCase: "Music Generation", pricing: "Free / $8/mo", creatorName: "Suno", verified: true },
-      { name: "Pika Labs", description: "Create and edit videos with AI-powered tools.", category: "video", useCase: "Video Creation", pricing: "Free / $8/mo", creatorName: "Pika", verified: true },
-      { name: "Make.com", description: "Visual platform to design and automate anything.", category: "automation", useCase: "Visual Automation", pricing: "Free / $9/mo", creatorName: "Make", verified: true },
-    ];
+  { name: "Whispr FlowAI", description: "Tool for automating workflows — converts voice/text inputs into tasks, summaries, and action items for teams.", category: "automation", useCase: "Workflow Automation", pricing: "TBD", creatorName: "Whispr", verified: true },
+  { name: "Gemini", description: "Google’s AI for content creation, coding help, image generation, chat, and research.", category: "multi", useCase: "Content, Coding, Image Generation, Research", pricing: "TBD", creatorName: "Google", verified: true },
+  { name: "EmilyAI", description: "Assistant focused on email drafting, inbox management, scheduling, and communication automation.", category: "productivity", useCase: "Email Management, Scheduling", pricing: "TBD", creatorName: "EmilyAI", verified: true },
+  { name: "FirefliesAI", description: "Meeting assistant — records, transcribes, summarizes, and analyzes meetings automatically.", category: "productivity", useCase: "Meeting Transcription, Analysis", pricing: "TBD", creatorName: "Fireflies", verified: true },
+  { name: "ChatGPT", description: "General-purpose AI for chat, coding, research, content, automation, data analysis, etc.", category: "text", useCase: "Conversation, Coding, Research, Content, Automation", pricing: "TBD", creatorName: "OpenAI", verified: true },
+  { name: "Claude", description: "Anthropic’s AI known for long-context tasks, analysis, writing, and safe enterprise workflows.", category: "text", useCase: "Analysis, Writing, Enterprise Workflows", pricing: "TBD", creatorName: "Anthropic", verified: true },
+  { name: "Phot AI", description: "AI design tool for photo editing, background removal, retouching, and AI-generated images.", category: "image", useCase: "Photo Editing, Image Generation", pricing: "TBD", creatorName: "Phot AI", verified: true },
+  { name: "SupergrowAI", description: "Tool for creating social media content, captions, and growth-focused marketing posts.", category: "marketing", useCase: "Social Media Content, Marketing", pricing: "TBD", creatorName: "Supergrow", verified: true },
+  { name: "Numerous AI", description: "Spreadsheet AI — automates Excel/Sheets tasks, formulas, cleaning, insights, and AI functions.", category: "productivity", useCase: "Spreadsheet Automation, Data Analysis", pricing: "TBD", creatorName: "Numerous", verified: true },
+  { name: "SunoAI", description: "Music generator — creates songs, vocals, background tracks instantly from text prompts.", category: "audio", useCase: "Music Generation", pricing: "TBD", creatorName: "Suno", verified: true },
+  { name: "Notebook LM", description: "Google AI for research and study, summarizes documents, PDFs, notes, and creates study guides.", category: "education", useCase: "Document Summarization, Study Guides", pricing: "TBD", creatorName: "Google", verified: true },
+  { name: "Social SonicAI", description: "AI for social media automation, scheduling, content creation, and engagement optimization.", category: "marketing", useCase: "Social Media Automation, Content Creation", pricing: "TBD", creatorName: "Social Sonic", verified: true },
+  { name: "BoltAI", description: "Website builder — creates full websites, HTML/CSS/JS code from simple prompts.", category: "web", useCase: "Website Generation, Code Generation", pricing: "TBD", creatorName: "Bolt", verified: true },
+  { name: "VapiAI", description: "Voice agent platform for creating AI calling bots, customer support, and sales automation with voice.", category: "voice", useCase: "AI Calling Bots, Customer Support", pricing: "TBD", creatorName: "Vapi", verified: true },
+  { name: "ChronicleAI", description: "Storytelling and documentation tool — helps create timelines, narratives, and structured stories.", category: "productivity", useCase: "Storytelling, Documentation", pricing: "TBD", creatorName: "Chronicle", verified: true },
+  { name: "Humanic AI", description: "HR automation tool using AI for candidate screening, onboarding flows, and employee insights.", category: "hr", useCase: "HR Automation, Employee Insights", pricing: "TBD", creatorName: "Humanic", verified: true },
+  { name: "HappenstanceAI", description: "For career discovery — analyzes personality, skills, and recommends career paths.", category: "career", useCase: "Career Guidance, Skill Analysis", pricing: "TBD", creatorName: "Happenstance", verified: true },
+  { name: "Perplexity Comet", description: "AI designed for deep research — provides verified answers with citations and advanced retrieval.", category: "research", useCase: "Research, Verification, Retrieval", pricing: "TBD", creatorName: "Perplexity", verified: true },
+];
+
     
     toolsData.forEach(tool => {
       const id = randomUUID();
