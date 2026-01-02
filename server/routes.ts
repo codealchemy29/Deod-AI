@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage.js";
+import { storage } from "./storage";
 import { insertAiToolSchema, insertToolSubmissionSchema, insertNewsletterSubscriptionSchema } from "@shared/schema";
 import { z } from "zod";
 
