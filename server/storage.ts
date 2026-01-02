@@ -13,7 +13,7 @@ import {
   type InsertMarketplaceProduct,
   type ToolSubmission,
   type InsertToolSubmission,
-} from "@shared/schema";
+} from "../shared/schema.js";
 import crypto from "crypto";
 
 export interface IStorage {
