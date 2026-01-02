@@ -14,7 +14,8 @@ import {
   type ToolSubmission,
   type InsertToolSubmission,
 } from "@shared/schema";
-import { randomUUID } from "crypto";
+import crypto from "crypto";
+const randomUUID = () => crypto.randomUUID();
 
 export interface IStorage {
   // Users
