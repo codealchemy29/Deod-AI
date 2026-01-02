@@ -19,14 +19,14 @@ import {
 } from "lucide-react";
 
 const navItems = [
+  { href: "/about", label: "About", icon: Info },
   { href: "/learn", label: "Learn AI", icon: GraduationCap },
   { href: "/explore", label: "Explore Tools", icon: Search },
   { href: "/create", label: "Create Tools", icon: Wrench },
   { href: "/submit", label: "Submit Tools", icon: Upload },
+  { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
   { href: "/news", label: "News", icon: Newspaper },
   { href: "/newsletter", label: "Newsletter", icon: Mail },
-  { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
-  { href: "/about", label: "About", icon: Info },
 ];
 
 export function Navigation() {
@@ -38,39 +38,42 @@ export function Navigation() {
     <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-background/80 border-b border-border/50">
       <nav className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2 group" data-testid="link-home">
-           <div className="relative w-max">
-  {/* Blurred background */}
-  <div className="absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity" />
-  
-  {/* Container for the logo */}
-  <div className="relative rounded-lg p-4 flex items-center justify-center">
-    <img 
-      src="/image-removebg-preview.png"  
-      alt="Logo" 
-      className="h-32 w-[200px] md:h-40 md:w-[250px] object-contain" 
-    />
+         <Link href="/" className="flex items-center gap-2 group" data-testid="link-home">
+  <div className="relative w-max">
+    {/* Updated Blurred background to Navy Blue theme */}
+    <div className="absolute inset-0 rounded-lg opacity-75 group-hover:opacity-100 transition-opacity" />
+    
+    <div className="relative rounded-lg p-2 flex items-center justify-center">
+      {/* Light Theme Logo (Visible by default, hidden in dark mode) */}
+      <img 
+        src="/image-removebg-preview.png"  
+        alt="Logo" 
+        className="h-20 w-[130px] md:h-28 md:w-[180px] object-contain dark:hidden" 
+      />
+
+      {/* Dark Theme Logo (Hidden by default, visible only in dark mode) */}
+      <img 
+        src="/logo_black.png"  // Replace with your dark theme logo path
+        alt="Logo" 
+        className="hidden h-20 w-[130px] md:h-28 md:w-[180px] object-contain dark:block" 
+      />
+    </div>
   </div>
-</div>
-
-
-
-            {/* <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
-              DEOD AI
-            </span> */}
-          </Link>
+</Link>
 
           <div className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
-                <Button
-                  variant={location === item.href ? "secondary" : "ghost"}
-                  size="sm"
-                  className="text-sm"
+                <button
+                  className={`px-3 py-2 text-sm font-medium transition-colors rounded-md ${
+                    location === item.href 
+                    ? "bg-[#1e3a8a]/10 text-[#1e3a8a]" 
+                    : "text-muted-foreground hover:text-[#1e3a8a] hover:bg-[#1e3a8a]/5"
+                  }`}
                   data-testid={`link-${item.label.toLowerCase().replace(' ', '-')}`}
                 >
                   {item.label}
-                </Button>
+                </button>
               </Link>
             ))}
           </div>
@@ -82,6 +85,7 @@ export function Navigation() {
               onClick={toggleTheme}
               data-testid="button-theme-toggle"
               aria-label="Toggle theme"
+              className="hover:text-[#1e3a8a] hover:bg-[#1e3a8a]/5"
             >
               {theme === "light" ? (
                 <Moon className="h-5 w-5" />
@@ -93,7 +97,7 @@ export function Navigation() {
             <div className="hidden md:block">
               <Link href="/submit">
                 <Button 
-                  className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white border-0"
+                  className="bg-gradient-to-r from-[#1e3a8a] to-blue-700 text-white border-0 shadow-sm hover:shadow-md transition-all active:scale-95"
                   data-testid="button-submit-tool-nav"
                 >
                   Submit Your Tool
@@ -104,7 +108,7 @@ export function Navigation() {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden hover:text-[#1e3a8a] hover:bg-[#1e3a8a]/5"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
               aria-label="Toggle menu"
@@ -114,18 +118,23 @@ export function Navigation() {
           </div>
         </div>
 
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-border/50">
+          <div className="lg:hidden py-4 border-t border-border/50 animate-in slide-in-from-top-2 duration-200">
             <div className="flex flex-col gap-1">
               {navItems.map((item) => (
                 <Link key={item.href} href={item.href}>
                   <Button
                     variant={location === item.href ? "secondary" : "ghost"}
-                    className="w-full justify-start gap-2"
+                    className={`w-full justify-start gap-2 ${
+                      location === item.href 
+                      ? "bg-[#1e3a8a]/10 text-[#1e3a8a]" 
+                      : "hover:text-[#1e3a8a] hover:bg-[#1e3a8a]/5"
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                     data-testid={`mobile-link-${item.label.toLowerCase().replace(' ', '-')}`}
                   >
-                    <item.icon className="h-4 w-4" />
+                    <item.icon className={`h-4 w-4 ${location === item.href ? "text-[#1e3a8a]" : ""}`} />
                     {item.label}
                   </Button>
                 </Link>
@@ -133,7 +142,7 @@ export function Navigation() {
               <div className="pt-2 mt-2 border-t border-border/50">
                 <Link href="/submit">
                   <Button 
-                    className="w-full bg-gradient-to-r from-purple-600 to-cyan-500 text-white border-0"
+                    className="w-full bg-gradient-to-r from-[#1e3a8a] to-blue-700 text-white border-0"
                     onClick={() => setMobileMenuOpen(false)}
                     data-testid="mobile-button-submit-tool"
                   >

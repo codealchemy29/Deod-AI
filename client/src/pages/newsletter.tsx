@@ -106,7 +106,7 @@ export default function Newsletter() {
     },
     onSuccess: () => {
       toast({
-        title: "Welcome to DEOD AI Insider!",
+        title: "Welcome to DEODAI Insider!",
         description: "You've been subscribed successfully. Check your email for confirmation.",
       });
       form.reset();
@@ -130,23 +130,24 @@ export default function Newsletter() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 md:py-24">
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-900/20 via-rose-900/10 to-red-900/20" />
+        {/* Updated Gradients to #1e3a8a */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a]/20 via-blue-900/10 to-indigo-900/20" />
         <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-72 h-72 bg-rose-500/20 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-red-500/10 rounded-full blur-3xl" />
+          <div className="absolute top-10 left-10 w-64 h-64 bg-[#1e3a8a]/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#1e3a8a]/10 rounded-full blur-3xl" />
         </div>
         
         <div className="relative max-w-4xl mx-auto px-4 md:px-6 lg:px-8 text-center">
-          <Badge variant="secondary" className="mb-6" data-testid="badge-newsletter-hero">
+          <Badge variant="secondary" className="mb-6 bg-[#1e3a8a]/10 text-[#1e3a8a] hover:bg-[#1e3a8a]/20" data-testid="badge-newsletter-hero">
             <Mail className="w-3 h-3 mr-1" />
             Newsletter
           </Badge>
           
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6" data-testid="text-newsletter-title">
             Join the{" "}
-            <span className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-500 bg-clip-text text-transparent">
-              DEOD AI Insider
+            <span className="bg-gradient-to-r from-[#1e3a8a] via-blue-700 to-indigo-600 bg-clip-text text-transparent">
+              DEODAI Insider
             </span>{" "}
             Newsletter
           </h1>
@@ -161,7 +162,7 @@ export default function Newsletter() {
             <CardContent className="p-6">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <FormField
                       control={form.control}
                       name="email"
@@ -171,6 +172,7 @@ export default function Newsletter() {
                             <Input
                               type="email"
                               placeholder="Enter your email address"
+                              className="focus-visible:ring-[#1e3a8a]"
                               {...field}
                               data-testid="input-newsletter-email"
                             />
@@ -181,7 +183,7 @@ export default function Newsletter() {
                     />
                     <Button 
                       type="submit" 
-                      className="bg-gradient-to-r from-pink-600 to-rose-500 text-white border-0" 
+                      className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white border-0" 
                       disabled={subscribeMutation.isPending}
                       data-testid="button-subscribe"
                     >
@@ -200,17 +202,18 @@ export default function Newsletter() {
                     control={form.control}
                     name="agreedToTerms"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 text-left">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
+                            className="data-[state=checked]:bg-[#1e3a8a] data-[state=checked]:border-[#1e3a8a]"
                             data-testid="checkbox-terms"
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel className="text-sm text-muted-foreground leading-relaxed font-normal">
-                            I agree to receive emails from DEOD AI. You can unsubscribe anytime. 
+                            I agree to receive emails from DEODAI. You can unsubscribe anytime. 
                             We respect your privacy and won't share your data.
                           </FormLabel>
                           <FormMessage />
@@ -223,17 +226,17 @@ export default function Newsletter() {
             </CardContent>
           </Card>
           
-          <div className="flex items-center justify-center gap-6 mt-8 text-muted-foreground text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-muted-foreground text-sm">
             <span className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
+              <Users className="h-4 w-4 text-[#1e3a8a]" />
               15,000+ subscribers
             </span>
             <span className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
+              <Shield className="h-4 w-4 text-[#1e3a8a]" />
               No spam, ever
             </span>
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" />
+              <CheckCircle2 className="h-4 w-4 text-[#1e3a8a]" />
               GDPR compliant
             </span>
           </div>
@@ -254,10 +257,10 @@ export default function Newsletter() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {benefits.map((benefit, index) => (
-              <Card key={index} className="text-center border-border/50 bg-card/50 backdrop-blur-sm" data-testid={`card-newsletter-benefit-${index}`}>
+              <Card key={index} className="text-center border-border/50 bg-card/50 backdrop-blur-sm group hover:border-[#1e3a8a]/50 transition-colors" data-testid={`card-newsletter-benefit-${index}`}>
                 <CardContent className="p-6">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-pink-500/10 to-rose-500/10 flex items-center justify-center mx-auto mb-4">
-                    <benefit.icon className="h-7 w-7 text-pink-500" />
+                  <div className="w-14 h-14 rounded-full bg-[#1e3a8a]/10 flex items-center justify-center mx-auto mb-4">
+                    <benefit.icon className="h-7 w-7 text-[#1e3a8a]" />
                   </div>
                   <h3 className="font-semibold text-lg mb-2">{benefit.title}</h3>
                   <p className="text-muted-foreground text-sm">{benefit.description}</p>
@@ -272,7 +275,7 @@ export default function Newsletter() {
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4" data-testid="badge-past-issues">
+            <Badge variant="secondary" className="mb-4 bg-[#1e3a8a]/10 text-[#1e3a8a]" data-testid="badge-past-issues">
               <Sparkles className="w-3 h-3 mr-1" />
               Past Issues
             </Badge>
@@ -286,13 +289,13 @@ export default function Newsletter() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {pastIssues.map((issue, index) => (
-              <Card key={index} className="hover-elevate border-border/50 bg-card/50 backdrop-blur-sm" data-testid={`card-past-issue-${index}`}>
+              <Card key={index} className="hover-elevate border-border/50 bg-card/50 backdrop-blur-sm group hover:border-[#1e3a8a]/30" data-testid={`card-past-issue-${index}`}>
                 <CardContent className="p-6">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 rounded-lg bg-[#1e3a8a] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <issue.icon className="h-6 w-6 text-white" />
                   </div>
-                  <div className="text-xs text-muted-foreground mb-2">{issue.date}</div>
-                  <h3 className="font-semibold text-lg mb-2">{issue.title}</h3>
+                  <div className="text-xs text-[#1e3a8a] font-medium mb-2">{issue.date}</div>
+                  <h3 className="font-semibold text-lg mb-2 group-hover:text-[#1e3a8a] transition-colors">{issue.title}</h3>
                   <p className="text-muted-foreground text-sm">{issue.description}</p>
                 </CardContent>
               </Card>
@@ -304,7 +307,7 @@ export default function Newsletter() {
       {/* Final CTA */}
       <section className="py-16 md:py-24 bg-card border-y border-border">
         <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 text-center">
-          <Mail className="h-12 w-12 text-pink-500 mx-auto mb-6" />
+          <Mail className="h-12 w-12 text-[#1e3a8a] mx-auto mb-6" />
           <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-final-cta">
             Don't Miss Out on AI Insights
           </h2>
@@ -315,10 +318,10 @@ export default function Newsletter() {
             <Input
               type="email"
               placeholder="Enter your email"
-              className="flex-1"
+              className="flex-1 focus-visible:ring-[#1e3a8a]"
               data-testid="input-footer-newsletter"
             />
-            <Button className="w-full sm:w-auto bg-gradient-to-r from-pink-600 to-rose-500 text-white border-0" data-testid="button-footer-subscribe">
+            <Button className="w-full sm:w-auto bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white border-0" data-testid="button-footer-subscribe">
               Subscribe
             </Button>
           </div>

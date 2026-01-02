@@ -28,6 +28,10 @@ import {
 } from "lucide-react";
 import type { AiTool } from "@shared/schema";
 
+/* =======================
+    DATA
+======================= */
+
 const categories = [
   { id: "all", label: "All Tools", icon: Grid3X3 },
   { id: "text", label: "Text AI", icon: Brain },
@@ -46,45 +50,53 @@ function getCategoryIcon(category: string) {
 function getCategoryColor(category: string) {
   switch (category) {
     case "text":
-      return "from-blue-500 to-cyan-500";
+      return "from-[#1e3a8a] to-teal-500";
     case "image":
-      return "from-purple-500 to-pink-500";
+      return "from-teal-500 to-cyan-500";
     case "video":
-      return "from-orange-500 to-amber-500";
+      return "from-blue-600 to-sky-500";
     case "audio":
-      return "from-green-500 to-emerald-500";
+      return "from-teal-600 to-emerald-500";
     case "code":
-      return "from-indigo-500 to-violet-500";
+      return "from-indigo-900 to-blue-700";
     case "automation":
-      return "from-pink-500 to-rose-500";
+      return "from-cyan-600 to-teal-600";
     default:
-      return "from-gray-500 to-gray-600";
+      return "from-muted to-muted-foreground";
   }
 }
 
+/* =======================
+    SKELETON
+======================= */
+
 function ToolCardSkeleton() {
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+    <Card className="bg-card border border-border/50 overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-start gap-4 mb-4">
-          <Skeleton className="w-12 h-12 rounded-lg" />
+          <Skeleton className="w-12 h-12 rounded-lg bg-muted" />
           <div className="flex-1">
-            <Skeleton className="h-5 w-24 mb-2" />
-            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-5 w-24 mb-2 bg-muted" />
+            <Skeleton className="h-4 w-16 bg-muted" />
           </div>
         </div>
-        <Skeleton className="h-4 w-full mb-2" />
-        <Skeleton className="h-4 w-3/4 mb-4" />
-        <Skeleton className="h-6 w-20 mb-4" />
+        <Skeleton className="h-4 w-full mb-2 bg-muted" />
+        <Skeleton className="h-4 w-3/4 mb-4 bg-muted" />
+        <Skeleton className="h-6 w-20 mb-4 bg-muted" />
         <div className="flex items-center justify-between pt-4 border-t border-border/50">
-          <Skeleton className="h-4 w-12" />
-          <Skeleton className="h-6 w-16" />
+          <Skeleton className="h-4 w-12 bg-muted" />
+          <Skeleton className="h-6 w-16 bg-muted" />
         </div>
-        <Skeleton className="h-9 w-full mt-4" />
+        <Skeleton className="h-9 w-full mt-4 bg-muted" />
       </CardContent>
     </Card>
   );
 }
+
+/* =======================
+    PAGE
+======================= */
 
 export default function Explore() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -109,57 +121,58 @@ export default function Explore() {
   });
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-16 md:py-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/10 to-cyan-900/20" />
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl" />
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground">
+
+      {/* ================= HERO ================= */}
+      <section className="relative overflow-hidden py-16 md:py-20 border-b border-border">
+        {/* Adaptive Background Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a]/5 via-background to-teal-500/5 dark:from-[#1e3a8a]/10 dark:via-background dark:to-teal-500/10" />
+        <div className="absolute top-10 left-10 w-64 h-64 bg-[#1e3a8a]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl" />
+
+        <div className="relative max-w-7xl mx-auto px-6">
           <div className="max-w-3xl mx-auto text-center">
-            <Badge variant="secondary" className="mb-4" data-testid="badge-explore-hero">
+            <Badge className="mb-4 bg-[#1e3a8a]/10 text-[#1e3a8a] dark:text-blue-300 border-[#1e3a8a]/20">
               <Search className="w-3 h-3 mr-1" />
               AI Tools Directory
             </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6" data-testid="text-explore-title">
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               Explore the Best{" "}
-              <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#1e3a8a] via-blue-700 to-teal-500 dark:from-blue-400 dark:to-teal-400 bg-clip-text text-transparent">
                 AI Tools & Agents
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8" data-testid="text-explore-subtitle">
+
+            <p className="text-lg md:text-xl text-muted-foreground">
               Discover, compare, and integrate the most powerful AI tools across every category.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Filters Section */}
-      <section className="sticky top-16 z-40 bg-background/95 backdrop-blur-lg border-b border-border py-4">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+      {/* ================= FILTERS ================= */}
+      <section className="sticky top-16 z-40 bg-background/95 backdrop-blur-lg border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Search AI tools..."
-                className="pl-10"
+                className="pl-10 bg-muted/50 focus-visible:ring-[#1e3a8a]"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                data-testid="input-search-tools"
               />
             </div>
-            
+
             <div className="flex gap-2">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-[160px]" data-testid="select-category">
+                <SelectTrigger className="w-[160px] bg-muted/50 border-border">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover border-border">
                   {categories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id}>
                       {cat.label}
@@ -167,12 +180,12 @@ export default function Explore() {
                   ))}
                 </SelectContent>
               </Select>
-              
+
               <Select value={pricingFilter} onValueChange={setPricingFilter}>
-                <SelectTrigger className="w-[140px]" data-testid="select-pricing">
+                <SelectTrigger className="w-[140px] bg-muted/50 border-border">
                   <SelectValue placeholder="Pricing" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover border-border">
                   <SelectItem value="all">All Pricing</SelectItem>
                   <SelectItem value="free">Free</SelectItem>
                   <SelectItem value="paid">Paid</SelectItem>
@@ -180,17 +193,19 @@ export default function Explore() {
               </Select>
             </div>
           </div>
-          
-          {/* Category Pills */}
+
           <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide">
             {categories.map((cat) => (
               <Button
                 key={cat.id}
-                variant={selectedCategory === cat.id ? "default" : "outline"}
                 size="sm"
+                variant={selectedCategory === cat.id ? "default" : "outline"}
+                className={
+                  selectedCategory === cat.id
+                    ? "bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+                    : "border-border hover:bg-[#1e3a8a]/5 hover:text-[#1e3a8a]"
+                }
                 onClick={() => setSelectedCategory(cat.id)}
-                className="flex-shrink-0"
-                data-testid={`button-category-${cat.id}`}
               >
                 <cat.icon className="h-4 w-4 mr-1" />
                 {cat.label}
@@ -200,98 +215,105 @@ export default function Explore() {
         </div>
       </section>
 
-      {/* Tools Grid */}
-      <section className="py-8 md:py-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <p className="text-muted-foreground" data-testid="text-results-count">
-              {isLoading ? "Loading..." : `Showing ${filteredTools.length} tools`}
-            </p>
-          </div>
-          
+      {/* ================= GRID ================= */}
+      <section className="py-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-muted-foreground mb-6">
+            {isLoading ? "Loading..." : `Showing ${filteredTools.length} tools`}
+          </p>
+
           {error && (
-            <div className="text-center py-12" data-testid="error-state-tools">
-              <p className="text-destructive">Failed to load tools. Please try again.</p>
+            <div className="text-center py-12 text-destructive">
+              Failed to load tools. Please try again.
             </div>
           )}
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoading ? (
-              Array.from({ length: 6 }).map((_, index) => (
-                <ToolCardSkeleton key={index} />
-              ))
-            ) : (
-              filteredTools.map((tool, index) => {
-                const CategoryIcon = getCategoryIcon(tool.category);
-                return (
-                  <Card
-                    key={tool.id}
-                    className="group hover-elevate border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden"
-                    data-testid={`card-tool-${index}`}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4 mb-4">
-                        <div
-                          className={`w-12 h-12 rounded-lg bg-gradient-to-r ${getCategoryColor(
-                            tool.category
-                          )} flex items-center justify-center flex-shrink-0`}
-                        >
-                          <CategoryIcon className="h-6 w-6 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-lg truncate">{tool.name}</h3>
-                            {tool.verified && (
-                              <CheckCircle2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                            )}
+            {isLoading
+              ? Array.from({ length: 6 }).map((_, i) => <ToolCardSkeleton key={i} />)
+              : filteredTools.map((tool) => {
+                  const Icon = getCategoryIcon(tool.category);
+                  return (
+                    <Card key={tool.id} className="bg-card border-border hover:shadow-md dark:hover:shadow-[#1e3a8a]/10 transition group">
+                      <CardContent className="p-6">
+                        <div className="flex gap-4 mb-4">
+                          <div
+                            className={`w-12 h-12 rounded-lg bg-gradient-to-r ${getCategoryColor(
+                              tool.category
+                            )} flex items-center justify-center shadow-sm`}
+                          >
+                            <Icon className="h-6 w-6 text-white" />
                           </div>
-                          <p className="text-muted-foreground text-sm">{tool.creatorName}</p>
+
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-lg group-hover:text-[#1e3a8a] transition-colors">{tool.name}</h3>
+                              {tool.verified && (
+                                <CheckCircle2 className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {tool.creatorName}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                        {tool.description}
-                      </p>
-                      
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        <Badge variant="secondary" className="text-xs">
+
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2 min-h-[40px]">
+                          {tool.description}
+                        </p>
+
+                        <Badge variant="secondary" className="mb-4 text-xs bg-muted text-muted-foreground">
                           {tool.useCase}
                         </Badge>
-                      </div>
-                      
-                      <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                        <div className="flex items-center gap-2">
+
+                        <div className="flex items-center justify-between pt-4 border-t border-border/50">
                           <span className="flex items-center gap-1 text-sm">
                             <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
                             4.8
                           </span>
+
+                          <Badge
+                            className={
+                              tool.pricing.toLowerCase().includes("free")
+                                ? "bg-teal-600/10 text-teal-600 dark:text-teal-400 border-teal-600/20"
+                                : "bg-muted text-muted-foreground"
+                            }
+                          >
+                            {tool.pricing}
+                          </Badge>
                         </div>
-                        <Badge
-                          variant={tool.pricing.toLowerCase().includes("free") ? "default" : "secondary"}
-                          className="text-xs"
+
+                        <Button
+                          variant="outline"
+                          className="w-full mt-4 border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white transition-all active:scale-[0.98]"
                         >
-                          {tool.pricing}
-                        </Badge>
-                      </div>
-                      
-                      <Button className="w-full mt-4" variant="outline" data-testid={`button-view-tool-${index}`}>
-                        View Tool
-                        <ExternalLink className="ml-2 h-4 w-4" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })
-            )}
+                          View Tool
+                          <ExternalLink className="ml-2 h-4 w-4" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
           </div>
-          
+
           {!isLoading && filteredTools.length === 0 && (
-            <div className="text-center py-12" data-testid="empty-state-tools">
-              <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No tools found</h3>
-              <p className="text-muted-foreground">
-                Try adjusting your search or filter criteria.
+            <div className="text-center py-20 bg-card rounded-2xl border border-dashed border-border mt-10">
+              <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-semibold">No tools matched your search</h3>
+              <p className="text-muted-foreground mt-2">
+                Try adjusting your filters or browsing all categories.
               </p>
+              <Button 
+                variant="outline" 
+                className="mt-4 text-[#1e3a8a]"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("all");
+                  setPricingFilter("all");
+                }}
+              >
+                Clear all filters
+              </Button>
             </div>
           )}
         </div>

@@ -27,19 +27,20 @@ const categories = [
 ];
 
 function getCategoryColor(category: string) {
+  // Using #1e3a8a (Blue 900) for primary themes with varying opacity
   switch (category) {
     case "Research":
-      return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
+      return "bg-[#1e3a8a]/10 text-[#1e3a8a]";
     case "Startups":
-      return "bg-purple-500/10 text-purple-600 dark:text-purple-400";
+      return "bg-teal-500/10 text-teal-600 dark:text-teal-400";
     case "Tool Launches":
-      return "bg-green-500/10 text-green-600 dark:text-green-400";
+      return "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400";
     case "Industry":
-      return "bg-orange-500/10 text-orange-600 dark:text-orange-400";
+      return "bg-[#1e3a8a]/20 text-[#1e3a8a]";
     case "Tutorials":
-      return "bg-pink-500/10 text-pink-600 dark:text-pink-400";
+      return "bg-sky-500/10 text-sky-600 dark:text-sky-400";
     default:
-      return "bg-gray-500/10 text-gray-600 dark:text-gray-400";
+      return "bg-slate-500/10 text-slate-600 dark:text-slate-400";
   }
 }
 
@@ -88,21 +89,21 @@ export default function News() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 md:py-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-violet-900/10 to-purple-900/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a]/20 via-blue-900/10 to-teal-900/10" />
         <div className="absolute inset-0">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 left-10 w-72 h-72 bg-violet-500/20 rounded-full blur-3xl" />
+          <div className="absolute top-10 right-10 w-64 h-64 bg-[#1e3a8a]/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-10 left-10 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl" />
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
-            <Badge variant="secondary" className="mb-4" data-testid="badge-news-hero">
+            <Badge variant="secondary" className="mb-4 bg-[#1e3a8a]/10 text-[#1e3a8a] hover:bg-[#1e3a8a]/20" data-testid="badge-news-hero">
               <Newspaper className="w-3 h-3 mr-1" />
               AI News
             </Badge>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6" data-testid="text-news-title">
               Latest AI News,{" "}
-              <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#1e3a8a] via-blue-700 to-teal-600 bg-clip-text text-transparent">
                 Trends & Breakthroughs
               </span>
             </h1>
@@ -116,7 +117,7 @@ export default function News() {
               <Input
                 type="search"
                 placeholder="Search news..."
-                className="pl-10"
+                className="pl-10 focus-visible:ring-[#1e3a8a]"
                 data-testid="input-search-news"
               />
             </div>
@@ -133,7 +134,7 @@ export default function News() {
                 key={cat.id}
                 variant={cat.id === "all" ? "default" : "outline"}
                 size="sm"
-                className="flex-shrink-0"
+                className={`flex-shrink-0 ${cat.id === "all" ? "bg-[#1e3a8a] hover:bg-[#1e3a8a]/90" : "hover:border-[#1e3a8a] hover:text-[#1e3a8a]"}`}
                 data-testid={`button-category-${cat.id}`}
               >
                 {cat.label}
@@ -163,8 +164,8 @@ export default function News() {
           ) : featuredArticle ? (
             <Card className="overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm" data-testid="card-featured-article">
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="aspect-video md:aspect-auto bg-gradient-to-br from-indigo-500/20 via-violet-500/20 to-purple-500/20 flex items-center justify-center">
-                  <Newspaper className="h-24 w-24 text-indigo-500/30" />
+                <div className="aspect-video md:aspect-auto bg-gradient-to-br from-[#1e3a8a]/20 via-blue-500/10 to-teal-500/20 flex items-center justify-center">
+                  <Newspaper className="h-24 w-24 text-[#1e3a8a]/30" />
                 </div>
                 <CardContent className="p-6 flex flex-col justify-center">
                   <Badge className={`w-fit mb-4 ${getCategoryColor(featuredArticle.category)}`}>
@@ -187,7 +188,7 @@ export default function News() {
                     </span>
                     <span>{featuredArticle.publishedAt}</span>
                   </div>
-                  <Button className="w-fit" data-testid="button-read-featured">
+                  <Button className="w-fit bg-[#1e3a8a] hover:bg-[#1e3a8a]/90" data-testid="button-read-featured">
                     Read Article
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -205,17 +206,11 @@ export default function News() {
             <h2 className="text-2xl md:text-3xl font-bold" data-testid="text-latest-title">
               Latest Articles
             </h2>
-            <Button variant="outline" data-testid="button-view-all-news">
+            <Button variant="outline" className="border-[#1e3a8a]/50 text-[#1e3a8a] hover:bg-[#1e3a8a]/5" data-testid="button-view-all-news">
               View All
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
-          
-          {error && (
-            <div className="text-center py-12" data-testid="error-state-news">
-              <p className="text-destructive">Failed to load news. Please try again.</p>
-            </div>
-          )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {isLoading ? (
@@ -227,14 +222,14 @@ export default function News() {
                 const CategoryIcon = getCategoryIcon(article.category);
                 return (
                   <Card key={article.id} className="group hover-elevate border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden" data-testid={`card-article-${index}`}>
-                    <div className="aspect-video bg-gradient-to-br from-indigo-500/10 via-violet-500/10 to-purple-500/10 flex items-center justify-center">
-                      <CategoryIcon className="h-12 w-12 text-indigo-500/30" />
+                    <div className="aspect-video bg-gradient-to-br from-[#1e3a8a]/10 via-blue-500/5 to-teal-500/5 flex items-center justify-center">
+                      <CategoryIcon className="h-12 w-12 text-[#1e3a8a]/30 group-hover:scale-110 transition-transform" />
                     </div>
                     <CardContent className="p-4">
                       <Badge className={`mb-3 ${getCategoryColor(article.category)}`}>
                         {article.category}
                       </Badge>
-                      <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                      <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-[#1e3a8a] transition-colors">
                         {article.title}
                       </h3>
                       <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
@@ -257,19 +252,9 @@ export default function News() {
             )}
           </div>
           
-          {!isLoading && articles.length === 0 && (
-            <div className="text-center py-12" data-testid="empty-state-news">
-              <Newspaper className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No articles found</h3>
-              <p className="text-muted-foreground">
-                Check back soon for the latest AI news.
-              </p>
-            </div>
-          )}
-          
           {!isLoading && articles.length > 0 && (
             <div className="text-center mt-12">
-              <Button size="lg" variant="outline" data-testid="button-load-more">
+              <Button size="lg" variant="outline" className="border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#1e3a8a]/5" data-testid="button-load-more">
                 Load More Articles
               </Button>
             </div>

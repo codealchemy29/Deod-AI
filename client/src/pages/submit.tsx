@@ -146,26 +146,26 @@ export default function Submit() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 md:py-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 via-emerald-900/10 to-teal-900/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-teal-900/10 to-blue-900/20" />
         <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-green-500/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-72 h-72 bg-emerald-500/20 rounded-full blur-3xl" />
+          <div className="absolute top-10 left-10 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-72 h-72 bg-teal-500/20 rounded-full blur-3xl" />
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <Badge variant="secondary" className="mb-4" data-testid="badge-submit-hero">
+            <Badge variant="secondary" className="mb-4 bg-blue-100 text-blue-700 hover:bg-blue-100" data-testid="badge-submit-hero">
               <Upload className="w-3 h-3 mr-1" />
               Submit Your Tool
             </Badge>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6" data-testid="text-submit-title">
               Submit Your AI Tool &{" "}
-              <span className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 via-teal-600 to-blue-500 bg-clip-text text-transparent">
                 Earn 90% Revenue
               </span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed" data-testid="text-submit-subtitle">
-              Join thousands of creators earning with DEOD AI. Submit your tool, 
+              Join thousands of creators earning with DEODAI. Submit your tool, 
               get verified, and start earning 90% of every sale.
             </p>
           </div>
@@ -174,9 +174,9 @@ export default function Submit() {
 
       {/* Revenue Highlight */}
       <section className="relative overflow-hidden py-16 md:py-20">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-900/90 via-emerald-900/90 to-teal-900/90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-teal-900/90 to-blue-900/90" />
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-64 h-64 bg-green-500/30 rounded-full blur-3xl" />
+          <div className="absolute top-0 left-1/4 w-64 h-64 bg-blue-500/30 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-teal-500/30 rounded-full blur-3xl" />
         </div>
         
@@ -202,15 +202,15 @@ export default function Submit() {
               
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2 text-white/80">
-                  <CheckCircle2 className="h-5 w-5 text-green-400" />
+                  <CheckCircle2 className="h-5 w-5 text-teal-400" />
                   <span>Instant earnings tracking</span>
                 </div>
                 <div className="flex items-center gap-2 text-white/80">
-                  <CheckCircle2 className="h-5 w-5 text-green-400" />
+                  <CheckCircle2 className="h-5 w-5 text-teal-400" />
                   <span>Weekly payouts</span>
                 </div>
                 <div className="flex items-center gap-2 text-white/80">
-                  <CheckCircle2 className="h-5 w-5 text-green-400" />
+                  <CheckCircle2 className="h-5 w-5 text-teal-400" />
                   <span>No minimums</span>
                 </div>
               </div>
@@ -234,28 +234,28 @@ export default function Submit() {
                       cy="50"
                       r="40"
                       fill="none"
-                      stroke="url(#gradient)"
+                      stroke="url(#gradient-blue)"
                       strokeWidth="12"
                       strokeDasharray="226.2"
                       strokeDashoffset="22.62"
                       strokeLinecap="round"
                     />
                     <defs>
-                      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#22c55e" />
+                      <linearGradient id="gradient-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#3b82f6" />
                         <stop offset="100%" stopColor="#14b8a6" />
                       </linearGradient>
                     </defs>
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                    <PieChart className="h-8 w-8 mb-2 text-green-400" />
+                    <PieChart className="h-8 w-8 mb-2 text-teal-400" />
                     <span className="text-4xl font-bold">90/10</span>
                     <span className="text-sm text-white/70">Revenue Split</span>
                   </div>
                 </div>
                 <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 text-sm text-white/80">
                   <span className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-gradient-to-r from-green-500 to-teal-500" />
+                    <span className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-teal-500" />
                     You: 90%
                   </span>
                   <span className="flex items-center gap-2">
@@ -293,6 +293,7 @@ export default function Submit() {
                                 placeholder="Enter your tool name"
                                 {...field}
                                 data-testid="input-submit-tool-name"
+                                className="focus-visible:ring-blue-500"
                               />
                             </FormControl>
                             <FormMessage />
@@ -310,7 +311,7 @@ export default function Submit() {
                               <Textarea
                                 placeholder="Describe what your tool does..."
                                 rows={4}
-                                className="resize-none"
+                                className="resize-none focus-visible:ring-blue-500"
                                 {...field}
                                 data-testid="input-submit-description"
                               />
@@ -328,7 +329,7 @@ export default function Submit() {
                             <FormLabel>Category *</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
-                                <SelectTrigger data-testid="select-submit-category">
+                                <SelectTrigger data-testid="select-submit-category" className="focus:ring-blue-500">
                                   <SelectValue placeholder="Select a category" />
                                 </SelectTrigger>
                               </FormControl>
@@ -357,6 +358,7 @@ export default function Submit() {
                                 placeholder="https://your-tool.com"
                                 {...field}
                                 data-testid="input-submit-website"
+                                className="focus-visible:ring-blue-500"
                               />
                             </FormControl>
                             <FormMessage />
@@ -376,6 +378,7 @@ export default function Submit() {
                                 placeholder="you@example.com"
                                 {...field}
                                 data-testid="input-submit-email"
+                                className="focus-visible:ring-blue-500"
                               />
                             </FormControl>
                             <FormMessage />
@@ -385,7 +388,7 @@ export default function Submit() {
                       
                       <Button 
                         type="submit" 
-                        className="w-full bg-gradient-to-r from-green-600 to-emerald-500 text-white border-0" 
+                        className="w-full bg-gradient-to-r from-blue-600 to-teal-500 text-white border-0 hover:opacity-90 transition-opacity" 
                         size="lg" 
                         disabled={submitMutation.isPending}
                         data-testid="button-submit-form"
@@ -415,13 +418,13 @@ export default function Submit() {
             {/* Benefits */}
             <div>
               <h2 className="text-3xl font-bold mb-6" data-testid="text-benefits-title">
-                Why Submit to DEOD AI?
+                Why Submit to DEODAI?
               </h2>
               <div className="grid gap-4">
                 {benefits.map((benefit, index) => (
                   <Card key={index} className="border-border/50 bg-card/50 backdrop-blur-sm" data-testid={`card-benefit-${index}`}>
                     <CardContent className="p-4 flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-teal-500 flex items-center justify-center flex-shrink-0">
                         <benefit.icon className="h-5 w-5 text-white" />
                       </div>
                       <div>
@@ -441,7 +444,7 @@ export default function Submit() {
       <section className="py-16 md:py-24 bg-card/30">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4" data-testid="badge-dashboard">
+            <Badge variant="secondary" className="mb-4 bg-teal-100 text-teal-700" data-testid="badge-dashboard">
               <BarChart3 className="w-3 h-3 mr-1" />
               Creator Dashboard
             </Badge>
@@ -459,16 +462,16 @@ export default function Submit() {
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="text-center p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20">
-                  <div className="text-3xl font-bold text-green-500">${mockEarnings.totalEarnings.toLocaleString()}</div>
+                <div className="text-center p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-teal-500/10 border border-blue-500/20">
+                  <div className="text-3xl font-bold text-blue-600">${mockEarnings.totalEarnings.toLocaleString()}</div>
                   <div className="text-muted-foreground text-sm">Total Earnings</div>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-                  <div className="text-3xl font-bold text-blue-500">${mockEarnings.thisMonth.toLocaleString()}</div>
+                <div className="text-center p-4 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 border border-teal-500/20">
+                  <div className="text-3xl font-bold text-teal-600">${mockEarnings.thisMonth.toLocaleString()}</div>
                   <div className="text-muted-foreground text-sm">This Month</div>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
-                  <div className="text-3xl font-bold text-purple-500">${mockEarnings.pendingPayout.toLocaleString()}</div>
+                <div className="text-center p-4 rounded-lg bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border border-indigo-500/20">
+                  <div className="text-3xl font-bold text-indigo-600">${mockEarnings.pendingPayout.toLocaleString()}</div>
                   <div className="text-muted-foreground text-sm">Pending Payout</div>
                 </div>
               </div>
@@ -482,7 +485,7 @@ export default function Submit() {
                       <div className="text-muted-foreground text-sm">{tool.sales} sales</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold text-green-500">${tool.earnings.toLocaleString()}</div>
+                      <div className="font-semibold text-teal-600">${tool.earnings.toLocaleString()}</div>
                       <div className="text-muted-foreground text-xs">earned</div>
                     </div>
                   </div>
