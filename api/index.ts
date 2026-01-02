@@ -4,27 +4,24 @@ import { createServer } from "http";
 
 const httpServer = createServer(app);
 
-// Keep the promise outside the handler to "memoize" it
-// This ensures routes are only registered ONCE per serverless wake-up
+// Keep the registration promise globally to avoid multiple setups
 let registrationPromise: Promise<any> | null = null;
 
-export default async (req: any, res: any) => {
+export default async function handler(req: any, res: any) {
   try {
     if (!registrationPromise) {
       registrationPromise = registerRoutes(httpServer, app);
     }
     
-    // Wait for routes to be ready
     await registrationPromise;
-
-    // Handle the request
     return app(req, res);
-  } catch (err) {
-    // This will now show up in your Vercel Logs
-    console.error("Vercel Runtime Error:", err);
+  } catch (err: any) {
+    // This turns the "500" into a readable message on your screen
+    console.error("Vercel Backend Crash:", err);
     res.status(500).json({ 
-      error: "Internal Server Error", 
-      details: err instanceof Error ? err.message : String(err) 
+      error: "Backend Setup Failed",
+      message: err.message,
+      stack: err.stack 
     });
   }
-};
+}
