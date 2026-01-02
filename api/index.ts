@@ -1,5 +1,5 @@
-import { app } from "../server/index";
-import { registerRoutes } from "../server/routes";
+import { app } from "../server/index.ts";
+import { registerRoutes } from "../server/routes.ts";
 import { createServer } from "http";
 
 const httpServer = createServer(app);
