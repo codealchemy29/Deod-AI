@@ -111,10 +111,29 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [pricingFilter, setPricingFilter] = useState("all");
 
-  const { data: tools = [], isLoading, error } = useQuery<AiTool[]>({
-    queryKey: ["/api/tools"],
-  });
-
+  // const { data:  isLoading, error } = useQuery<AiTool[]>({
+  //   queryKey: ["/api/tools"],
+  // });
+ const tools = [
+  { name: "Whispr FlowAI", description: "Tool for automating workflows — converts voice/text inputs into tasks, summaries, and action items for teams.", category: "automation", useCase: "Workflow Automation", pricing: "TBD", creatorName: "Whispr", verified: true },
+  { name: "Gemini", description: "Google’s AI for content creation, coding help, image generation, chat, and research.", category: "multi", useCase: "Content, Coding, Image Generation, Research", pricing: "TBD", creatorName: "Google", verified: true },
+  { name: "EmilyAI", description: "Assistant focused on email drafting, inbox management, scheduling, and communication automation.", category: "productivity", useCase: "Email Management, Scheduling", pricing: "TBD", creatorName: "EmilyAI", verified: true },
+  { name: "FirefliesAI", description: "Meeting assistant — records, transcribes, summarizes, and analyzes meetings automatically.", category: "productivity", useCase: "Meeting Transcription, Analysis", pricing: "TBD", creatorName: "Fireflies", verified: true },
+  { name: "ChatGPT", description: "General-purpose AI for chat, coding, research, content, automation, data analysis, etc.", category: "text", useCase: "Conversation, Coding, Research, Content, Automation", pricing: "TBD", creatorName: "OpenAI", verified: true },
+  { name: "Claude", description: "Anthropic’s AI known for long-context tasks, analysis, writing, and safe enterprise workflows.", category: "text", useCase: "Analysis, Writing, Enterprise Workflows", pricing: "TBD", creatorName: "Anthropic", verified: true },
+  { name: "Phot AI", description: "AI design tool for photo editing, background removal, retouching, and AI-generated images.", category: "image", useCase: "Photo Editing, Image Generation", pricing: "TBD", creatorName: "Phot AI", verified: true },
+  { name: "SupergrowAI", description: "Tool for creating social media content, captions, and growth-focused marketing posts.", category: "marketing", useCase: "Social Media Content, Marketing", pricing: "TBD", creatorName: "Supergrow", verified: true },
+  { name: "Numerous AI", description: "Spreadsheet AI — automates Excel/Sheets tasks, formulas, cleaning, insights, and AI functions.", category: "productivity", useCase: "Spreadsheet Automation, Data Analysis", pricing: "TBD", creatorName: "Numerous", verified: true },
+  { name: "SunoAI", description: "Music generator — creates songs, vocals, background tracks instantly from text prompts.", category: "audio", useCase: "Music Generation", pricing: "TBD", creatorName: "Suno", verified: true },
+  { name: "Notebook LM", description: "Google AI for research and study, summarizes documents, PDFs, notes, and creates study guides.", category: "education", useCase: "Document Summarization, Study Guides", pricing: "TBD", creatorName: "Google", verified: true },
+  { name: "Social SonicAI", description: "AI for social media automation, scheduling, content creation, and engagement optimization.", category: "marketing", useCase: "Social Media Automation, Content Creation", pricing: "TBD", creatorName: "Social Sonic", verified: true },
+  { name: "BoltAI", description: "Website builder — creates full websites, HTML/CSS/JS code from simple prompts.", category: "web", useCase: "Website Generation, Code Generation", pricing: "TBD", creatorName: "Bolt", verified: true },
+  { name: "VapiAI", description: "Voice agent platform for creating AI calling bots, customer support, and sales automation with voice.", category: "voice", useCase: "AI Calling Bots, Customer Support", pricing: "TBD", creatorName: "Vapi", verified: true },
+  { name: "ChronicleAI", description: "Storytelling and documentation tool — helps create timelines, narratives, and structured stories.", category: "productivity", useCase: "Storytelling, Documentation", pricing: "TBD", creatorName: "Chronicle", verified: true },
+  { name: "Humanic AI", description: "HR automation tool using AI for candidate screening, onboarding flows, and employee insights.", category: "hr", useCase: "HR Automation, Employee Insights", pricing: "TBD", creatorName: "Humanic", verified: true },
+  { name: "HappenstanceAI", description: "For career discovery — analyzes personality, skills, and recommends career paths.", category: "career", useCase: "Career Guidance, Skill Analysis", pricing: "TBD", creatorName: "Happenstance", verified: true },
+  { name: "Perplexity Comet", description: "AI designed for deep research — provides verified answers with citations and advanced retrieval.", category: "research", useCase: "Research, Verification, Retrieval", pricing: "TBD", creatorName: "Perplexity", verified: true },
+];
   const filteredTools = tools.filter((tool) => {
     const matchesSearch =
       tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -246,12 +265,12 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoading
+            {false
               ? Array.from({ length: 6 }).map((_, i) => <ToolCardSkeleton key={i} />)
-              : filteredTools.slice(0, 6).map((tool) => {
+              : filteredTools.slice(0, 6).map((tool,index) => {
                   const Icon = getCategoryIcon(tool.category);
                   return (
-                    <Card key={tool.id} className="bg-card border-border hover:shadow-lg transition-all group">
+                    <Card key={index} className="bg-card border-border hover:shadow-lg transition-all group">
                       <CardContent className="p-6">
                         <div className="flex gap-4 mb-4">
                           <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${getCategoryColor(tool.category)} flex items-center justify-center text-white shadow-sm`}>
@@ -282,7 +301,7 @@ export default function Home() {
           </div>
 
           {/* View More CTA */}
-          {!isLoading && filteredTools.length > 0 && (
+          {false && filteredTools.length > 0 && (
             <div className="mt-12 text-center">
               <Link href="/explore">
                 <Button size="lg" className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white">
