@@ -78,12 +78,19 @@ function ArticleCardSkeleton() {
 }
 
 export default function News() {
-  const { data: articles = [], isLoading, error } = useQuery<NewsArticle[]>({
-    queryKey: ["/api/news"],
-  });
-
-  const featuredArticle = articles[0];
-  const otherArticles = articles.slice(1);
+  // const { data: articles = [], isLoading, error } = useQuery<NewsArticle[]>({
+  //   queryKey: ["/api/news"],
+  // });
+ const newsData = [
+      { title: "GPT-5 Rumors: What We Know About OpenAI's Next Frontier Model", excerpt: "Industry insiders are buzzing with speculation about OpenAI's next-generation model.", content: "Full article content here...", category: "Industry", author: "Sarah Chen", publishedAt: "December 15, 2024" },
+      { title: "Google Gemini 2.0: A Deep Dive Into Multimodal Reasoning", excerpt: "Google's latest AI model brings unprecedented multimodal capabilities.", content: "Full article content here...", category: "Research", author: "Mike Johnson", publishedAt: "December 14, 2024" },
+      { title: "10 AI Startups That Raised $100M+ in 2024", excerpt: "From AI agents to enterprise automation, these startups are reshaping the landscape.", content: "Full article content here...", category: "Startups", author: "Emily Davis", publishedAt: "December 13, 2024" },
+      { title: "Anthropic Releases Claude 3.5: Faster, Smarter, Safer", excerpt: "Claude's latest update brings significant improvements in speed and reasoning.", content: "Full article content here...", category: "Tool Launches", author: "James Wilson", publishedAt: "December 12, 2024" },
+      { title: "How to Build a RAG System from Scratch", excerpt: "A comprehensive guide to building Retrieval-Augmented Generation systems.", content: "Full article content here...", category: "Tutorials", author: "Alex Kumar", publishedAt: "December 11, 2024" },
+      { title: "The Rise of AI Agents: Why 2025 Will Be the Year of Autonomous AI", excerpt: "Industry experts predict a major shift towards AI agents.", content: "Full article content here...", category: "Industry", author: "Sarah Chen", publishedAt: "December 10, 2024" },
+    ];
+  const featuredArticle = newsData[0];
+  const otherArticles = newsData.slice(1);
 
   return (
     <div className="min-h-screen">
@@ -147,7 +154,7 @@ export default function News() {
       {/* Featured Article */}
       <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-          {isLoading ? (
+          {false ? (
             <Card className="overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm">
               <div className="grid md:grid-cols-2 gap-6">
                 <Skeleton className="aspect-video md:aspect-auto md:h-full" />
@@ -213,7 +220,7 @@ export default function News() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoading ? (
+            {false ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <ArticleCardSkeleton key={index} />
               ))
@@ -221,7 +228,7 @@ export default function News() {
               otherArticles.map((article, index) => {
                 const CategoryIcon = getCategoryIcon(article.category);
                 return (
-                  <Card key={article.id} className="group hover-elevate border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden" data-testid={`card-article-${index}`}>
+                  <Card key={index} className="group hover-elevate border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden" data-testid={`card-article-${index}`}>
                     <div className="aspect-video bg-gradient-to-br from-[#1e3a8a]/10 via-blue-500/5 to-teal-500/5 flex items-center justify-center">
                       <CategoryIcon className="h-12 w-12 text-[#1e3a8a]/30 group-hover:scale-110 transition-transform" />
                     </div>
@@ -252,7 +259,7 @@ export default function News() {
             )}
           </div>
           
-          {!isLoading && articles.length > 0 && (
+          {false && newsData.length > 0 && (
             <div className="text-center mt-12">
               <Button size="lg" variant="outline" className="border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#1e3a8a]/5" data-testid="button-load-more">
                 Load More Articles

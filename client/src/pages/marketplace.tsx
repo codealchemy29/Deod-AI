@@ -106,11 +106,23 @@ export default function Marketplace() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("popular");
 
-  const { data: products = [], isLoading, error } = useQuery<MarketplaceProduct[]>({
-    queryKey: ["/api/marketplace"],
-  });
+  // const { data: products = [], isLoading, error } = useQuery<MarketplaceProduct[]>({
+  //   queryKey: ["/api/marketplace"],
+  // });
 
-  const filteredProducts = products
+  const productsData = [
+      { name: "Ultimate ChatGPT Prompt Pack", description: "500+ expertly crafted prompts for productivity, writing, coding, and more.", price: 29, category: "prompts", creatorName: "Sarah Chen", rating: 49, reviewCount: 245 },
+      { name: "AI Content Writer Pro", description: "A powerful content generation tool with SEO optimization built-in.", price: 49, category: "tools", creatorName: "Mike Johnson", rating: 48, reviewCount: 189 },
+      { name: "Customer Support Agent", description: "Autonomous AI agent that handles customer inquiries 24/7.", price: 99, category: "agents", creatorName: "Emily Davis", rating: 47, reviewCount: 156 },
+      { name: "Midjourney Prompt Templates", description: "100+ tested prompts for stunning AI art generation.", price: 19, category: "prompts", creatorName: "Alex Kumar", rating: 49, reviewCount: 312 },
+      { name: "AI Landing Page Builder", description: "Generate beautiful landing pages with AI in minutes.", price: 79, category: "tools", creatorName: "James Wilson", rating: 46, reviewCount: 98 },
+      { name: "Research Assistant Agent", description: "AI agent that searches, summarizes, and synthesizes research.", price: 59, category: "agents", creatorName: "Lisa Park", rating: 48, reviewCount: 178 },
+      { name: "SaaS Dashboard Template", description: "Complete React dashboard template with AI features built-in.", price: 149, category: "templates", creatorName: "David Brown", rating: 47, reviewCount: 67 },
+      { name: "OpenAI API Wrapper", description: "Production-ready API wrapper with rate limiting and caching.", price: 39, category: "code", creatorName: "Chris Lee", rating: 49, reviewCount: 134 },
+    ];
+  
+
+  const filteredProducts = productsData
     .filter((product) => {
       const matchesSearch =
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -225,18 +237,18 @@ export default function Marketplace() {
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4 mb-6">
             <p className="text-muted-foreground" data-testid="text-products-count">
-              {isLoading ? "Loading..." : `Showing ${filteredProducts.length} products`}
+              {true ? "Loading..." : `Showing ${filteredProducts.length} products`}
             </p>
           </div>
           
-          {error && (
+          {false && (
             <div className="text-center py-12" data-testid="error-state-products">
               <p className="text-destructive">Failed to load products. Please try again.</p>
             </div>
           )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoading ? (
+            {false ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <ProductCardSkeleton key={index} />
               ))
@@ -245,7 +257,7 @@ export default function Marketplace() {
                 const CategoryIcon = getCategoryIcon(product.category);
                 return (
                   <Card
-                    key={product.id}
+                    key={index}
                     className="group hover-elevate border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-[#1e3a8a]/50"
                     data-testid={`card-product-${index}`}
                   >
@@ -291,7 +303,7 @@ export default function Marketplace() {
             )}
           </div>
           
-          {!isLoading && filteredProducts.length === 0 && (
+          {false && filteredProducts.length === 0 && (
             <div className="text-center py-12" data-testid="empty-state-products">
               <ShoppingBag className="h-12 w-12 text-[#1e3a8a]/40 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No products found</h3>
