@@ -23,73 +23,156 @@ import {
   CheckCircle2,
   Layers,
 } from "lucide-react";
+import {motion} from "framer-motion";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 /* =======================
     DATA
 ======================= */
 
-const learningPaths = [
+// const learningPaths = [
+//   {
+//     title: "AI Fundamentals",
+//     description: "Start your AI journey with core concepts and terminology.",
+//     level: "Beginner",
+//     duration: "4 weeks",
+//     lessons: 24,
+//     students: "12,500+",
+//     icon: Brain,
+//     topics: ["Introduction to AI", "Machine Learning Basics", "Neural Networks", "AI Ethics"],
+//   },
+//   {
+//     title: "Machine Learning Mastery",
+//     description: "Deep dive into ML algorithms and practical applications.",
+//     level: "Intermediate",
+//     duration: "8 weeks",
+//     lessons: 48,
+//     students: "8,200+",
+//     icon: Layers,
+//     topics: ["Supervised Learning", "Unsupervised Learning", "Model Training", "Feature Engineering"],
+//   },
+//   {
+//     title: "Large Language Models",
+//     description: "Understand and work with LLMs like GPT, Claude, and more.",
+//     level: "Intermediate",
+//     duration: "6 weeks",
+//     lessons: 36,
+//     students: "6,800+",
+//     icon: BookOpen,
+//     topics: ["Transformer Architecture", "Prompt Engineering", "Fine-tuning", "RAG Systems"],
+//   },
+//   {
+//     title: "AI Agents & Automation",
+//     description: "Build intelligent agents that can reason and take actions.",
+//     level: "Advanced",
+//     duration: "8 weeks",
+//     lessons: 42,
+//     students: "4,500+",
+//     icon: Bot,
+//     topics: ["Agent Frameworks", "Tool Use", "Multi-Agent Systems", "Production Deployment"],
+//   },
+//   {
+//     title: "AI Application Development",
+//     description: "Create production-ready AI applications from scratch.",
+//     level: "Advanced",
+//     duration: "10 weeks",
+//     lessons: 56,
+//     students: "3,200+",
+//     icon: Code,
+//     topics: ["API Integration", "Backend Architecture", "Frontend Development", "Scaling & Optimization"],
+//   },
+//   {
+//     title: "AI Business & Monetization",
+//     description: "Turn your AI skills into a profitable business.",
+//     level: "All Levels",
+//     duration: "4 weeks",
+//     lessons: 20,
+//     students: "5,100+",
+//     icon: Zap,
+//     topics: ["Market Research", "Product Strategy", "Pricing Models", "Marketing & Sales"],
+//   },
+// ];
+const plans = [
   {
-    title: "AI Fundamentals",
-    description: "Start your AI journey with core concepts and terminology.",
-    level: "Beginner",
-    duration: "4 weeks",
-    lessons: 24,
-    students: "12,500+",
-    icon: Brain,
-    topics: ["Introduction to AI", "Machine Learning Basics", "Neural Networks", "AI Ethics"],
+    name: "Beginner Level",
+    subtitle: "Perfect for absolute beginners",
+    originalPrice: "$200",
+    offerPrice: "$100",
+    description:
+      "Ideal for students and professionals who are just starting their AI journey.",
+    features: [
+      "Introduction to Artificial Intelligence",
+      "Basics of ChatGPT & AI tools",
+      "Prompt engineering fundamentals",
+      "AI for daily productivity & simple tasks",
+      "Social media & content creation basics using AI",
+      "Beginner-friendly explanations (no tech background needed)",
+    ],
+    bestFor: "Students, creators, professionals starting with AI",
+    popular: false,
   },
   {
-    title: "Machine Learning Mastery",
-    description: "Deep dive into ML algorithms and practical applications.",
-    level: "Intermediate",
-    duration: "8 weeks",
-    lessons: 48,
-    students: "8,200+",
-    icon: Layers,
-    topics: ["Supervised Learning", "Unsupervised Learning", "Model Training", "Feature Engineering"],
+    name: "Intermediate Level",
+    subtitle: "For learners who want practical AI skills",
+    originalPrice: "$300",
+    offerPrice: "$200",
+    description:
+      "Build practical AI skills with hands-on projects and automation workflows.",
+    features: [
+      "Everything in Beginner Level",
+      "Advanced prompt engineering",
+      "AI tools for social media management",
+      "Personal branding using AI",
+      "Content automation & scheduling",
+      "Research, data mining & workflow optimization",
+      "Hands-on use cases & mini projects",
+    ],
+    bestFor: "Freelancers, marketers, content creators, working professionals",
+    popular: false,
   },
   {
-    title: "Large Language Models",
-    description: "Understand and work with LLMs like GPT, Claude, and more.",
-    level: "Intermediate",
-    duration: "6 weeks",
-    lessons: 36,
-    students: "6,800+",
-    icon: BookOpen,
-    topics: ["Transformer Architecture", "Prompt Engineering", "Fine-tuning", "RAG Systems"],
-  },
-  {
-    title: "AI Agents & Automation",
-    description: "Build intelligent agents that can reason and take actions.",
-    level: "Advanced",
-    duration: "8 weeks",
-    lessons: 42,
-    students: "4,500+",
-    icon: Bot,
-    topics: ["Agent Frameworks", "Tool Use", "Multi-Agent Systems", "Production Deployment"],
-  },
-  {
-    title: "AI Application Development",
-    description: "Create production-ready AI applications from scratch.",
-    level: "Advanced",
-    duration: "10 weeks",
-    lessons: 56,
-    students: "3,200+",
-    icon: Code,
-    topics: ["API Integration", "Backend Architecture", "Frontend Development", "Scaling & Optimization"],
-  },
-  {
-    title: "AI Business & Monetization",
-    description: "Turn your AI skills into a profitable business.",
-    level: "All Levels",
-    duration: "4 weeks",
-    lessons: 20,
-    students: "5,100+",
-    icon: Zap,
-    topics: ["Market Research", "Product Strategy", "Pricing Models", "Marketing & Sales"],
+    name: "Pro Level",
+    subtitle: "For serious professionals & entrepreneurs",
+    originalPrice: "$1000",
+    offerPrice: "$500",
+    description:
+      "Advanced AI automation, agents, and monetization strategies.",
+    features: [
+      "Everything in Beginner & Intermediate Levels",
+      "AI automation for businesses",
+      "Building AI agents & advanced workflows",
+      "Advanced Excel automation with AI",
+      "Client management & AI consulting skills",
+      "Real-world case studies",
+      "Monetizing AI skills (services & subscriptions)",
+      "Priority support & exclusive resources",
+    ],
+    bestFor: "Entrepreneurs, consultants, business owners, AI power users",
+    popular: true,
   },
 ];
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.2, duration: 0.6 },
+  }),
+};
+
+
+
 
 const featuredCourses = [
   {
@@ -121,6 +204,7 @@ const featuredCourses = [
   },
 ];
 
+
 /* =======================
     HELPERS
 ======================= */
@@ -143,6 +227,12 @@ function getLevelColor(level: string) {
 ======================= */
 
 export default function Learn() {
+  const [open, setOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const couponCode = "DEOD50"; // example coupon
+
+
+
   return (
     <div className="min-h-screen bg-background text-foreground">
 
@@ -171,12 +261,17 @@ export default function Learn() {
           </p>
 
           <div className="flex flex-wrap gap-4">
-            <Button size="lg" className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white">
-              Start Learning Free
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button size="lg" variant="outline" className="border-border">
-              View All Paths
+            <Button
+  size="lg"
+  onClick={() => setOpen(true)}
+  className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+>
+  Start Learning
+  <ArrowRight className="ml-2 h-4 w-4" />
+</Button>
+
+            <Button size="lg" onClick={() => setOpen(true)} variant="outline" className="border-border">
+              Learn AI With Tutor
             </Button>
           </div>
 
@@ -196,7 +291,7 @@ export default function Learn() {
       </section>
 
       {/* ================= LEARNING PATHS ================= */}
-      <section className="py-28 bg-background">
+      {/* <section className="py-28 bg-background">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-4xl font-bold mb-4">
@@ -264,7 +359,94 @@ export default function Learn() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
+
+      <section className="py-28 bg-gray-50 dark:bg-background border-y border-border">
+  <div className="max-w-7xl mx-auto px-6 text-center">
+    <h2 className="text-4xl font-bold mb-4">
+      AI Course Pricing Plans
+    </h2>
+    <p className="text-muted-foreground text-lg">
+      Choose the plan that fits your learning stage and goals.
+    </p>
+
+    <div className="grid md:grid-cols-3 gap-8 mt-12">
+      {plans.map((plan, index) => (
+        <motion.div
+          key={index}
+          custom={index}
+          initial="hidden"
+          animate="visible"
+          variants={cardVariants}
+          whileHover={{ scale: 1.05 }}
+          className={`relative rounded-2xl shadow-xl p-8 border transition
+            bg-white dark:bg-card text-foreground
+            ${plan.popular ? "border-indigo-600" : "border-border"}
+          `}
+        >
+          {plan.popular && (
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 
+              bg-indigo-600 text-white text-sm px-4 py-1 rounded-full">
+              Most Popular
+            </span>
+          )}
+
+          <h3 className="text-2xl font-bold">
+            {plan.name}
+          </h3>
+          <p className="text-indigo-600 font-medium mt-1">
+            {plan.subtitle}
+          </p>
+
+          <p className="text-muted-foreground mt-4">
+            {plan.description}
+          </p>
+
+          {/* Price */}
+          <div className="mt-6">
+            <span className="text-gray-400 line-through text-lg mr-2">
+              {plan.originalPrice}
+            </span>
+            <span className="text-4xl font-bold">
+              {plan.offerPrice}
+            </span>
+          </div>
+
+          {/* Features */}
+          <div className="mt-6 text-left">
+            <h4 className="font-semibold mb-2">
+              What you’ll get:
+            </h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {plan.features.map((feature, i) => (
+                <li key={i} className="flex gap-2">
+                  ✅ <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Best for */}
+          <p className="mt-4 text-sm text-muted-foreground">
+            <strong className="text-foreground">Best for:</strong>{" "}
+            {plan.bestFor}
+          </p>
+
+          <button
+            className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
+              plan.popular
+                ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                : "bg-gray-900 text-white hover:bg-gray-800"
+            }`}
+          >
+            Enroll Now
+          </button>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</section>
+
 
       {/* ================= FEATURED COURSES ================= */}
       <section className="py-28 bg-muted/30 border-y border-border">
@@ -347,6 +529,114 @@ export default function Learn() {
           </Link>
         </div>
       </section>
+
+
+<Dialog open={open} onOpenChange={setOpen}>
+  <DialogContent className="sm:max-w-xl p-6">
+    <DialogHeader>
+      <DialogTitle>Course Registration</DialogTitle>
+    </DialogHeader>
+
+    <form className="space-y-4">
+      {/* Name */}
+      <div className="space-y-1">
+        <Label>Name</Label>
+        <Input placeholder="Enter your name" />
+      </div>
+
+      {/* Email */}
+      <div className="space-y-1">
+        <Label>Email</Label>
+        <Input type="email" placeholder="Enter your email" />
+      </div>
+
+      {/* Phone */}
+      <div className="space-y-1">
+        <Label>Phone Number</Label>
+        <Input type="tel" placeholder="Enter your phone number" />
+      </div>
+
+      {/* Course Select */}
+      <div className="space-y-1">
+        <Label>Select Course</Label>
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="Choose a course" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="beginner">Beginner Level</SelectItem>
+            <SelectItem value="intermediate">Intermediate Level</SelectItem>
+            <SelectItem value="pro">Pro Level</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Payment Option */}
+      <div className="space-y-1">
+  <Label>Payment Option</Label>
+
+  <Select onValueChange={(value) => setPaymentMethod(value)}>
+    <SelectTrigger>
+      <SelectValue placeholder="Select payment method" />
+    </SelectTrigger>
+
+    <SelectContent>
+      <SelectItem value="deod-usdt">Deod / USDT</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
+
+
+
+{paymentMethod === "deod-usdt" && (
+  <div className="mt-4 border border-dashed border-indigo-500 rounded-xl p-4 bg-indigo-50 dark:bg-indigo-950/30">
+    <p className="text-sm text-muted-foreground mb-2">
+      🎁 You received a coupon code
+    </p>
+
+    <div className="flex items-center justify-between bg-white dark:bg-card border rounded-lg px-4 py-3">
+      <span className="text-lg font-bold tracking-widest text-indigo-600">
+        DEOD50
+      </span>
+
+      <Badge className="bg-indigo-600 text-white">
+        50% OFF
+      </Badge>
+    </div>
+
+    <div className="flex gap-3 mt-4">
+      <Button
+        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white"
+        onClick={() => alert("Coupon redeemed!")}
+      >
+        Redeem Now
+      </Button>
+
+      <Button
+        variant="outline"
+        className="flex-1"
+        onClick={() => alert("You can redeem later")}
+      >
+        Redeem Later
+      </Button>
+    </div>
+
+    <p className="text-xs text-muted-foreground mt-2">
+      You can use this coupon now or later during payment.
+    </p>
+  </div>
+)}
+
+
+
+
+      {/* Submit */}
+      <Button className="w-full bg-[#1e3a8a] text-white mt-4">
+        Register Now
+      </Button>
+    </form>
+  </DialogContent>
+</Dialog>
 
     </div>
   );
