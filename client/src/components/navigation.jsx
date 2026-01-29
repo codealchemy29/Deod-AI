@@ -5,7 +5,7 @@ import { useTheme } from "@/components/theme-provider";
 import { Menu, X, Sun, Moon, GraduationCap, Search, Wrench, Upload, Newspaper, Mail, ShoppingBag, Info } from "lucide-react";
 var navItems = [
     { href: "/about", label: "About", icon: Info },
-    { href: "/learn", label: "Learn AI", icon: GraduationCap },
+    { href: "/learn", label: "Learn AI With Tutor", icon: GraduationCap },
     { href: "/explore", label: "Explore Tools", icon: Search },
     { href: "/create", label: "Create Tools", icon: Wrench },
     { href: "/submit", label: "Submit Tools", icon: Upload },
@@ -41,7 +41,9 @@ export function Navigation() {
                 <button className={"px-3 py-2 text-sm font-medium transition-colors rounded-md ".concat(location === item.href
                 ? "bg-[#1e3a8a]/10 text-[#1e3a8a]"
                 : "text-muted-foreground hover:text-[#1e3a8a] hover:bg-[#1e3a8a]/5")} data-testid={"link-".concat(item.label.toLowerCase().replace(' ', '-'))}>
-                  {item.label}
+                 <span className="whitespace-nowrap">
+  {item.label}
+</span>
                 </button>
               </Link>); })}
           </div>
