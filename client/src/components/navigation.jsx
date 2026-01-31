@@ -54,13 +54,20 @@ export function Navigation() {
             </Button>
 
             <div className="hidden md:block">
-              <Link href="/submit">
+              <Link href="/register">
                 <Button className="bg-gradient-to-r from-[#1e3a8a] to-blue-700 text-white border-0 shadow-sm hover:shadow-md transition-all active:scale-95" data-testid="button-submit-tool-nav">
-                  Submit Your Tool
+                Register
                 </Button>
               </Link>
             </div>
 
+ <div className="hidden md:block">
+              <Link href="/login">
+                <Button className="bg-gradient-to-r from-[#1e3a8a] to-blue-700 text-white border-0 shadow-sm hover:shadow-md transition-all active:scale-95" data-testid="button-submit-tool-nav">
+                  Login
+                </Button>
+              </Link>
+            </div>
             <Button variant="ghost" size="icon" className="lg:hidden hover:text-[#1e3a8a] hover:bg-[#1e3a8a]/5" onClick={function () { return setMobileMenuOpen(!mobileMenuOpen); }} data-testid="button-mobile-menu" aria-label="Toggle menu">
               {mobileMenuOpen ? <X className="h-5 w-5"/> : <Menu className="h-5 w-5"/>}
             </Button>

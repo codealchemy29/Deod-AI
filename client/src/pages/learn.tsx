@@ -34,8 +34,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-
+import { Copy, Check } from "lucide-react";
 /* =======================
     DATA
 ======================= */
@@ -229,8 +228,31 @@ function getLevelColor(level: string) {
 export default function Learn() {
   const [open, setOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
-  const couponCode = "DEOD50"; // example coupon
+  // const couponCode = "DEOD50"; 
+const [selectedPlan, setSelectedPlan] = useState<any>(null);
+const [enrollOpen, setEnrollOpen] = useState(false);
+const [couponOpen, setCouponOpen] = useState(false);
+const [copied, setCopied] = useState(false);
 
+const COUPON_CODE = "DEOD50";
+const CLAIM_URL = "https://your-payment-site.com"; // replace
+// const { toast } = useToast();
+
+// 🔹 CLICK HANDLER
+const handleEnrollClick = (plan: any) => {
+setSelectedPlan(plan);
+setEnrollOpen(true);
+};
+
+const handleCopy = async () => {
+  try {
+    await navigator.clipboard.writeText(COUPON_CODE);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  } catch (err) {
+    console.error("Copy failed");
+  }
+};
 
 
   return (
@@ -432,15 +454,16 @@ export default function Learn() {
             {plan.bestFor}
           </p>
 
-          <button
-            className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
-              plan.popular
-                ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                : "bg-gray-900 text-white hover:bg-gray-800"
-            }`}
-          >
-            Enroll Now
-          </button>
+         <button
+onClick={() => handleEnrollClick(plan)}
+className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
+plan.popular
+? "bg-indigo-600 text-white hover:bg-indigo-700"
+: "bg-gray-900 text-white hover:bg-gray-800"
+}`}
+>
+Enroll Now
+</button>
         </motion.div>
       ))}
     </div>
@@ -637,6 +660,118 @@ export default function Learn() {
     </form>
   </DialogContent>
 </Dialog>
+
+
+// 🔹 ADD THIS DIALOG AT THE BOTTOM OF THE PAGE
+<Dialog open={enrollOpen} onOpenChange={setEnrollOpen}>
+<DialogContent className="max-w-lg p-6">
+{selectedPlan && (
+<div className="relative">
+{/* Connect Wallet */}
+<div className="flex items-start justify-between mb-5">
+  <div>
+    <h2 className="text-2xl font-bold">{selectedPlan.name}</h2>
+    <p className="text-indigo-600 font-medium">
+      {selectedPlan.subtitle}
+    </p>
+  </div>
+
+  <Button className="right-5" variant="outline" size="sm" >
+    Connect Wallet
+  </Button>
+</div>
+
+
+{/* Plan Info */}
+{/* <h2 className="text-2xl font-bold mb-1">
+{selectedPlan.name}
+</h2>
+
+
+<p className="text-indigo-600 font-medium mb-4">
+{selectedPlan.subtitle}
+</p> */}
+
+
+<div className="flex items-center gap-3 mb-6">
+<span className="line-through text-muted-foreground">
+{selectedPlan.originalPrice}
+</span>
+<span className="text-4xl font-bold">
+{selectedPlan.offerPrice}
+</span>
+</div>
+
+
+<Badge className="mb-4">Best for: {selectedPlan.bestFor}</Badge>
+
+
+<Button
+  className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+  onClick={() => {
+    setEnrollOpen(false);
+    setCouponOpen(true);
+  }}
+>
+  Continue to Payment
+</Button>
+</div>
+)}
+</DialogContent>
+</Dialog>
+
+<Dialog open={couponOpen} onOpenChange={setCouponOpen}>
+  <DialogContent className="max-w-md p-6">
+    <div className="space-y-6 text-center">
+
+      {/* Title */}
+      <h2 className="text-2xl font-bold">
+        🎉 Your Coupon Code
+      </h2>
+
+      <p className="text-muted-foreground">
+        Use this coupon during payment to get an exclusive discount.
+      </p>
+
+      {/* Coupon Card */}
+      <div className="flex items-center justify-between gap-3 border border-dashed border-indigo-600 rounded-xl px-4 py-3 bg-indigo-50 dark:bg-indigo-950/30">
+  <span className="text-xl font-bold tracking-widest text-indigo-600">
+    {COUPON_CODE}
+  </span>
+
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={handleCopy}
+    aria-label="Copy coupon code"
+  >
+    {copied ? (
+      <Check className="h-5 w-5 text-green-600" />
+    ) : (
+      <Copy className="h-5 w-5" />
+    )}
+  </Button>
+</div>
+
+
+      <p className="text-xs text-muted-foreground">
+        Click the icon to copy the coupon code
+      </p>
+
+      {/* Claim Button */}
+      <a
+        href={CLAIM_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Button className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white">
+          Claim & Continue Payment
+        </Button>
+      </a>
+    </div>
+  </DialogContent>
+</Dialog>
+
 
     </div>
   );
