@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link,useLocation  } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LogIn, Mail, Lock, ArrowRight } from "lucide-react";
+import { API_BASE_URL } from "@/config/api";
 
 export default function Login() {
   const [form, setForm] = useState({
@@ -12,22 +13,54 @@ export default function Login() {
   });
 
   const [error, setError] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  
 
-    if (!form.email || !form.password) {
-      setError("Please enter your email and password");
-      return;
+const [loading, setLoading] = useState(false);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  setLoading(true);
+  setError(null);
+console.log(API_BASE_URL)
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
+
+    const contentType = res.headers.get("content-type");
+
+    if (!contentType?.includes("application/json")) {
+      const text = await res.text();
+      throw new Error("Server returned HTML instead of JSON");
     }
 
-    setError(null);
-    console.log("Login payload", form);
-  };
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Login failed");
+    }
+
+    localStorage.setItem("token", data.data.token);
+    setLocation("/profile");
+
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
@@ -82,13 +115,15 @@ export default function Login() {
             {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
             <Button
-              type="submit"
-              size="lg"
-              className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
-            >
-              Sign In
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+  type="submit"
+  size="lg"
+  disabled={loading}
+  className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+>
+  {loading ? "Signing in..." : "Sign In"}
+  {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
+</Button>
+
           </form>
 
           <div className="flex items-center justify-between mt-4 text-sm">

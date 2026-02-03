@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect  } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
+import { getMe } from "@/utils/auth";
+import { User, LogOut } from "lucide-react";
+import { API_BASE_URL } from "@/config/api";
+
 import { Menu, X, Sun, Moon, GraduationCap, Search, Wrench, Upload, Newspaper, Mail, ShoppingBag, Info } from "lucide-react";
 var navItems = [
     { href: "/about", label: "About", icon: Info },
@@ -14,10 +18,28 @@ var navItems = [
     { href: "/newsletter", label: "Newsletter", icon: Mail },
 ];
 export function Navigation() {
-    var location = useLocation()[0];
+    // var location = useLocation()[0];
     var _a = useState(false), mobileMenuOpen = _a[0], setMobileMenuOpen = _a[1];
     var _b = useTheme(), theme = _b.theme, toggleTheme = _b.toggleTheme;
-    return (<header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-background/80 border-b border-border/50">
+
+    const [user, setUser] = useState(null);
+const [location, setLocation] = useLocation();
+
+useEffect(() => {
+  getMe().then((userData) => {
+    if (userData) {
+      setUser(userData);
+    }
+  });
+}, [location]);
+
+const logout = () => {
+  localStorage.removeItem("token");
+  setUser(null);
+  setLocation("/login");
+};
+    return (
+    <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-background/80 border-b border-border/50">
       <nav className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
          <Link href="/" className="flex items-center gap-2 group" data-testid="link-home">
@@ -53,21 +75,49 @@ export function Navigation() {
               {theme === "light" ? (<Moon className="h-5 w-5"/>) : (<Sun className="h-5 w-5"/>)}
             </Button>
 
-            <div className="hidden md:block">
-              <Link href="/register">
-                <Button className="bg-gradient-to-r from-[#1e3a8a] to-blue-700 text-white border-0 shadow-sm hover:shadow-md transition-all active:scale-95" data-testid="button-submit-tool-nav">
-                Register
-                </Button>
-              </Link>
-            </div>
+            {user ? (
+  <div className="hidden md:flex items-center gap-3">
+  <Link href="/profile">
+  <Button
+    variant="ghost"
+    size="icon"
+    className="hover:text-[#1e3a8a] hover:bg-[#1e3a8a]/10"
+    title="Profile"
+  >
+    <User className="h-5 w-5" />
+  </Button>
+</Link>
 
- <div className="hidden md:block">
-              <Link href="/login">
-                <Button className="bg-gradient-to-r from-[#1e3a8a] to-blue-700 text-white border-0 shadow-sm hover:shadow-md transition-all active:scale-95" data-testid="button-submit-tool-nav">
-                  Login
-                </Button>
-              </Link>
-            </div>
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={logout}
+  title="Logout"
+  className="text-red-500 hover:bg-red-500/10"
+>
+  <LogOut className="h-5 w-5" />
+</Button>
+  </div>
+) : (
+  <>
+    <div className="hidden md:block">
+      <Link href="/register">
+        <Button className="bg-gradient-to-r from-[#1e3a8a] to-blue-700 text-white">
+          Register
+        </Button>
+      </Link>
+    </div>
+
+    <div className="hidden md:block">
+      <Link href="/login">
+        <Button className="bg-gradient-to-r from-[#1e3a8a] to-blue-700 text-white">
+          Login
+        </Button>
+      </Link>
+    </div>
+  </>
+)}
+
             <Button variant="ghost" size="icon" className="lg:hidden hover:text-[#1e3a8a] hover:bg-[#1e3a8a]/5" onClick={function () { return setMobileMenuOpen(!mobileMenuOpen); }} data-testid="button-mobile-menu" aria-label="Toggle menu">
               {mobileMenuOpen ? <X className="h-5 w-5"/> : <Menu className="h-5 w-5"/>}
             </Button>

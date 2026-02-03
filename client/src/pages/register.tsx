@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link,useLocation  } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, User, Mail, Phone, Lock, ArrowRight } from "lucide-react";
+import { API_BASE_URL } from "@/config/api";
+
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -15,21 +17,62 @@ export default function Register() {
   });
 
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [, setLocation] = useLocation();
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
+
     setError(null);
-    console.log("Register payload", form);
+    setLoading(true);
+
+    try {
+      const res = await fetch( `${API_BASE_URL}/api/v1/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          phone: form.phone,
+          confirmPassword: form.confirmPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
+
+      console.log("Registration success:", data);
+
+      if (data.data?.token) {
+  localStorage.setItem("token", data.data.token);
+}
+    setLocation("/login");
+    
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
       {/* Background */}
@@ -118,15 +161,18 @@ export default function Register() {
               />
             </div>
 
-            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+            {error && (
+              <p className="text-sm text-red-500 text-center">{error}</p>
+            )}
 
             <Button
               type="submit"
               size="lg"
+              disabled={loading}
               className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
             >
-              Create Account
-              <ArrowRight className="ml-2 h-4 w-4" />
+              {loading ? "Creating Account..." : "Create Account"}
+              {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </form>
 

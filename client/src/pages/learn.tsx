@@ -24,7 +24,7 @@ import {
   Layers,
 } from "lucide-react";
 import {motion} from "framer-motion";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Copy, Check } from "lucide-react";
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+import { API_BASE_URL } from "@/config/api";
+
 /* =======================
     DATA
 ======================= */
@@ -101,65 +108,7 @@ import { Copy, Check } from "lucide-react";
 //     topics: ["Market Research", "Product Strategy", "Pricing Models", "Marketing & Sales"],
 //   },
 // ];
-const plans = [
-  {
-    name: "Beginner Level",
-    subtitle: "Perfect for absolute beginners",
-    originalPrice: "$200",
-    offerPrice: "$100",
-    description:
-      "Ideal for students and professionals who are just starting their AI journey.",
-    features: [
-      "Introduction to Artificial Intelligence",
-      "Basics of ChatGPT & AI tools",
-      "Prompt engineering fundamentals",
-      "AI for daily productivity & simple tasks",
-      "Social media & content creation basics using AI",
-      "Beginner-friendly explanations (no tech background needed)",
-    ],
-    bestFor: "Students, creators, professionals starting with AI",
-    popular: false,
-  },
-  {
-    name: "Intermediate Level",
-    subtitle: "For learners who want practical AI skills",
-    originalPrice: "$300",
-    offerPrice: "$200",
-    description:
-      "Build practical AI skills with hands-on projects and automation workflows.",
-    features: [
-      "Everything in Beginner Level",
-      "Advanced prompt engineering",
-      "AI tools for social media management",
-      "Personal branding using AI",
-      "Content automation & scheduling",
-      "Research, data mining & workflow optimization",
-      "Hands-on use cases & mini projects",
-    ],
-    bestFor: "Freelancers, marketers, content creators, working professionals",
-    popular: false,
-  },
-  {
-    name: "Pro Level",
-    subtitle: "For serious professionals & entrepreneurs",
-    originalPrice: "$1000",
-    offerPrice: "$500",
-    description:
-      "Advanced AI automation, agents, and monetization strategies.",
-    features: [
-      "Everything in Beginner & Intermediate Levels",
-      "AI automation for businesses",
-      "Building AI agents & advanced workflows",
-      "Advanced Excel automation with AI",
-      "Client management & AI consulting skills",
-      "Real-world case studies",
-      "Monetizing AI skills (services & subscriptions)",
-      "Priority support & exclusive resources",
-    ],
-    bestFor: "Entrepreneurs, consultants, business owners, AI power users",
-    popular: true,
-  },
-];
+
 
 const cardVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -234,9 +183,100 @@ const [enrollOpen, setEnrollOpen] = useState(false);
 const [couponOpen, setCouponOpen] = useState(false);
 const [copied, setCopied] = useState(false);
 
-const COUPON_CODE = "DEOD50";
-const CLAIM_URL = "https://your-payment-site.com"; // replace
+
+const CLAIM_URL = "https://biz-ai-opal.vercel.app"; // replace
 // const { toast } = useToast();
+const [plans, setPlans] = useState<any[]>([]);
+const [loadingPlans, setLoadingPlans] = useState(true);
+
+const [couponData, setCouponData] = useState<any>(null);
+const [couponLoading, setCouponLoading] = useState(false);
+const [couponError, setCouponError] = useState<string | null>(null);
+
+const createCoupon = async () => {
+  if (!selectedPlan || !selectedPlan._id) {
+    setCouponError("Invalid package selected");
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    setCouponError("Please login first");
+    return;
+  }
+
+  const payload = {
+    packageId: selectedPlan._id,
+    senderWalletAddress:
+      walletAddress || "0x0000000000000000000000000000000000000000",
+
+    // 🔹 MOCK VALUES (until blockchain payment is live)
+    transactionHash:
+      "0xDEV_TX_" + Date.now().toString(16),
+
+    deodAmount: Number(
+      (selectedPlan.discountedPrice * 87.89).toFixed(6)
+    ), // mock conversion
+
+    usdAmount: Number(selectedPlan.discountedPrice),
+  };
+
+  console.log("Coupon payload:", payload);
+
+  try {
+    setCouponLoading(true);
+    setCouponError(null);
+
+    const res = await fetch(
+       `${API_BASE_URL}/api/v1/coupons`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      throw new Error(json.message || "Coupon creation failed");
+    }
+
+    setCouponData(json.data);
+    setEnrollOpen(false);
+    setCouponOpen(true);
+  } catch (err: any) {
+    setCouponError(err.message);
+  } finally {
+    setCouponLoading(false);
+  }
+};
+
+
+
+
+useEffect(() => {
+  const fetchPackages = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/packages`);
+      const json = await res.json();
+
+      if (res.ok) {
+        setPlans(json.data.filter((p: any) => p.isActive));
+      }
+    } catch (err) {
+      console.error("Failed to fetch packages", err);
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
+
+  fetchPackages();
+}, []);
+
 
 // 🔹 CLICK HANDLER
 const handleEnrollClick = (plan: any) => {
@@ -244,17 +284,37 @@ setSelectedPlan(plan);
 setEnrollOpen(true);
 };
 
-const handleCopy = async () => {
+// const handleCopy = async () => {
+//   try {
+//     await navigator.clipboard.writeText(COUPON_CODE);
+//     setCopied(true);
+//     setTimeout(() => setCopied(false), 2000);
+//   } catch (err) {
+//     console.error("Copy failed");
+//   }
+// };
+
+const [walletAddress, setWalletAddress] = useState<string | null>(null);
+const [walletError, setWalletError] = useState<string | null>(null);
+
+const connectMetaMask = async () => {
   try {
-    await navigator.clipboard.writeText(COUPON_CODE);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  } catch (err) {
-    console.error("Copy failed");
+    if (!window.ethereum) {
+      setWalletError("MetaMask is not installed");
+      return;
+    }
+
+    const accounts = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+
+    setWalletAddress(accounts[0]);
+    setWalletError(null);
+  } catch (err: any) {
+    console.error(err);
+    setWalletError("Wallet connection failed");
   }
 };
-
-
   return (
     <div className="min-h-screen bg-background text-foreground">
 
@@ -388,6 +448,7 @@ const handleCopy = async () => {
     <h2 className="text-4xl font-bold mb-4">
       AI Course Pricing Plans
     </h2>
+
     <p className="text-muted-foreground text-lg">
       Choose the plan that fits your learning stage and goals.
     </p>
@@ -395,7 +456,7 @@ const handleCopy = async () => {
     <div className="grid md:grid-cols-3 gap-8 mt-12">
       {plans.map((plan, index) => (
         <motion.div
-          key={index}
+          key={plan._id}
           custom={index}
           initial="hidden"
           animate="visible"
@@ -403,72 +464,78 @@ const handleCopy = async () => {
           whileHover={{ scale: 1.05 }}
           className={`relative rounded-2xl shadow-xl p-8 border transition
             bg-white dark:bg-card text-foreground
-            ${plan.popular ? "border-indigo-600" : "border-border"}
+            ${plan.isPopular ? "border-indigo-600" : "border-border"}
           `}
         >
-          {plan.popular && (
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 
+          {plan.isPopular && (
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2
               bg-indigo-600 text-white text-sm px-4 py-1 rounded-full">
               Most Popular
             </span>
           )}
 
-          <h3 className="text-2xl font-bold">
-            {plan.name}
-          </h3>
-          <p className="text-indigo-600 font-medium mt-1">
-            {plan.subtitle}
-          </p>
+          {/* Title */}
+{/* Title */}
+<h2 className="text-2xl font-bold">
+  {plan.title}
+</h2>
 
-          <p className="text-muted-foreground mt-4">
-            {plan.description}
-          </p>
+<p className="text-indigo-600 font-medium capitalize">
+  {plan.level} level
+</p>
 
-          {/* Price */}
-          <div className="mt-6">
-            <span className="text-gray-400 line-through text-lg mr-2">
-              {plan.originalPrice}
-            </span>
-            <span className="text-4xl font-bold">
-              {plan.offerPrice}
-            </span>
-          </div>
+{/* Price */}
+<div className="mt-6 flex items-end justify-center gap-2">
+  <span className="line-through text-muted-foreground">
+    ${plan.originalPrice}
+  </span>
+
+  <span className="text-4xl font-bold">
+    ${plan.discountedPrice}
+  </span>
+
+  <span className="text-sm text-muted-foreground">
+    {plan.currency}
+  </span>
+</div>
+
 
           {/* Features */}
           <div className="mt-6 text-left">
-            <h4 className="font-semibold mb-2">
-              What you’ll get:
-            </h4>
+            <h4 className="font-semibold mb-2">What you’ll get:</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              {plan.features.map((feature, i) => (
+              {plan.features.map((feature: string, i: number) => (
                 <li key={i} className="flex gap-2">
-                  ✅ <span>{feature}</span>
+                  <CheckCircle2 className="h-4 w-4 text-indigo-600 mt-0.5" />
+                  <span>{feature}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Best for */}
-          <p className="mt-4 text-sm text-muted-foreground">
-            <strong className="text-foreground">Best for:</strong>{" "}
-            {plan.bestFor}
-          </p>
+          {/* Best For */}
+         <p className="mt-4 text-sm text-muted-foreground">
+  <strong className="text-foreground">Best for:</strong>{" "}
+  {plan.bestFor.join(", ")}
+</p>
 
-         <button
-onClick={() => handleEnrollClick(plan)}
-className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
-plan.popular
-? "bg-indigo-600 text-white hover:bg-indigo-700"
-: "bg-gray-900 text-white hover:bg-gray-800"
-}`}
->
-Enroll Now
-</button>
+          {/* CTA */}
+          <button
+            onClick={() => handleEnrollClick(plan)}
+            className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
+              plan.isPopular
+                ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                : "bg-gray-900 text-white hover:bg-gray-800"
+            }`}
+          >
+            Enroll Now
+          </button>
         </motion.div>
       ))}
     </div>
   </div>
 </section>
+
 
 
       {/* ================= FEATURED COURSES ================= */}
@@ -662,113 +729,118 @@ Enroll Now
 </Dialog>
 
 
-// 🔹 ADD THIS DIALOG AT THE BOTTOM OF THE PAGE
 <Dialog open={enrollOpen} onOpenChange={setEnrollOpen}>
-<DialogContent className="max-w-lg p-6">
-{selectedPlan && (
-<div className="relative">
-{/* Connect Wallet */}
-<div className="flex items-start justify-between mb-5">
-  <div>
-    <h2 className="text-2xl font-bold">{selectedPlan.name}</h2>
-    <p className="text-indigo-600 font-medium">
-      {selectedPlan.subtitle}
-    </p>
-  </div>
+  <DialogContent className="max-w-lg p-6">
+    {!selectedPlan ? (
+      <div className="text-center text-muted-foreground">
+        Loading plan...
+      </div>
+    ) : (
+      <div>
+        <div className="flex justify-between mb-5">
+          <div>
+            <h2 className="text-2xl font-bold">
+              {selectedPlan.title}
+            </h2>
+            <p className="text-indigo-600 capitalize">
+              {selectedPlan.level} level
+            </p>
+          </div>
 
-  <Button className="right-5" variant="outline" size="sm" >
-    Connect Wallet
-  </Button>
-</div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={connectMetaMask}
+          >
+            {walletAddress
+              ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+              : "Connect Wallet"}
+          </Button>
+        </div>
 
+        <div className="flex items-end gap-3 mb-6">
+          <span className="line-through text-muted-foreground">
+            ${selectedPlan.originalPrice}
+          </span>
+          <span className="text-4xl font-bold">
+            ${selectedPlan.discountedPrice}
+          </span>
+        </div>
 
-{/* Plan Info */}
-{/* <h2 className="text-2xl font-bold mb-1">
-{selectedPlan.name}
-</h2>
+        <Badge className="mb-4">
+          Best for: {selectedPlan.bestFor.join(", ")}
+        </Badge>
 
-
-<p className="text-indigo-600 font-medium mb-4">
-{selectedPlan.subtitle}
-</p> */}
-
-
-<div className="flex items-center gap-3 mb-6">
-<span className="line-through text-muted-foreground">
-{selectedPlan.originalPrice}
-</span>
-<span className="text-4xl font-bold">
-{selectedPlan.offerPrice}
-</span>
-</div>
-
-
-<Badge className="mb-4">Best for: {selectedPlan.bestFor}</Badge>
-
-
-<Button
-  className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
-  onClick={() => {
-    setEnrollOpen(false);
-    setCouponOpen(true);
-  }}
+      <Button
+  className="w-full bg-[#1e3a8a] text-white"
+  disabled={couponLoading}
+  onClick={createCoupon}
 >
-  Continue to Payment
+  {couponLoading ? "Generating Coupon..." : "Continue to Payment"}
 </Button>
-</div>
-)}
-</DialogContent>
+      </div>
+    )}
+  </DialogContent>
 </Dialog>
+
+
 
 <Dialog open={couponOpen} onOpenChange={setCouponOpen}>
   <DialogContent className="max-w-md p-6">
-    <div className="space-y-6 text-center">
+    {couponData ? (
+      <div className="space-y-6 text-center">
 
-      {/* Title */}
-      <h2 className="text-2xl font-bold">
-        🎉 Your Coupon Code
-      </h2>
+        <h2 className="text-2xl font-bold">🎉 Coupon Generated</h2>
 
-      <p className="text-muted-foreground">
-        Use this coupon during payment to get an exclusive discount.
-      </p>
+        <p className="text-muted-foreground">
+          Use this coupon during payment
+        </p>
 
-      {/* Coupon Card */}
-      <div className="flex items-center justify-between gap-3 border border-dashed border-indigo-600 rounded-xl px-4 py-3 bg-indigo-50 dark:bg-indigo-950/30">
-  <span className="text-xl font-bold tracking-widest text-indigo-600">
-    {COUPON_CODE}
-  </span>
+        <div className="flex items-center justify-between gap-3
+          border border-dashed border-indigo-600 rounded-xl
+          px-4 py-3 bg-indigo-50 dark:bg-indigo-950/30">
 
-  <Button
-    variant="ghost"
-    size="icon"
-    onClick={handleCopy}
-    aria-label="Copy coupon code"
-  >
-    {copied ? (
-      <Check className="h-5 w-5 text-green-600" />
+          <span className="text-xl font-bold tracking-widest text-indigo-600">
+            {couponData.code}
+          </span>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() =>
+              navigator.clipboard.writeText(couponData.code)
+            }
+          >
+            <Copy className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <div className="text-sm text-muted-foreground space-y-1">
+          <p>Amount: ${couponData.usdAmount}</p>
+          <p>Wallet: {couponData.senderWalletAddress.slice(0,6)}…</p>
+        </div>
+
+        <a
+          href={`${CLAIM_URL}?token=${couponData.redemptionToken}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button className="w-full bg-[#1e3a8a] text-white">
+            Claim & Continue Payment
+          </Button>
+        </a>
+      </div>
     ) : (
-      <Copy className="h-5 w-5" />
-    )}
-  </Button>
-</div>
-
-
-      <p className="text-xs text-muted-foreground">
-        Click the icon to copy the coupon code
+      <p className="text-center text-muted-foreground">
+        No coupon available
       </p>
+    )}
 
-      {/* Claim Button */}
-      <a
-        href={CLAIM_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Button className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white">
-          Claim & Continue Payment
-        </Button>
-      </a>
-    </div>
+    {couponError && (
+      <p className="text-sm text-red-500 text-center mt-2">
+        {couponError}
+      </p>
+    )}
   </DialogContent>
 </Dialog>
 

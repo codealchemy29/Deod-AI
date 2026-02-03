@@ -18,6 +18,7 @@ import About from "@/pages/about";
 import NotFound from "@/pages/not-found";
 import Register from "./pages/register";
 import Login from "./pages/login";
+import Profile from "./pages/profile";
 
 function Router() {
   return (
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/newsletter" component={Newsletter} />
       <Route path="/marketplace" component={Marketplace} />
       <Route path="/about" component={About} />
+      <Route path="/profile" component={Profile} />
       <Route path="/register" component={Register} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />
