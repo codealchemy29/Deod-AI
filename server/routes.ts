@@ -8,7 +8,40 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  
+
+  // Proxy auth requests to production API to bypass CORS in dev
+  app.use("/api/v1/auth", async (req, res) => {
+    try {
+      const targetUrl = `https://api.deod.ai/api/v1/auth${req.url}`;
+
+      const headers: Record<string, string> = {};
+      for (const [key, value] of Object.entries(req.headers)) {
+        if (key !== 'host' && key !== 'content-length' && typeof value === 'string') {
+          headers[key] = value;
+        }
+      }
+
+      const response = await fetch(targetUrl, {
+        method: req.method,
+        headers: headers,
+        body: (req.method !== 'GET' && req.method !== 'HEAD') ? JSON.stringify(req.body) : undefined,
+      });
+
+      response.headers.forEach((value, key) => {
+        if (key !== 'content-encoding' && key !== 'content-length' && key !== 'transfer-encoding') {
+          res.setHeader(key, value);
+        }
+      });
+
+      res.status(response.status);
+      const text = await response.text();
+      res.send(text);
+    } catch (error) {
+      console.error('Proxy error:', error);
+      res.status(500).json({ error: 'Proxy implementation error' });
+    }
+  });
+
   // AI Tools endpoints
   app.get("/api/tools", async (req, res) => {
     try {
@@ -110,13 +143,13 @@ export async function registerRoutes(
   app.post("/api/newsletter/subscribe", async (req, res) => {
     try {
       const validatedData = insertNewsletterSubscriptionSchema.parse(req.body);
-      
+
       // Check if email already exists
       const existing = await storage.getNewsletterSubscriptionByEmail(validatedData.email);
       if (existing) {
         return res.status(400).json({ error: "Email already subscribed" });
       }
-      
+
       const subscription = await storage.createNewsletterSubscription(validatedData);
       res.status(201).json(subscription);
     } catch (error) {

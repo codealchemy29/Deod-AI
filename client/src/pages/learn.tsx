@@ -1,11 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -23,8 +18,8 @@ import {
   CheckCircle2,
   Layers,
 } from "lucide-react";
-import {motion} from "framer-motion";
-import { useState,useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +28,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Copy, Check } from "lucide-react";
 declare global {
   interface Window {
@@ -109,18 +110,14 @@ import { API_BASE_URL } from "@/config/api";
 //   },
 // ];
 
-
 const cardVariants = {
   hidden: { opacity: 0, y: 40 },
-  visible: (i) => ({
+  visible: (i: any) => ({
     opacity: 1,
     y: 0,
     transition: { delay: i * 0.2, duration: 0.6 },
   }),
 };
-
-
-
 
 const featuredCourses = [
   {
@@ -152,7 +149,6 @@ const featuredCourses = [
   },
 ];
 
-
 /* =======================
     HELPERS
 ======================= */
@@ -177,147 +173,193 @@ function getLevelColor(level: string) {
 export default function Learn() {
   const [open, setOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
-  // const couponCode = "DEOD50"; 
-const [selectedPlan, setSelectedPlan] = useState<any>(null);
-const [enrollOpen, setEnrollOpen] = useState(false);
-const [couponOpen, setCouponOpen] = useState(false);
-const [copied, setCopied] = useState(false);
+  // const couponCode = "DEOD50";
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [enrollOpen, setEnrollOpen] = useState(false);
+  const [couponOpen, setCouponOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const authToken = localStorage.getItem("token");
+  const [activeCouponMessage, setActiveCouponMessage] = useState<string | null>(
+    null,
+  );
 
+  const CLAIM_URL = "http://localhost:5000"; // replace
+  // const { toast } = useToast();
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
 
-const CLAIM_URL = "https://biz-ai-opal.vercel.app"; // replace
-// const { toast } = useToast();
-const [plans, setPlans] = useState<any[]>([]);
-const [loadingPlans, setLoadingPlans] = useState(true);
+  const [couponData, setCouponData] = useState<any>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [isExistingCoupon, setIsExistingCoupon] = useState(false);
+  console.log("coupondata=>", couponData);
 
-const [couponData, setCouponData] = useState<any>(null);
-const [couponLoading, setCouponLoading] = useState(false);
-const [couponError, setCouponError] = useState<string | null>(null);
-
-const createCoupon = async () => {
-  if (!selectedPlan || !selectedPlan._id) {
-    setCouponError("Invalid package selected");
-    return;
-  }
-
+  const createCoupon = async () => {
+    setActiveCouponMessage(null);
+    
   const token = localStorage.getItem("token");
+
+    // ✅ LOGIN CHECK FIRST
   if (!token) {
-    setCouponError("Please login first");
+    setCouponError("Please login or register first to redeem a coupon.");
+    setCouponOpen(true);
+    setIsExistingCoupon(false);
     return;
   }
 
-  const payload = {
-    packageId: selectedPlan._id,
-    senderWalletAddress:
-      walletAddress || "0x0000000000000000000000000000000000000000",
+  const existingCoupon = await getActiveCouponForPackage(selectedPlan._id);
+console.log("isExistingCoupon:", isExistingCoupon);
+  if (existingCoupon) {
+    setCouponData(existingCoupon);
+    setIsExistingCoupon(true);
+    setCouponOpen(true);
+    setEnrollOpen(false);
+    return;
+  }
+  
 
-    // 🔹 MOCK VALUES (until blockchain payment is live)
-    transactionHash:
-      "0xDEV_TX_" + Date.now().toString(16),
+    // const token = localStorage.getItem("token");
+    // if (!token) {
+    //   setCouponError("Please login first");
+    //   return;
+    // }
 
-    deodAmount: Number(
-      (selectedPlan.discountedPrice * 87.89).toFixed(6)
-    ), // mock conversion
+    const payload = {
+      packageId: selectedPlan._id,
+      senderWalletAddress:
+        walletAddress || "0x0000000000000000000000000000000000000000",
 
-    usdAmount: Number(selectedPlan.discountedPrice),
-  };
+      // 🔹 MOCK VALUES (until blockchain payment is live)
+      transactionHash: "0xDEV_TX_" + Date.now().toString(16),
 
-  console.log("Coupon payload:", payload);
+      deodAmount: Number((selectedPlan.discountedPrice * 87.89).toFixed(6)), // mock conversion
 
-  try {
-    setCouponLoading(true);
-    setCouponError(null);
+      usdAmount: Number(selectedPlan.discountedPrice),
+    };
 
-    const res = await fetch(
-       `${API_BASE_URL}/api/v1/coupons`,
-      {
+    console.log("Coupon payload:", payload);
+
+    try {
+      setCouponLoading(true);
+      setCouponError(null);
+
+      const res = await fetch(`${API_BASE_URL}/api/v1/coupons`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
-      }
-    );
+      });
 
-    const json = await res.json();
-
-    if (!res.ok) {
-      throw new Error(json.message || "Coupon creation failed");
-    }
-
-    setCouponData(json.data);
-    setEnrollOpen(false);
-    setCouponOpen(true);
-  } catch (err: any) {
-    setCouponError(err.message);
-  } finally {
-    setCouponLoading(false);
-  }
-};
-
-
-
-
-useEffect(() => {
-  const fetchPackages = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/packages`);
       const json = await res.json();
+      console.log("Coupon API response:", json);
 
-      if (res.ok) {
-        setPlans(json.data.filter((p: any) => p.isActive));
+      if (!res.ok) {
+        throw new Error(json.message || "Coupon creation failed");
       }
-    } catch (err) {
-      console.error("Failed to fetch packages", err);
+
+      setCouponData(json.data);
+      setIsExistingCoupon(false);
+      setEnrollOpen(false);
+      setCouponOpen(true);
+    } catch (err: any) {
+      setCouponError(err.message);
     } finally {
-      setLoadingPlans(false);
+      setCouponLoading(false);
     }
   };
 
-  fetchPackages();
-}, []);
-
-
-// 🔹 CLICK HANDLER
-const handleEnrollClick = (plan: any) => {
-setSelectedPlan(plan);
-setEnrollOpen(true);
-};
-
-// const handleCopy = async () => {
-//   try {
-//     await navigator.clipboard.writeText(COUPON_CODE);
-//     setCopied(true);
-//     setTimeout(() => setCopied(false), 2000);
-//   } catch (err) {
-//     console.error("Copy failed");
-//   }
-// };
-
-const [walletAddress, setWalletAddress] = useState<string | null>(null);
-const [walletError, setWalletError] = useState<string | null>(null);
-
-const connectMetaMask = async () => {
+  const getActiveCouponForPackage = async (packageId: string) => {
   try {
-    if (!window.ethereum) {
-      setWalletError("MetaMask is not installed");
-      return;
-    }
+    const token = localStorage.getItem("token");
+    if (!token) return null;
 
-    const accounts = await window.ethereum.request({
-      method: "eth_requestAccounts",
+    const res = await fetch(`${API_BASE_URL}/api/v1/coupons/my-coupons`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
-    setWalletAddress(accounts[0]);
-    setWalletError(null);
-  } catch (err: any) {
-    console.error(err);
-    setWalletError("Wallet connection failed");
+    if (!res.ok) return null;
+
+    const json = await res.json();
+
+    if (!Array.isArray(json?.data)) return null;
+
+    return (
+      json.data.find(
+        (c: any) =>
+          c.packageId === packageId &&
+          c.isActive &&
+          !c.isRedeemed
+      ) || null
+    );
+  } catch (err) {
+    console.error("Error checking active coupon:", err);
+    return null;
   }
 };
+
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/v1/packages`);
+        const json = await res.json();
+
+        if (res.ok) {
+          setPlans(json.data.filter((p: any) => p.isActive));
+        }
+      } catch (err) {
+        console.error("Failed to fetch packages", err);
+      } finally {
+        setLoadingPlans(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
+
+  // 🔹 CLICK HANDLER
+  const handleEnrollClick = (plan: any) => {
+    setSelectedPlan(plan);
+    setEnrollOpen(true);
+  };
+
+  // const handleCopy = async () => {
+  //   try {
+  //     await navigator.clipboard.writeText(COUPON_CODE);
+  //     setCopied(true);
+  //     setTimeout(() => setCopied(false), 2000);
+  //   } catch (err) {
+  //     console.error("Copy failed");
+  //   }
+  // };
+
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [walletError, setWalletError] = useState<string | null>(null);
+
+  const connectMetaMask = async () => {
+    try {
+      if (!window.ethereum) {
+        setWalletError("MetaMask is not installed");
+        return;
+      }
+
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+
+      setWalletAddress(accounts[0]);
+      setWalletError(null);
+    } catch (err: any) {
+      console.error(err);
+      setWalletError("Wallet connection failed");
+    }
+  };
   return (
     <div className="min-h-screen bg-background text-foreground">
-
       {/* ================= HERO ================= */}
       <section className="relative overflow-hidden border-b border-border">
         {/* Themed Gradient Background */}
@@ -337,22 +379,27 @@ const connectMetaMask = async () => {
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mb-10">
-            From beginner fundamentals to advanced AI engineering. Master the skills
-            that will define the future of technology with structured learning paths
-            and hands-on projects.
+            From beginner fundamentals to advanced AI engineering. Master the
+            skills that will define the future of technology with structured
+            learning paths and hands-on projects.
           </p>
 
           <div className="flex flex-wrap gap-4">
             <Button
-  size="lg"
-  onClick={() => setOpen(true)}
-  className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
->
-  Start Learning
-  <ArrowRight className="ml-2 h-4 w-4" />
-</Button>
+              size="lg"
+              onClick={() => setOpen(true)}
+              className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+            >
+              Start Learning
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
 
-            <Button size="lg" onClick={() => setOpen(true)} variant="outline" className="border-border">
+            <Button
+              size="lg"
+              onClick={() => setOpen(true)}
+              variant="outline"
+              className="border-border"
+            >
               Learn AI With Tutor
             </Button>
           </div>
@@ -444,99 +491,94 @@ const connectMetaMask = async () => {
       </section> */}
 
       <section className="py-28 bg-gray-50 dark:bg-background border-y border-border">
-  <div className="max-w-7xl mx-auto px-6 text-center">
-    <h2 className="text-4xl font-bold mb-4">
-      AI Course Pricing Plans
-    </h2>
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold mb-4">AI Course Pricing Plans</h2>
 
-    <p className="text-muted-foreground text-lg">
-      Choose the plan that fits your learning stage and goals.
-    </p>
+          <p className="text-muted-foreground text-lg">
+            Choose the plan that fits your learning stage and goals.
+          </p>
 
-    <div className="grid md:grid-cols-3 gap-8 mt-12">
-      {plans.map((plan, index) => (
-        <motion.div
-          key={plan._id}
-          custom={index}
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-          whileHover={{ scale: 1.05 }}
-          className={`relative rounded-2xl shadow-xl p-8 border transition
+          <div className="grid md:grid-cols-3 gap-8 mt-12">
+            {plans.map((plan, index) => (
+              <motion.div
+                key={plan._id}
+                custom={index}
+                initial="hidden"
+                animate="visible"
+                variants={cardVariants}
+                whileHover={{ scale: 1.05 }}
+                className={`relative rounded-2xl shadow-xl p-8 border transition
             bg-white dark:bg-card text-foreground
             ${plan.isPopular ? "border-indigo-600" : "border-border"}
           `}
-        >
-          {plan.isPopular && (
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2
-              bg-indigo-600 text-white text-sm px-4 py-1 rounded-full">
-              Most Popular
-            </span>
-          )}
+              >
+                {plan.isPopular && (
+                  <span
+                    className="absolute -top-3 left-1/2 -translate-x-1/2
+              bg-indigo-600 text-white text-sm px-4 py-1 rounded-full"
+                  >
+                    Most Popular
+                  </span>
+                )}
 
-          {/* Title */}
-{/* Title */}
-<h2 className="text-2xl font-bold">
-  {plan.title}
-</h2>
+                {/* Title */}
+                {/* Title */}
+                <h2 className="text-2xl font-bold">{plan.title}</h2>
 
-<p className="text-indigo-600 font-medium capitalize">
-  {plan.level} level
-</p>
+                <p className="text-indigo-600 font-medium capitalize">
+                  {plan.level} level
+                </p>
 
-{/* Price */}
-<div className="mt-6 flex items-end justify-center gap-2">
-  <span className="line-through text-muted-foreground">
-    ${plan.originalPrice}
-  </span>
+                {/* Price */}
+                <div className="mt-6 flex items-end justify-center gap-2">
+                  <span className="line-through text-muted-foreground">
+                    ${plan.originalPrice}
+                  </span>
 
-  <span className="text-4xl font-bold">
-    ${plan.discountedPrice}
-  </span>
+                  <span className="text-4xl font-bold">
+                    ${plan.discountedPrice}
+                  </span>
 
-  <span className="text-sm text-muted-foreground">
-    {plan.currency}
-  </span>
-</div>
+                  <span className="text-sm text-muted-foreground">
+                    {plan.currency}
+                  </span>
+                </div>
 
+                {/* Features */}
+                <div className="mt-6 text-left">
+                  <h4 className="font-semibold mb-2">What you’ll get:</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {plan.features.map((feature: string, i: number) => (
+                      <li key={i} className="flex gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-indigo-600 mt-0.5" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-          {/* Features */}
-          <div className="mt-6 text-left">
-            <h4 className="font-semibold mb-2">What you’ll get:</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              {plan.features.map((feature: string, i: number) => (
-                <li key={i} className="flex gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-indigo-600 mt-0.5" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
+                {/* Best For */}
+                <p className="mt-4 text-sm text-muted-foreground">
+                  <strong className="text-foreground">Best for:</strong>{" "}
+                  {plan.bestFor.join(", ")}
+                </p>
+
+                {/* CTA */}
+                <button
+                  onClick={() => handleEnrollClick(plan)}
+                  className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
+                    plan.isPopular
+                      ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                      : "bg-gray-900 text-white hover:bg-gray-800"
+                  }`}
+                >
+                  Enroll Now
+                </button>
+              </motion.div>
+            ))}
           </div>
-
-          {/* Best For */}
-         <p className="mt-4 text-sm text-muted-foreground">
-  <strong className="text-foreground">Best for:</strong>{" "}
-  {plan.bestFor.join(", ")}
-</p>
-
-          {/* CTA */}
-          <button
-            onClick={() => handleEnrollClick(plan)}
-            className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
-              plan.isPopular
-                ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                : "bg-gray-900 text-white hover:bg-gray-800"
-            }`}
-          >
-            Enroll Now
-          </button>
-        </motion.div>
-      ))}
-    </div>
-  </div>
-</section>
-
-
+        </div>
+      </section>
 
       {/* ================= FEATURED COURSES ================= */}
       <section className="py-28 bg-muted/30 border-y border-border">
@@ -556,7 +598,10 @@ const connectMetaMask = async () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredCourses.map((course, index) => (
-              <Card key={index} className="bg-card border-border hover:shadow-md transition overflow-hidden">
+              <Card
+                key={index}
+                className="bg-card border-border hover:shadow-md transition overflow-hidden"
+              >
                 <div className="aspect-video bg-gradient-to-br from-[#1e3a8a]/20 to-teal-500/20 flex items-center justify-center">
                   <Play className="h-10 w-10 text-[#1e3a8a] dark:text-blue-400" />
                 </div>
@@ -583,13 +628,18 @@ const connectMetaMask = async () => {
                   </div>
 
                   {course.progress > 0 && (
-                    <Progress value={course.progress} className="h-1.5 bg-muted" />
+                    <Progress
+                      value={course.progress}
+                      className="h-1.5 bg-muted"
+                    />
                   )}
 
                   <Button
                     className="w-full"
                     variant={course.progress > 0 ? "default" : "outline"}
-                    style={course.progress > 0 ? { backgroundColor: '#1e3a8a' } : {}}
+                    style={
+                      course.progress > 0 ? { backgroundColor: "#1e3a8a" } : {}
+                    }
                   >
                     {course.progress > 0 ? "Continue Learning" : "Start Course"}
                   </Button>
@@ -612,7 +662,10 @@ const connectMetaMask = async () => {
             industry-recognized certifications are launching soon.
           </p>
           <Link href="/newsletter">
-            <Button size="lg" className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white">
+            <Button
+              size="lg"
+              className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+            >
               Notify Me
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -620,231 +673,240 @@ const connectMetaMask = async () => {
         </div>
       </section>
 
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-xl p-6">
+          <DialogHeader>
+            <DialogTitle>Course Registration</DialogTitle>
+          </DialogHeader>
 
-<Dialog open={open} onOpenChange={setOpen}>
-  <DialogContent className="sm:max-w-xl p-6">
-    <DialogHeader>
-      <DialogTitle>Course Registration</DialogTitle>
-    </DialogHeader>
+          <form className="space-y-4">
+            {/* Name */}
+            <div className="space-y-1">
+              <Label>Name</Label>
+              <Input placeholder="Enter your name" />
+            </div>
 
-    <form className="space-y-4">
-      {/* Name */}
-      <div className="space-y-1">
-        <Label>Name</Label>
-        <Input placeholder="Enter your name" />
+            {/* Email */}
+            <div className="space-y-1">
+              <Label>Email</Label>
+              <Input type="email" placeholder="Enter your email" />
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-1">
+              <Label>Phone Number</Label>
+              <Input type="tel" placeholder="Enter your phone number" />
+            </div>
+
+            {/* Course Select */}
+            <div className="space-y-1">
+              <Label>Select Course</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a course" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Beginner Level</SelectItem>
+                  <SelectItem value="intermediate">
+                    Intermediate Level
+                  </SelectItem>
+                  <SelectItem value="pro">Pro Level</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Payment Option */}
+            <div className="space-y-1">
+              <Label>Payment Option</Label>
+
+              <Select onValueChange={(value) => setPaymentMethod(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select payment method" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="deod-usdt">Deod / USDT</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {paymentMethod === "deod-usdt" && (
+              <div className="mt-4 border border-dashed border-indigo-500 rounded-xl p-4 bg-indigo-50 dark:bg-indigo-950/30">
+                <p className="text-sm text-muted-foreground mb-2">
+                  🎁 You received a coupon code
+                </p>
+
+                <div className="flex items-center justify-between bg-white dark:bg-card border rounded-lg px-4 py-3">
+                  <span className="text-lg font-bold tracking-widest text-indigo-600">
+                    DEOD50
+                  </span>
+
+                  <Badge className="bg-indigo-600 text-white">50% OFF</Badge>
+                </div>
+
+                <div className="flex gap-3 mt-4">
+                  <Button
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white"
+                    onClick={() => alert("Coupon redeemed!")}
+                  >
+                    Redeem Now
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => alert("You can redeem later")}
+                  >
+                    Redeem Later
+                  </Button>
+                </div>
+
+                <p className="text-xs text-muted-foreground mt-2">
+                  You can use this coupon now or later during payment.
+                </p>
+              </div>
+            )}
+
+            {/* Submit */}
+            <Button className="w-full bg-[#1e3a8a] text-white mt-4">
+              Register Now
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={enrollOpen} onOpenChange={setEnrollOpen}>
+        <DialogContent className="max-w-lg p-6">
+          {!selectedPlan ? (
+            <div className="text-center text-muted-foreground">
+              Loading plan...
+            </div>
+          ) : (
+            <div>
+              <div className="flex justify-between mb-5">
+                <div>
+                  <h2 className="text-2xl font-bold">{selectedPlan.title}</h2>
+                  <p className="text-indigo-600 capitalize">
+                    {selectedPlan.level} level
+                  </p>
+                </div>
+
+                <Button variant="outline" size="sm" onClick={connectMetaMask}>
+                  {walletAddress
+                    ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+                    : "Connect Wallet"}
+                </Button>
+              </div>
+
+              <div className="flex items-end gap-3 mb-6">
+                <span className="line-through text-muted-foreground">
+                  ${selectedPlan.originalPrice}
+                </span>
+                <span className="text-4xl font-bold">
+                  ${selectedPlan.discountedPrice}
+                </span>
+              </div>
+
+              <Badge className="mb-4">
+                Best for: {selectedPlan.bestFor.join(", ")}
+              </Badge>
+
+              <Button
+                className="w-full bg-[#1e3a8a] text-white"
+                disabled={couponLoading}
+                onClick={createCoupon}
+              >
+                {couponLoading ? "Generating Coupon..." : "Continue to Payment"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={couponOpen} onOpenChange={setCouponOpen}>
+        <DialogContent className="max-w-md p-6">
+          {/* {activeCouponMessage && (
+      <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 
+          border border-amber-400 rounded-lg px-4 py-3 text-sm">
+        <CheckCircle2 className="h-4 w-4 text-amber-500" />
+        <span>{activeCouponMessage}</span>
       </div>
-
-      {/* Email */}
-      <div className="space-y-1">
-        <Label>Email</Label>
-        <Input type="email" placeholder="Enter your email" />
-      </div>
-
-      {/* Phone */}
-      <div className="space-y-1">
-        <Label>Phone Number</Label>
-        <Input type="tel" placeholder="Enter your phone number" />
-      </div>
-
-      {/* Course Select */}
-      <div className="space-y-1">
-        <Label>Select Course</Label>
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Choose a course" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="beginner">Beginner Level</SelectItem>
-            <SelectItem value="intermediate">Intermediate Level</SelectItem>
-            <SelectItem value="pro">Pro Level</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Payment Option */}
-      <div className="space-y-1">
-  <Label>Payment Option</Label>
-
-  <Select onValueChange={(value) => setPaymentMethod(value)}>
-    <SelectTrigger>
-      <SelectValue placeholder="Select payment method" />
-    </SelectTrigger>
-
-    <SelectContent>
-      <SelectItem value="deod-usdt">Deod / USDT</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
-
-
-
-{paymentMethod === "deod-usdt" && (
-  <div className="mt-4 border border-dashed border-indigo-500 rounded-xl p-4 bg-indigo-50 dark:bg-indigo-950/30">
-    <p className="text-sm text-muted-foreground mb-2">
-      🎁 You received a coupon code
-    </p>
-
-    <div className="flex items-center justify-between bg-white dark:bg-card border rounded-lg px-4 py-3">
-      <span className="text-lg font-bold tracking-widest text-indigo-600">
-        DEOD50
-      </span>
-
-      <Badge className="bg-indigo-600 text-white">
-        50% OFF
-      </Badge>
-    </div>
-
-    <div className="flex gap-3 mt-4">
-      <Button
-        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white"
-        onClick={() => alert("Coupon redeemed!")}
-      >
-        Redeem Now
-      </Button>
-
-      <Button
-        variant="outline"
-        className="flex-1"
-        onClick={() => alert("You can redeem later")}
-      >
-        Redeem Later
-      </Button>
-    </div>
-
-    <p className="text-xs text-muted-foreground mt-2">
-      You can use this coupon now or later during payment.
-    </p>
+    )} */}
+{couponError && !couponData && (
+  <div className="bg-red-50 border border-red-400 rounded-lg px-4 py-3 text-sm text-red-600">
+    {couponError}
   </div>
 )}
+          {couponData ? (
+            <div className="space-y-6 text-center">
+              <h2 className="text-2xl font-bold">
+                {isExistingCoupon
+                  ? "Active Coupon Found 🎟️"
+                  : "🎉 Coupon Generated"}
+              </h2>
+              {isExistingCoupon && (
+                <div
+                  className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 
+      border border-green-400 rounded-lg px-4 py-3 text-sm text-green-700 dark:text-green-300"
+                >
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <span>
+                    Your coupon is already active. Please redeem it below.
+                  </span>
+                </div>
+              )}
+              <p className="text-muted-foreground">
+                Use this coupon during payment
+              </p>
 
-
-
-
-      {/* Submit */}
-      <Button className="w-full bg-[#1e3a8a] text-white mt-4">
-        Register Now
-      </Button>
-    </form>
-  </DialogContent>
-</Dialog>
-
-
-<Dialog open={enrollOpen} onOpenChange={setEnrollOpen}>
-  <DialogContent className="max-w-lg p-6">
-    {!selectedPlan ? (
-      <div className="text-center text-muted-foreground">
-        Loading plan...
-      </div>
-    ) : (
-      <div>
-        <div className="flex justify-between mb-5">
-          <div>
-            <h2 className="text-2xl font-bold">
-              {selectedPlan.title}
-            </h2>
-            <p className="text-indigo-600 capitalize">
-              {selectedPlan.level} level
-            </p>
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={connectMetaMask}
-          >
-            {walletAddress
-              ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
-              : "Connect Wallet"}
-          </Button>
-        </div>
-
-        <div className="flex items-end gap-3 mb-6">
-          <span className="line-through text-muted-foreground">
-            ${selectedPlan.originalPrice}
-          </span>
-          <span className="text-4xl font-bold">
-            ${selectedPlan.discountedPrice}
-          </span>
-        </div>
-
-        <Badge className="mb-4">
-          Best for: {selectedPlan.bestFor.join(", ")}
-        </Badge>
-
-      <Button
-  className="w-full bg-[#1e3a8a] text-white"
-  disabled={couponLoading}
-  onClick={createCoupon}
->
-  {couponLoading ? "Generating Coupon..." : "Continue to Payment"}
-</Button>
-      </div>
-    )}
-  </DialogContent>
-</Dialog>
-
-
-
-<Dialog open={couponOpen} onOpenChange={setCouponOpen}>
-  <DialogContent className="max-w-md p-6">
-    {couponData ? (
-      <div className="space-y-6 text-center">
-
-        <h2 className="text-2xl font-bold">🎉 Coupon Generated</h2>
-
-        <p className="text-muted-foreground">
-          Use this coupon during payment
-        </p>
-
-        <div className="flex items-center justify-between gap-3
+              <div
+                className="flex items-center justify-between gap-3
           border border-dashed border-indigo-600 rounded-xl
-          px-4 py-3 bg-indigo-50 dark:bg-indigo-950/30">
+          px-4 py-3 bg-indigo-50 dark:bg-indigo-950/30"
+              >
+                <span className="text-xl font-bold tracking-widest text-indigo-600">
+                  {couponData.code}
+                </span>
 
-          <span className="text-xl font-bold tracking-widest text-indigo-600">
-            {couponData.code}
-          </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigator.clipboard.writeText(couponData.code)}
+                >
+                  <Copy className="h-5 w-5" />
+                </Button>
+              </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() =>
-              navigator.clipboard.writeText(couponData.code)
-            }
-          >
-            <Copy className="h-5 w-5" />
-          </Button>
-        </div>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>Amount: ${couponData.usdAmount}</p>
+                <p>Wallet: {couponData.senderWalletAddress.slice(0, 6)}…</p>
+              </div>
 
-        <div className="text-sm text-muted-foreground space-y-1">
-          <p>Amount: ${couponData.usdAmount}</p>
-          <p>Wallet: {couponData.senderWalletAddress.slice(0,6)}…</p>
-        </div>
+              <a
+                href={`${CLAIM_URL}/coupon?coupon=${couponData.code}&token=${couponData.redemptionToken}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button className="w-full bg-[#1e3a8a] text-white">
+                  {isExistingCoupon
+                    ? "Redeem Active Coupon"
+                    : "Claim & Continue Payment"}
+                </Button>
+              </a>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground">
+              No coupon available
+            </p>
+          )}
 
-        <a
-          href={`${CLAIM_URL}?token=${couponData.redemptionToken}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Button className="w-full bg-[#1e3a8a] text-white">
-            Claim & Continue Payment
-          </Button>
-        </a>
-      </div>
-    ) : (
-      <p className="text-center text-muted-foreground">
-        No coupon available
-      </p>
-    )}
-
-    {couponError && (
-      <p className="text-sm text-red-500 text-center mt-2">
-        {couponError}
-      </p>
-    )}
-  </DialogContent>
-</Dialog>
-
-
+          {couponError && (
+            <p className="text-sm text-red-500 text-center mt-2">
+              {couponError}
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
