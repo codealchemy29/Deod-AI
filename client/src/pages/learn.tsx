@@ -45,6 +45,7 @@ declare global {
 }
 import { API_BASE_URL } from "@/config/api";
 import { ERC20_ABI } from "@/config/abi";
+import { CLAIM_URL, TOKEN_CONTRACT_ADDRESS, RECIPIENT_ADDRESS } from "@/config/env";
 
 /* =======================
     DATA
@@ -185,7 +186,6 @@ export default function Learn() {
     const { toast } = useToast();
     const [deodRate, setDeodRate] = useState<number | null>(null);
 
-    const CLAIM_URL = "https://biz-ai-opal.vercel.app"; // replace
     const [plans, setPlans] = useState<any[]>([]);
     const [loadingPlans, setLoadingPlans] = useState(true);
 
@@ -256,13 +256,6 @@ export default function Learn() {
             });
             return;
         }
-
-        // Token Transfer Logic
-        const TOKEN_CONTRACT_ADDRESS =
-            "0x3fb98B9DaebFdaA06b72Df9704aDe353500e7CFf";
-        const RECIPIENT_ADDRESS = "0x1384Ec7727BFc47969052a9A0b23d9DAF93eBD1A";
-        // ABI for transfer function
-        
 
         let txHash = "";
 
@@ -1065,12 +1058,12 @@ export default function Learn() {
                             </div>
 
                             <a
-                                href={`${CLAIM_URL}?token=${couponData.redemptionToken}`}
+                                href={`${CLAIM_URL}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
                                 <Button className="w-full bg-[#1e3a8a] text-white">
-                                    Claim & Continue Payment
+                                    Claim Coupon
                                 </Button>
                             </a>
                         </div>
