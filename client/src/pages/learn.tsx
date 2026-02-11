@@ -1,46 +1,50 @@
 import { Link } from "wouter";
+import { ethers } from "ethers";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  GraduationCap,
-  BookOpen,
-  Brain,
-  Code,
-  Bot,
-  Zap,
-  Clock,
-  Users,
-  Star,
-  ArrowRight,
-  Play,
-  CheckCircle2,
-  Layers,
+    GraduationCap,
+    BookOpen,
+    Brain,
+    Code,
+    Bot,
+    Zap,
+    Clock,
+    Users,
+    Star,
+    ArrowRight,
+    Play,
+    CheckCircle2,
+    Layers,
 } from "lucide-react";
-import {motion} from "framer-motion";
-import { useState,useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import { Copy, Check } from "lucide-react";
 declare global {
-  interface Window {
-    ethereum?: any;
-  }
+    interface Window {
+        ethereum?: any;
+    }
 }
 import { API_BASE_URL } from "@/config/api";
+import { ERC20_ABI } from "@/config/abi";
 
 /* =======================
     DATA
@@ -109,65 +113,60 @@ import { API_BASE_URL } from "@/config/api";
 //   },
 // ];
 
-
 const cardVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (i) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.2, duration: 0.6 },
-  }),
+    hidden: { opacity: 0, y: 40 },
+    visible: (i: any) => ({
+        opacity: 1,
+        y: 0,
+        transition: { delay: i * 0.2, duration: 0.6 },
+    }),
 };
 
-
-
-
 const featuredCourses = [
-  {
-    title: "Build Your First AI Chatbot",
-    instructor: "Sarah Chen",
-    rating: 4.9,
-    students: 3500,
-    duration: "3 hours",
-    level: "Beginner",
-    progress: 0,
-  },
-  {
-    title: "Advanced Prompt Engineering",
-    instructor: "Mike Johnson",
-    rating: 4.8,
-    students: 2800,
-    duration: "5 hours",
-    level: "Intermediate",
-    progress: 35,
-  },
-  {
-    title: "RAG Applications with LangChain",
-    instructor: "Emily Davis",
-    rating: 4.9,
-    students: 1900,
-    duration: "6 hours",
-    level: "Advanced",
-    progress: 0,
-  },
+    {
+        title: "Build Your First AI Chatbot",
+        instructor: "Sarah Chen",
+        rating: 4.9,
+        students: 3500,
+        duration: "3 hours",
+        level: "Beginner",
+        progress: 0,
+    },
+    {
+        title: "Advanced Prompt Engineering",
+        instructor: "Mike Johnson",
+        rating: 4.8,
+        students: 2800,
+        duration: "5 hours",
+        level: "Intermediate",
+        progress: 35,
+    },
+    {
+        title: "RAG Applications with LangChain",
+        instructor: "Emily Davis",
+        rating: 4.9,
+        students: 1900,
+        duration: "6 hours",
+        level: "Advanced",
+        progress: 0,
+    },
 ];
-
 
 /* =======================
     HELPERS
 ======================= */
 
 function getLevelColor(level: string) {
-  switch (level) {
-    case "Beginner":
-      return "bg-green-500/10 text-green-600 dark:text-green-400";
-    case "Intermediate":
-      return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
-    case "Advanced":
-      return "bg-purple-500/10 text-purple-600 dark:text-purple-400";
-    default:
-      return "bg-gray-500/10 text-gray-600 dark:text-gray-400";
-  }
+    switch (level) {
+        case "Beginner":
+            return "bg-green-500/10 text-green-600 dark:text-green-400";
+        case "Intermediate":
+            return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
+        case "Advanced":
+            return "bg-purple-500/10 text-purple-600 dark:text-purple-400";
+        default:
+            return "bg-gray-500/10 text-gray-600 dark:text-gray-400";
+    }
 }
 
 /* =======================
@@ -175,205 +174,373 @@ function getLevelColor(level: string) {
 ======================= */
 
 export default function Learn() {
-  const [open, setOpen] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("");
-  // const couponCode = "DEOD50"; 
-const [selectedPlan, setSelectedPlan] = useState<any>(null);
-const [enrollOpen, setEnrollOpen] = useState(false);
-const [couponOpen, setCouponOpen] = useState(false);
-const [copied, setCopied] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState("");
+    // const couponCode = "DEOD50";
+    const [selectedPlan, setSelectedPlan] = useState<any>(null);
+    const [enrollOpen, setEnrollOpen] = useState(false);
+    const [couponOpen, setCouponOpen] = useState(false);
+    const [copied, setCopied] = useState(false);
 
+    const { toast } = useToast();
+    const [deodRate, setDeodRate] = useState<number | null>(null);
 
-const CLAIM_URL = "https://biz-ai-opal.vercel.app"; // replace
-// const { toast } = useToast();
-const [plans, setPlans] = useState<any[]>([]);
-const [loadingPlans, setLoadingPlans] = useState(true);
+    const CLAIM_URL = "https://biz-ai-opal.vercel.app"; // replace
+    const [plans, setPlans] = useState<any[]>([]);
+    const [loadingPlans, setLoadingPlans] = useState(true);
 
-const [couponData, setCouponData] = useState<any>(null);
-const [couponLoading, setCouponLoading] = useState(false);
-const [couponError, setCouponError] = useState<string | null>(null);
+    const [couponData, setCouponData] = useState<any>(null);
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [couponError, setCouponError] = useState<string | null>(null);
 
-const createCoupon = async () => {
-  if (!selectedPlan || !selectedPlan._id) {
-    setCouponError("Invalid package selected");
-    return;
-  }
-
-  const token = localStorage.getItem("token");
-  if (!token) {
-    setCouponError("Please login first");
-    return;
-  }
-
-  const payload = {
-    packageId: selectedPlan._id,
-    senderWalletAddress:
-      walletAddress || "0x0000000000000000000000000000000000000000",
-
-    // 🔹 MOCK VALUES (until blockchain payment is live)
-    transactionHash:
-      "0xDEV_TX_" + Date.now().toString(16),
-
-    deodAmount: Number(
-      (selectedPlan.discountedPrice * 87.89).toFixed(6)
-    ), // mock conversion
-
-    usdAmount: Number(selectedPlan.discountedPrice),
-  };
-
-  console.log("Coupon payload:", payload);
-
-  try {
-    setCouponLoading(true);
-    setCouponError(null);
-
-    const res = await fetch(
-       `${API_BASE_URL}/api/v1/coupons`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      }
+    // Check for existing coupons
+    const [purchasedPackageIds, setPurchasedPackageIds] = useState<string[]>(
+        [],
     );
 
-    const json = await res.json();
+    useEffect(() => {
+        const fetchUserCoupons = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) return;
 
-    if (!res.ok) {
-      throw new Error(json.message || "Coupon creation failed");
-    }
+            try {
+                const res = await fetch(
+                    `${API_BASE_URL}/api/v1/coupons/my-coupons`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    },
+                );
+                if (res.ok) {
+                    const json = await res.json();
 
-    setCouponData(json.data);
-    setEnrollOpen(false);
-    setCouponOpen(true);
-  } catch (err: any) {
-    setCouponError(err.message);
-  } finally {
-    setCouponLoading(false);
-  }
-};
+                    // json.data is an array of coupon objects
+                    // Based on user provided response, packageId is a string reference
+                    const lids = json.data.map((c: any) => c.packageId);
+                    setPurchasedPackageIds(lids);
+                }
+            } catch (err) {
+                console.error("Failed to fetch user coupons", err);
+            }
+        };
 
+        fetchUserCoupons();
+    }, [open, enrollOpen]); // Re-fetch when modals close/open to refresh state
 
+    const createCoupon = async () => {
+        if (!selectedPlan || !selectedPlan._id) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Invalid package selected",
+            });
+            return;
+        }
 
+        const token = localStorage.getItem("token");
+        if (!token) {
+            toast({
+                variant: "destructive",
+                title: "Authentication Required",
+                description: "Please login to continue",
+            });
+            return;
+        }
 
-useEffect(() => {
-  const fetchPackages = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/packages`);
-      const json = await res.json();
+        if (!walletAddress) {
+            toast({
+                variant: "destructive",
+                title: "Wallet Required",
+                description: "Please connect your wallet to proceed.",
+            });
+            return;
+        }
 
-      if (res.ok) {
-        setPlans(json.data.filter((p: any) => p.isActive));
-      }
-    } catch (err) {
-      console.error("Failed to fetch packages", err);
-    } finally {
-      setLoadingPlans(false);
-    }
-  };
+        // Token Transfer Logic
+        const TOKEN_CONTRACT_ADDRESS =
+            "0x3fb98B9DaebFdaA06b72Df9704aDe353500e7CFf";
+        const RECIPIENT_ADDRESS = "0x1384Ec7727BFc47969052a9A0b23d9DAF93eBD1A";
+        // ABI for transfer function
+        
 
-  fetchPackages();
-}, []);
+        let txHash = "";
 
+        try {
+            setCouponLoading(true);
+            //  ;
+            if (!window.ethereum) throw new Error("No crypto wallet found");
 
-// 🔹 CLICK HANDLER
-const handleEnrollClick = (plan: any) => {
-setSelectedPlan(plan);
-setEnrollOpen(true);
-};
+            // Using ethers v6 BrowserProvider
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const tokenContract = new ethers.Contract(
+                TOKEN_CONTRACT_ADDRESS,
+                ERC20_ABI,
+                signer,
+            );
 
-// const handleCopy = async () => {
-//   try {
-//     await navigator.clipboard.writeText(COUPON_CODE);
-//     setCopied(true);
-//     setTimeout(() => setCopied(false), 2000);
-//   } catch (err) {
-//     console.error("Copy failed");
-//   }
-// };
+            // Calculate Amount
+            // Determine decimals (default 18 if call fails or just assume 18 for standard tokens)
+            let decimals = 18;
+            try {
+                decimals = await tokenContract.decimals();
+            } catch (e) {
+                console.warn("Could not fetch decimals, defaulting to 18", e);
+            }
 
-const [walletAddress, setWalletAddress] = useState<string | null>(null);
-const [walletError, setWalletError] = useState<string | null>(null);
+            const amountToSend = ethers.parseUnits(
+                (selectedPlan.discountedPrice * (deodRate || 87.89)).toFixed(6),
+                decimals,
+            );
 
-const connectMetaMask = async () => {
-  try {
-    if (!window.ethereum) {
-      setWalletError("MetaMask is not installed");
-      return;
-    }
+            // Send Transaction
+            const tx = await tokenContract.transfer(
+                RECIPIENT_ADDRESS,
+                amountToSend,
+            );
+            toast({
+                title: "Transaction Sent",
+                description: "Waiting for confirmation...",
+            });
 
-    const accounts = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
+            const receipt = await tx.wait();
+            txHash = receipt.hash;
 
-    setWalletAddress(accounts[0]);
-    setWalletError(null);
-  } catch (err: any) {
-    console.error(err);
-    setWalletError("Wallet connection failed");
-  }
-};
-  return (
-    <div className="min-h-screen bg-background text-foreground">
+            toast({
+                title: "Transaction Confirmed",
+                description: "Payment successful! Creating coupon...",
+            });
+        } catch (error: any) {
+            console.error("Token Transfer Failed:", error);
+            setCouponLoading(false);
+            toast({
+                variant: "destructive",
+                title: "Payment Failed",
+                description: error.message || "User rejected transaction",
+            });
+            return; // Stop execution if transfer fails
+        }
 
-      {/* ================= HERO ================= */}
-      <section className="relative overflow-hidden border-b border-border">
-        {/* Themed Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-background to-teal-50 dark:from-[#1e3a8a]/10 dark:via-background dark:to-teal-900/10" />
+        const payload = {
+            packageId: selectedPlan._id,
+            senderWalletAddress: walletAddress,
+            transactionHash: txHash,
+            deodAmount: Number(
+                (selectedPlan.discountedPrice * (deodRate || 87.89)).toFixed(6),
+            ),
+            usdAmount: Number(selectedPlan.discountedPrice),
+        };
 
-        <div className="relative max-w-7xl mx-auto px-6 py-28">
-          <Badge className="mb-6 bg-[#1e3a8a]/10 text-[#1e3a8a] dark:text-blue-300 border-[#1e3a8a]/20">
-            <GraduationCap className="w-3 h-3 mr-1" />
-            AI Education
-          </Badge>
+        console.log("Coupon payload:", payload);
 
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Learn AI Skills That{" "}
-            <span className="bg-gradient-to-r from-[#1e3a8a] to-teal-600 dark:from-blue-400 dark:to-teal-400 bg-clip-text text-transparent">
-              Actually Matter
-            </span>
-          </h1>
+        try {
+            // setCouponLoading(true); // Already true
+            setCouponError(null);
+            const res = await fetch(`${API_BASE_URL}/api/v1/coupons`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload),
+            });
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mb-10">
-            From beginner fundamentals to advanced AI engineering. Master the skills
-            that will define the future of technology with structured learning paths
-            and hands-on projects.
-          </p>
+            const json = await res.json();
 
-          <div className="flex flex-wrap gap-4">
-            <Button
-  size="lg"
-  onClick={() => setOpen(true)}
-  className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
->
-  Start Learning
-  <ArrowRight className="ml-2 h-4 w-4" />
-</Button>
+            if (!res.ok) {
+                if (
+                    res.status === 400 &&
+                    json.message ===
+                        "You already have an active coupon for this package"
+                ) {
+                    setEnrollOpen(false);
+                    toast({
+                        title: "Already Enrolled",
+                        description:
+                            "You already have an active coupon for this plan.",
+                    });
+                    return;
+                }
+                throw new Error(json.message || "Coupon creation failed");
+            }
 
-            <Button size="lg" onClick={() => setOpen(true)} variant="outline" className="border-border">
-              Learn AI With Tutor
-            </Button>
-          </div>
+            setCouponData(json.data);
+            setEnrollOpen(false);
+            setCouponOpen(true);
 
-          <div className="flex flex-wrap gap-6 mt-8 text-sm text-muted-foreground">
-            {[
-              "Free to start",
-              "Project-based learning",
-              "Certificate on completion",
-            ].map((item, i) => (
-              <span key={i} className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+            toast({
+                title: "Coupon Generated",
+                description: "Your coupon code is ready!",
+            });
+        } catch (err: any) {
+            setCouponError(err.message);
+            toast({
+                variant: "destructive",
+                title: "Failed",
+                description: err.message,
+            });
+        } finally {
+            setCouponLoading(false);
+        }
+    };
 
-      {/* ================= LEARNING PATHS ================= */}
-      {/* <section className="py-28 bg-background">
+    // Fetch real-time DEOD price
+    useEffect(() => {
+        const fetchRate = async () => {
+            try {
+                const response = await fetch(
+                    "https://api.paraswap.io/prices/?srcToken=0x55d398326f99059fF775485246999027B3197955&destToken=0x3510FbBC13090F991Ffa523527113A166161683e&amount=1000000000000000000&srcDecimals=18&destDecimals=18&side=SELL&network=56",
+                );
+                const data = await response.json();
+                const rate =
+                    Number(data.priceRoute.destAmount) /
+                    Number(data.priceRoute.srcAmount);
+                setDeodRate(rate);
+            } catch (error) {
+                console.error("Failed to fetch DEOD rate", error);
+            }
+        };
+
+        fetchRate();
+        const interval = setInterval(fetchRate, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        const fetchPackages = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/v1/packages`);
+                const json = await res.json();
+
+                if (res.ok) {
+                    setPlans(json.data.filter((p: any) => p.isActive));
+                }
+            } catch (err) {
+                console.error("Failed to fetch packages", err);
+            } finally {
+                setLoadingPlans(false);
+            }
+        };
+
+        fetchPackages();
+    }, []);
+
+    // 🔹 CLICK HANDLER
+    const handleEnrollClick = (plan: any) => {
+        setSelectedPlan(plan);
+        setEnrollOpen(true);
+    };
+
+    // const handleCopy = async () => {
+    //   try {
+    //     await navigator.clipboard.writeText(COUPON_CODE);
+    //     setCopied(true);
+    //     setTimeout(() => setCopied(false), 2000);
+    //   } catch (err) {
+    //     console.error("Copy failed");
+    //   }
+    // };
+
+    const [walletAddress, setWalletAddress] = useState<string | null>(null);
+    const [walletError, setWalletError] = useState<string | null>(null);
+
+    const connectMetaMask = async () => {
+        try {
+            if (!window.ethereum) {
+                toast({
+                    variant: "destructive",
+                    title: "MetaMask Not Found",
+                    description: "Please install MetaMask to continue.",
+                });
+                setWalletError("MetaMask is not installed");
+                return;
+            }
+
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+
+            setWalletAddress(accounts[0]);
+            setWalletError(null);
+            toast({
+                title: "Wallet Connected",
+                description: `Connected to ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
+            });
+        } catch (err: any) {
+            console.error(err);
+            setWalletError("Wallet connection failed");
+            toast({
+                variant: "destructive",
+                title: "Connection Failed",
+                description: "Could not connect wallet.",
+            });
+        }
+    };
+    return (
+        <div className="min-h-screen bg-background text-foreground">
+            {/* ================= HERO ================= */}
+            <section className="relative overflow-hidden border-b border-border">
+                {/* Themed Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-background to-teal-50 dark:from-[#1e3a8a]/10 dark:via-background dark:to-teal-900/10" />
+
+                <div className="relative max-w-7xl mx-auto px-6 py-28">
+                    <Badge className="mb-6 bg-[#1e3a8a]/10 text-[#1e3a8a] dark:text-blue-300 border-[#1e3a8a]/20">
+                        <GraduationCap className="w-3 h-3 mr-1" />
+                        AI Education
+                    </Badge>
+
+                    <h1 className="text-5xl md:text-6xl font-bold mb-6">
+                        Learn AI Skills That{" "}
+                        <span className="bg-gradient-to-r from-[#1e3a8a] to-teal-600 dark:from-blue-400 dark:to-teal-400 bg-clip-text text-transparent">
+                            Actually Matter
+                        </span>
+                    </h1>
+
+                    <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mb-10">
+                        From beginner fundamentals to advanced AI engineering.
+                        Master the skills that will define the future of
+                        technology with structured learning paths and hands-on
+                        projects.
+                    </p>
+
+                    <div className="flex flex-wrap gap-4">
+                        <Button
+                            size="lg"
+                            onClick={() => setOpen(true)}
+                            className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+                        >
+                            Start Learning
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+
+                        <Button
+                            size="lg"
+                            onClick={() => setOpen(true)}
+                            variant="outline"
+                            className="border-border"
+                        >
+                            Learn AI With Tutor
+                        </Button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-6 mt-8 text-sm text-muted-foreground">
+                        {[
+                            "Free to start",
+                            "Project-based learning",
+                            "Certificate on completion",
+                        ].map((item, i) => (
+                            <span key={i} className="flex items-center gap-2">
+                                <CheckCircle2 className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                                {item}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ================= LEARNING PATHS ================= */}
+            {/* <section className="py-28 bg-background">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-4xl font-bold mb-4">
@@ -443,408 +610,483 @@ const connectMetaMask = async () => {
         </div>
       </section> */}
 
-      <section className="py-28 bg-gray-50 dark:bg-background border-y border-border">
-  <div className="max-w-7xl mx-auto px-6 text-center">
-    <h2 className="text-4xl font-bold mb-4">
-      AI Course Pricing Plans
-    </h2>
+            <section className="py-28 bg-gray-50 dark:bg-background border-y border-border">
+                <div className="max-w-7xl mx-auto px-6 text-center">
+                    <h2 className="text-4xl font-bold mb-4">
+                        AI Course Pricing Plans
+                    </h2>
 
-    <p className="text-muted-foreground text-lg">
-      Choose the plan that fits your learning stage and goals.
-    </p>
+                    <p className="text-muted-foreground text-lg">
+                        Choose the plan that fits your learning stage and goals.
+                    </p>
 
-    <div className="grid md:grid-cols-3 gap-8 mt-12">
-      {plans.map((plan, index) => (
-        <motion.div
-          key={plan._id}
-          custom={index}
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-          whileHover={{ scale: 1.05 }}
-          className={`relative rounded-2xl shadow-xl p-8 border transition
+                    <div className="grid md:grid-cols-3 gap-8 mt-12">
+                        {plans.map((plan, index) => (
+                            <motion.div
+                                key={plan._id}
+                                custom={index}
+                                initial="hidden"
+                                animate="visible"
+                                variants={cardVariants}
+                                whileHover={{ scale: 1.05 }}
+                                className={`relative rounded-2xl shadow-xl p-8 border transition
             bg-white dark:bg-card text-foreground
             ${plan.isPopular ? "border-indigo-600" : "border-border"}
           `}
-        >
-          {plan.isPopular && (
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2
-              bg-indigo-600 text-white text-sm px-4 py-1 rounded-full">
-              Most Popular
-            </span>
-          )}
+                            >
+                                {plan.isPopular && (
+                                    <span
+                                        className="absolute -top-3 left-1/2 -translate-x-1/2
+              bg-indigo-600 text-white text-sm px-4 py-1 rounded-full"
+                                    >
+                                        Most Popular
+                                    </span>
+                                )}
 
-          {/* Title */}
-{/* Title */}
-<h2 className="text-2xl font-bold">
-  {plan.title}
-</h2>
+                                {/* Title */}
+                                {/* Title */}
+                                <h2 className="text-2xl font-bold">
+                                    {plan.title}
+                                </h2>
 
-<p className="text-indigo-600 font-medium capitalize">
-  {plan.level} level
-</p>
+                                <p className="text-indigo-600 font-medium capitalize">
+                                    {plan.level} level
+                                </p>
 
-{/* Price */}
-<div className="mt-6 flex items-end justify-center gap-2">
-  <span className="line-through text-muted-foreground">
-    ${plan.originalPrice}
-  </span>
+                                {/* Price */}
+                                <div className="mt-6 flex items-end justify-center gap-2">
+                                    <span className="line-through text-muted-foreground">
+                                        ${plan.originalPrice}
+                                    </span>
 
-  <span className="text-4xl font-bold">
-    ${plan.discountedPrice}
-  </span>
+                                    <span className="text-4xl font-bold">
+                                        ${plan.discountedPrice}
+                                    </span>
 
-  <span className="text-sm text-muted-foreground">
-    {plan.currency}
-  </span>
-</div>
+                                    <span className="text-sm text-muted-foreground">
+                                        {plan.currency}
+                                    </span>
+                                </div>
 
+                                {/* Features */}
+                                <div className="mt-6 text-left">
+                                    <h4 className="font-semibold mb-2">
+                                        What you’ll get:
+                                    </h4>
+                                    <ul className="space-y-2 text-sm text-muted-foreground">
+                                        {plan.features.map(
+                                            (feature: string, i: number) => (
+                                                <li
+                                                    key={i}
+                                                    className="flex gap-2"
+                                                >
+                                                    <CheckCircle2 className="h-4 w-4 text-indigo-600 mt-0.5" />
+                                                    <span>{feature}</span>
+                                                </li>
+                                            ),
+                                        )}
+                                    </ul>
+                                </div>
 
-          {/* Features */}
-          <div className="mt-6 text-left">
-            <h4 className="font-semibold mb-2">What you’ll get:</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              {plan.features.map((feature: string, i: number) => (
-                <li key={i} className="flex gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-indigo-600 mt-0.5" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+                                {/* Best For */}
+                                <p className="mt-4 text-sm text-muted-foreground">
+                                    <strong className="text-foreground">
+                                        Best for:
+                                    </strong>{" "}
+                                    {plan.bestFor.join(", ")}
+                                </p>
 
-          {/* Best For */}
-         <p className="mt-4 text-sm text-muted-foreground">
-  <strong className="text-foreground">Best for:</strong>{" "}
-  {plan.bestFor.join(", ")}
-</p>
-
-          {/* CTA */}
-          <button
-            onClick={() => handleEnrollClick(plan)}
-            className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
-              plan.isPopular
-                ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                : "bg-gray-900 text-white hover:bg-gray-800"
-            }`}
-          >
-            Enroll Now
-          </button>
-        </motion.div>
-      ))}
-    </div>
-  </div>
-</section>
-
-
-
-      {/* ================= FEATURED COURSES ================= */}
-      <section className="py-28 bg-muted/30 border-y border-border">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
-            <div>
-              <h2 className="text-4xl font-bold mb-2">Featured Courses</h2>
-              <p className="text-muted-foreground">
-                Hand-picked courses from top AI instructors.
-              </p>
-            </div>
-            <Button variant="outline" className="border-border">
-              View All Courses
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredCourses.map((course, index) => (
-              <Card key={index} className="bg-card border-border hover:shadow-md transition overflow-hidden">
-                <div className="aspect-video bg-gradient-to-br from-[#1e3a8a]/20 to-teal-500/20 flex items-center justify-center">
-                  <Play className="h-10 w-10 text-[#1e3a8a] dark:text-blue-400" />
+                                {/* CTA */}
+                                <button
+                                    onClick={() => handleEnrollClick(plan)}
+                                    disabled={purchasedPackageIds.includes(
+                                        plan._id,
+                                    )}
+                                    className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
+                                        purchasedPackageIds.includes(plan._id)
+                                            ? "bg-green-600 text-white cursor-not-allowed opacity-80"
+                                            : plan.isPopular
+                                              ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                                              : "bg-gray-900 text-white hover:bg-gray-800"
+                                    }`}
+                                >
+                                    {purchasedPackageIds.includes(plan._id)
+                                        ? "Enrolled"
+                                        : "Enroll Now"}
+                                </button>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
+            </section>
 
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Badge className={getLevelColor(course.level)}>
-                      {course.level}
+            {/* ================= FEATURED COURSES ================= */}
+            <section className="py-28 bg-muted/30 border-y border-border">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
+                        <div>
+                            <h2 className="text-4xl font-bold mb-2">
+                                Featured Courses
+                            </h2>
+                            <p className="text-muted-foreground">
+                                Hand-picked courses from top AI instructors.
+                            </p>
+                        </div>
+                        <Button variant="outline" className="border-border">
+                            View All Courses
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {featuredCourses.map((course, index) => (
+                            <Card
+                                key={index}
+                                className="bg-card border-border hover:shadow-md transition overflow-hidden"
+                            >
+                                <div className="aspect-video bg-gradient-to-br from-[#1e3a8a]/20 to-teal-500/20 flex items-center justify-center">
+                                    <Play className="h-10 w-10 text-[#1e3a8a] dark:text-blue-400" />
+                                </div>
+
+                                <CardContent className="p-4 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <Badge
+                                            className={getLevelColor(
+                                                course.level,
+                                            )}
+                                        >
+                                            {course.level}
+                                        </Badge>
+                                        <span className="flex items-center gap-1 text-sm">
+                                            <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                                            {course.rating}
+                                        </span>
+                                    </div>
+
+                                    <h3 className="font-semibold text-lg">
+                                        {course.title}
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        By {course.instructor}
+                                    </p>
+
+                                    <div className="flex justify-between text-sm text-muted-foreground">
+                                        <span>{course.duration}</span>
+                                        <span>
+                                            {course.students.toLocaleString()}{" "}
+                                            students
+                                        </span>
+                                    </div>
+
+                                    {course.progress > 0 && (
+                                        <Progress
+                                            value={course.progress}
+                                            className="h-1.5 bg-muted"
+                                        />
+                                    )}
+
+                                    <Button
+                                        className="w-full"
+                                        variant={
+                                            course.progress > 0
+                                                ? "default"
+                                                : "outline"
+                                        }
+                                        style={
+                                            course.progress > 0
+                                                ? { backgroundColor: "#1e3a8a" }
+                                                : {}
+                                        }
+                                    >
+                                        {course.progress > 0
+                                            ? "Continue Learning"
+                                            : "Start Course"}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ================= COMING SOON ================= */}
+            <section className="py-24 bg-background border-t border-border">
+                <div className="max-w-4xl mx-auto px-6 text-center">
+                    <Badge className="mb-4 bg-[#1e3a8a] text-white">
+                        Coming Soon
                     </Badge>
-                    <span className="flex items-center gap-1 text-sm">
-                      <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                      {course.rating}
-                    </span>
-                  </div>
+                    <h2 className="text-4xl font-bold mb-4">
+                        Interactive Labs & Certifications
+                    </h2>
+                    <p className="text-muted-foreground text-lg mb-8">
+                        Interactive coding labs, AI sandbox environments, and
+                        industry-recognized certifications are launching soon.
+                    </p>
+                    <Link href="/newsletter">
+                        <Button
+                            size="lg"
+                            className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+                        >
+                            Notify Me
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </Link>
+                </div>
+            </section>
 
-                  <h3 className="font-semibold text-lg">{course.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    By {course.instructor}
-                  </p>
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className="sm:max-w-xl p-6">
+                    <DialogHeader>
+                        <DialogTitle>Course Registration</DialogTitle>
+                    </DialogHeader>
 
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{course.duration}</span>
-                    <span>{course.students.toLocaleString()} students</span>
-                  </div>
+                    <form className="space-y-4">
+                        {/* Name */}
+                        <div className="space-y-1">
+                            <Label>Name</Label>
+                            <Input placeholder="Enter your name" />
+                        </div>
 
-                  {course.progress > 0 && (
-                    <Progress value={course.progress} className="h-1.5 bg-muted" />
-                  )}
+                        {/* Email */}
+                        <div className="space-y-1">
+                            <Label>Email</Label>
+                            <Input
+                                type="email"
+                                placeholder="Enter your email"
+                            />
+                        </div>
 
-                  <Button
-                    className="w-full"
-                    variant={course.progress > 0 ? "default" : "outline"}
-                    style={course.progress > 0 ? { backgroundColor: '#1e3a8a' } : {}}
-                  >
-                    {course.progress > 0 ? "Continue Learning" : "Start Course"}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+                        {/* Phone */}
+                        <div className="space-y-1">
+                            <Label>Phone Number</Label>
+                            <Input
+                                type="tel"
+                                placeholder="Enter your phone number"
+                            />
+                        </div>
 
-      {/* ================= COMING SOON ================= */}
-      <section className="py-24 bg-background border-t border-border">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <Badge className="mb-4 bg-[#1e3a8a] text-white">Coming Soon</Badge>
-          <h2 className="text-4xl font-bold mb-4">
-            Interactive Labs & Certifications
-          </h2>
-          <p className="text-muted-foreground text-lg mb-8">
-            Interactive coding labs, AI sandbox environments, and
-            industry-recognized certifications are launching soon.
-          </p>
-          <Link href="/newsletter">
-            <Button size="lg" className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white">
-              Notify Me
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </section>
+                        {/* Course Select */}
+                        <div className="space-y-1">
+                            <Label>Select Course</Label>
+                            <Select>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Choose a course" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="beginner">
+                                        Beginner Level
+                                    </SelectItem>
+                                    <SelectItem value="intermediate">
+                                        Intermediate Level
+                                    </SelectItem>
+                                    <SelectItem value="pro">
+                                        Pro Level
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
+                        {/* Payment Option */}
+                        <div className="space-y-1">
+                            <Label>Payment Option</Label>
 
-<Dialog open={open} onOpenChange={setOpen}>
-  <DialogContent className="sm:max-w-xl p-6">
-    <DialogHeader>
-      <DialogTitle>Course Registration</DialogTitle>
-    </DialogHeader>
+                            <Select
+                                onValueChange={(value) =>
+                                    setPaymentMethod(value)
+                                }
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select payment method" />
+                                </SelectTrigger>
 
-    <form className="space-y-4">
-      {/* Name */}
-      <div className="space-y-1">
-        <Label>Name</Label>
-        <Input placeholder="Enter your name" />
-      </div>
+                                <SelectContent>
+                                    <SelectItem value="deod-usdt">
+                                        Deod / USDT
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-      {/* Email */}
-      <div className="space-y-1">
-        <Label>Email</Label>
-        <Input type="email" placeholder="Enter your email" />
-      </div>
+                        {paymentMethod === "deod-usdt" && (
+                            <div className="mt-4 border border-dashed border-indigo-500 rounded-xl p-4 bg-indigo-50 dark:bg-indigo-950/30">
+                                <p className="text-sm text-muted-foreground mb-2">
+                                    🎁 You received a coupon code
+                                </p>
 
-      {/* Phone */}
-      <div className="space-y-1">
-        <Label>Phone Number</Label>
-        <Input type="tel" placeholder="Enter your phone number" />
-      </div>
+                                <div className="flex items-center justify-between bg-white dark:bg-card border rounded-lg px-4 py-3">
+                                    <span className="text-lg font-bold tracking-widest text-indigo-600">
+                                        DEOD50
+                                    </span>
 
-      {/* Course Select */}
-      <div className="space-y-1">
-        <Label>Select Course</Label>
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Choose a course" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="beginner">Beginner Level</SelectItem>
-            <SelectItem value="intermediate">Intermediate Level</SelectItem>
-            <SelectItem value="pro">Pro Level</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+                                    <Badge className="bg-indigo-600 text-white">
+                                        50% OFF
+                                    </Badge>
+                                </div>
 
-      {/* Payment Option */}
-      <div className="space-y-1">
-  <Label>Payment Option</Label>
+                                <div className="flex gap-3 mt-4">
+                                    <Button
+                                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white"
+                                        onClick={() =>
+                                            alert("Coupon redeemed!")
+                                        }
+                                    >
+                                        Redeem Now
+                                    </Button>
 
-  <Select onValueChange={(value) => setPaymentMethod(value)}>
-    <SelectTrigger>
-      <SelectValue placeholder="Select payment method" />
-    </SelectTrigger>
+                                    <Button
+                                        variant="outline"
+                                        className="flex-1"
+                                        onClick={() =>
+                                            alert("You can redeem later")
+                                        }
+                                    >
+                                        Redeem Later
+                                    </Button>
+                                </div>
 
-    <SelectContent>
-      <SelectItem value="deod-usdt">Deod / USDT</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
+                                <p className="text-xs text-muted-foreground mt-2">
+                                    You can use this coupon now or later during
+                                    payment.
+                                </p>
+                            </div>
+                        )}
 
+                        {/* Submit */}
+                        <Button className="w-full bg-[#1e3a8a] text-white mt-4">
+                            Register Now
+                        </Button>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
+            <Dialog open={enrollOpen} onOpenChange={setEnrollOpen}>
+                <DialogContent className="max-w-lg p-6">
+                    {!selectedPlan ? (
+                        <div className="text-center text-muted-foreground">
+                            Loading plan...
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="flex justify-between mb-5">
+                                <div>
+                                    <h2 className="text-2xl font-bold">
+                                        {selectedPlan.title}
+                                    </h2>
+                                    <p className="text-indigo-600 capitalize">
+                                        {selectedPlan.level} level
+                                    </p>
+                                </div>
 
-{paymentMethod === "deod-usdt" && (
-  <div className="mt-4 border border-dashed border-indigo-500 rounded-xl p-4 bg-indigo-50 dark:bg-indigo-950/30">
-    <p className="text-sm text-muted-foreground mb-2">
-      🎁 You received a coupon code
-    </p>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={connectMetaMask}
+                                >
+                                    {walletAddress
+                                        ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+                                        : "Connect Wallet"}
+                                </Button>
+                            </div>
 
-    <div className="flex items-center justify-between bg-white dark:bg-card border rounded-lg px-4 py-3">
-      <span className="text-lg font-bold tracking-widest text-indigo-600">
-        DEOD50
-      </span>
+                            <div className="flex items-end gap-3 mb-2">
+                                <span className="line-through text-muted-foreground">
+                                    ${selectedPlan.originalPrice}
+                                </span>
+                                <span className="text-4xl font-bold">
+                                    ${selectedPlan.discountedPrice}
+                                </span>
+                            </div>
 
-      <Badge className="bg-indigo-600 text-white">
-        50% OFF
-      </Badge>
-    </div>
+                            {deodRate && (
+                                <p className="text-sm text-muted-foreground mb-6">
+                                    1 USDT ≈ {deodRate.toFixed(2)} DEOD
+                                </p>
+                            )}
 
-    <div className="flex gap-3 mt-4">
-      <Button
-        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white"
-        onClick={() => alert("Coupon redeemed!")}
-      >
-        Redeem Now
-      </Button>
+                            <Badge className="mb-4">
+                                Best for: {selectedPlan.bestFor.join(", ")}
+                            </Badge>
 
-      <Button
-        variant="outline"
-        className="flex-1"
-        onClick={() => alert("You can redeem later")}
-      >
-        Redeem Later
-      </Button>
-    </div>
+                            <Button
+                                className="w-full bg-[#1e3a8a] text-white"
+                                disabled={couponLoading}
+                                onClick={createCoupon}
+                            >
+                                {couponLoading
+                                    ? "Generating Coupon..."
+                                    : "Continue to Payment"}
+                            </Button>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
 
-    <p className="text-xs text-muted-foreground mt-2">
-      You can use this coupon now or later during payment.
-    </p>
-  </div>
-)}
+            <Dialog open={couponOpen} onOpenChange={setCouponOpen}>
+                <DialogContent className="max-w-md p-6">
+                    {couponData ? (
+                        <div className="space-y-6 text-center">
+                            <h2 className="text-2xl font-bold">
+                                🎉 Coupon Generated
+                            </h2>
 
+                            <p className="text-muted-foreground">
+                                Use this coupon during payment
+                            </p>
 
-
-
-      {/* Submit */}
-      <Button className="w-full bg-[#1e3a8a] text-white mt-4">
-        Register Now
-      </Button>
-    </form>
-  </DialogContent>
-</Dialog>
-
-
-<Dialog open={enrollOpen} onOpenChange={setEnrollOpen}>
-  <DialogContent className="max-w-lg p-6">
-    {!selectedPlan ? (
-      <div className="text-center text-muted-foreground">
-        Loading plan...
-      </div>
-    ) : (
-      <div>
-        <div className="flex justify-between mb-5">
-          <div>
-            <h2 className="text-2xl font-bold">
-              {selectedPlan.title}
-            </h2>
-            <p className="text-indigo-600 capitalize">
-              {selectedPlan.level} level
-            </p>
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={connectMetaMask}
-          >
-            {walletAddress
-              ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
-              : "Connect Wallet"}
-          </Button>
-        </div>
-
-        <div className="flex items-end gap-3 mb-6">
-          <span className="line-through text-muted-foreground">
-            ${selectedPlan.originalPrice}
-          </span>
-          <span className="text-4xl font-bold">
-            ${selectedPlan.discountedPrice}
-          </span>
-        </div>
-
-        <Badge className="mb-4">
-          Best for: {selectedPlan.bestFor.join(", ")}
-        </Badge>
-
-      <Button
-  className="w-full bg-[#1e3a8a] text-white"
-  disabled={couponLoading}
-  onClick={createCoupon}
->
-  {couponLoading ? "Generating Coupon..." : "Continue to Payment"}
-</Button>
-      </div>
-    )}
-  </DialogContent>
-</Dialog>
-
-
-
-<Dialog open={couponOpen} onOpenChange={setCouponOpen}>
-  <DialogContent className="max-w-md p-6">
-    {couponData ? (
-      <div className="space-y-6 text-center">
-
-        <h2 className="text-2xl font-bold">🎉 Coupon Generated</h2>
-
-        <p className="text-muted-foreground">
-          Use this coupon during payment
-        </p>
-
-        <div className="flex items-center justify-between gap-3
+                            <div
+                                className="flex items-center justify-between gap-3
           border border-dashed border-indigo-600 rounded-xl
-          px-4 py-3 bg-indigo-50 dark:bg-indigo-950/30">
+          px-4 py-3 bg-indigo-50 dark:bg-indigo-950/30"
+                            >
+                                <span className="text-xl font-bold tracking-widest text-indigo-600">
+                                    {couponData.code}
+                                </span>
 
-          <span className="text-xl font-bold tracking-widest text-indigo-600">
-            {couponData.code}
-          </span>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                        navigator.clipboard.writeText(
+                                            couponData.code,
+                                        )
+                                    }
+                                >
+                                    <Copy className="h-5 w-5" />
+                                </Button>
+                            </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() =>
-              navigator.clipboard.writeText(couponData.code)
-            }
-          >
-            <Copy className="h-5 w-5" />
-          </Button>
+                            <div className="text-sm text-muted-foreground space-y-1">
+                                <p>Amount: ${couponData.usdAmount}</p>
+                                <p>
+                                    Wallet:{" "}
+                                    {couponData.senderWalletAddress.slice(0, 6)}
+                                    …
+                                </p>
+                            </div>
+
+                            <a
+                                href={`${CLAIM_URL}?token=${couponData.redemptionToken}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Button className="w-full bg-[#1e3a8a] text-white">
+                                    Claim & Continue Payment
+                                </Button>
+                            </a>
+                        </div>
+                    ) : (
+                        <p className="text-center text-muted-foreground">
+                            No coupon available
+                        </p>
+                    )}
+
+                    {couponError && (
+                        <p className="text-sm text-red-500 text-center mt-2">
+                            {couponError}
+                        </p>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
-
-        <div className="text-sm text-muted-foreground space-y-1">
-          <p>Amount: ${couponData.usdAmount}</p>
-          <p>Wallet: {couponData.senderWalletAddress.slice(0,6)}…</p>
-        </div>
-
-        <a
-          href={`${CLAIM_URL}?token=${couponData.redemptionToken}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Button className="w-full bg-[#1e3a8a] text-white">
-            Claim & Continue Payment
-          </Button>
-        </a>
-      </div>
-    ) : (
-      <p className="text-center text-muted-foreground">
-        No coupon available
-      </p>
-    )}
-
-    {couponError && (
-      <p className="text-sm text-red-500 text-center mt-2">
-        {couponError}
-      </p>
-    )}
-  </DialogContent>
-</Dialog>
-
-
-    </div>
-  );
+    );
 }
