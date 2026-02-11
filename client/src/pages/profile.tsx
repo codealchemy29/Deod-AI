@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { CLAIM_URL } from "@/config/env";
 
 export default function Profile() {
   const [user, setUser] = useState<any>(null);
@@ -18,7 +19,7 @@ const [coupons, setCoupons] = useState([]);
 const [couponOpen, setCouponOpen] = useState(false);
 const [couponData, setCouponData] = useState<any>(null);
 
-const CLAIM_URL = "https://biz-ai-opal.vercel.app";
+
 const authToken = localStorage.getItem("token");
 
 

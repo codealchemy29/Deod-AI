@@ -1,0 +1,1 @@
+export const CLAIM_URL = "http://localhost:5000"

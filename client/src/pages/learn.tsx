@@ -42,6 +42,7 @@ declare global {
   }
 }
 import { API_BASE_URL } from "@/config/api";
+import { CLAIM_URL } from "@/config/env";
 
 /* =======================
     DATA
@@ -183,7 +184,6 @@ export default function Learn() {
     null,
   );
 
-  const CLAIM_URL = "http://localhost:5000"; // replace
   // const { toast } = useToast();
   const [plans, setPlans] = useState<any[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
