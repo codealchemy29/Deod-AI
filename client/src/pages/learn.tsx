@@ -45,7 +45,12 @@ declare global {
 }
 import { API_BASE_URL } from "@/config/api";
 import { ERC20_ABI } from "@/config/abi";
-import { CLAIM_URL, TOKEN_CONTRACT_ADDRESS, RECIPIENT_ADDRESS } from "@/config/env";
+import {
+    CLAIM_URL,
+    TOKEN_CONTRACT_ADDRESS,
+    RECIPIENT_ADDRESS,
+} from "@/config/env";
+import { switchNetworks } from "@/utils/switchNetwork";
 
 /* =======================
     DATA
@@ -263,7 +268,7 @@ export default function Learn() {
             setCouponLoading(true);
             //  ;
             if (!window.ethereum) throw new Error("No crypto wallet found");
-
+            await switchNetworks("bnbTestnet");
             // Using ethers v6 BrowserProvider
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
