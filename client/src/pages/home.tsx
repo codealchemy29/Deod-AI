@@ -37,6 +37,15 @@ import {
     Star,
     Users,
 } from "lucide-react";
+import { useEffect } from "react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import EnrollmentForm from "@/components/EnrollmentForm";
+
 import type { AiTool } from "@shared/schema";
 
 /* =======================
@@ -144,6 +153,7 @@ export default function Home() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [pricingFilter, setPricingFilter] = useState("all");
+    const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
 
     // const { data:  isLoading, error } = useQuery<AiTool[]>({
     //   queryKey: ["/api/tools"],
@@ -452,15 +462,14 @@ export default function Home() {
 
                         <div className="hidden sm:block w-px h-16 bg-white/20 mx-4"></div>
 
-                        <Link href="/learn">
-                            <Button
-                                size="lg"
-                                className="h-14 px-8 rounded-full text-lg bg-white text-[#1e3a8a] hover:bg-blue-50 font-semibold shadow-xl shadow-blue-900/20 transition-transform hover:scale-105"
-                            >
-                                Enroll Now{" "}
-                                <ArrowRight className="ml-2 h-5 w-5" />
-                            </Button>
-                        </Link>
+                        <Button
+                            size="lg"
+                            onClick={() => setIsEnrollmentOpen(true)}
+                            className="h-14 px-8 rounded-full text-lg bg-white text-[#1e3a8a] hover:bg-blue-50 font-semibold shadow-xl shadow-blue-900/20 transition-transform hover:scale-105"
+                        >
+                            Enroll Now{" "}
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
                     </div>
 
                     <p className="mt-6 text-sm text-blue-200">
@@ -540,67 +549,67 @@ export default function Home() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {false
                             ? Array.from({ length: 6 }).map((_, i) => (
-                                  <ToolCardSkeleton key={i} />
-                              ))
+                                <ToolCardSkeleton key={i} />
+                            ))
                             : filteredTools.slice(0, 6).map((tool, index) => {
-                                  const Icon = getCategoryIcon(tool.category);
-                                  return (
-                                      <Card
-                                          key={index}
-                                          className="bg-card border-border hover:shadow-lg transition-all group"
-                                      >
-                                          <CardContent className="p-6">
-                                              <div className="flex gap-4 mb-4">
-                                                  <div
-                                                      className={`w-12 h-12 rounded-lg bg-gradient-to-r ${getCategoryColor(tool.category)} flex items-center justify-center text-white shadow-sm`}
-                                                  >
-                                                      <Icon className="h-6 w-6" />
-                                                  </div>
-                                                  <div className="flex-1">
-                                                      <div className="flex items-center gap-2">
-                                                          <h3 className="font-semibold text-lg group-hover:text-[#1e3a8a] transition-colors">
-                                                              {tool.name}
-                                                          </h3>
-                                                          {tool.verified && (
-                                                              <CheckCircle2 className="h-4 w-4 text-teal-500" />
-                                                          )}
-                                                      </div>
-                                                      <p className="text-sm text-muted-foreground">
-                                                          {tool.creatorName}
-                                                      </p>
-                                                  </div>
-                                              </div>
-                                              <p className="text-sm text-muted-foreground mb-4 line-clamp-2 min-h-[40px]">
-                                                  {tool.description}
-                                              </p>
-                                              <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                                                  <span className="flex items-center gap-1 text-sm">
-                                                      <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />{" "}
-                                                      4.8
-                                                  </span>
-                                                  <Badge
-                                                      className={
-                                                          tool.pricing
-                                                              .toLowerCase()
-                                                              .includes("free")
-                                                              ? "bg-teal-500/10 text-teal-600 border-none"
-                                                              : "bg-muted text-muted-foreground border-none"
-                                                      }
-                                                  >
-                                                      {tool.pricing}
-                                                  </Badge>
-                                              </div>
-                                              <Button
-                                                  variant="outline"
-                                                  className="w-full mt-4 border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white"
-                                              >
-                                                  View Tool{" "}
-                                                  <ExternalLink className="ml-2 h-4 w-4" />
-                                              </Button>
-                                          </CardContent>
-                                      </Card>
-                                  );
-                              })}
+                                const Icon = getCategoryIcon(tool.category);
+                                return (
+                                    <Card
+                                        key={index}
+                                        className="bg-card border-border hover:shadow-lg transition-all group"
+                                    >
+                                        <CardContent className="p-6">
+                                            <div className="flex gap-4 mb-4">
+                                                <div
+                                                    className={`w-12 h-12 rounded-lg bg-gradient-to-r ${getCategoryColor(tool.category)} flex items-center justify-center text-white shadow-sm`}
+                                                >
+                                                    <Icon className="h-6 w-6" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <h3 className="font-semibold text-lg group-hover:text-[#1e3a8a] transition-colors">
+                                                            {tool.name}
+                                                        </h3>
+                                                        {tool.verified && (
+                                                            <CheckCircle2 className="h-4 w-4 text-teal-500" />
+                                                        )}
+                                                    </div>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {tool.creatorName}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2 min-h-[40px]">
+                                                {tool.description}
+                                            </p>
+                                            <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                                                <span className="flex items-center gap-1 text-sm">
+                                                    <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />{" "}
+                                                    4.8
+                                                </span>
+                                                <Badge
+                                                    className={
+                                                        tool.pricing
+                                                            .toLowerCase()
+                                                            .includes("free")
+                                                            ? "bg-teal-500/10 text-teal-600 border-none"
+                                                            : "bg-muted text-muted-foreground border-none"
+                                                    }
+                                                >
+                                                    {tool.pricing}
+                                                </Badge>
+                                            </div>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full mt-4 border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white"
+                                            >
+                                                View Tool{" "}
+                                                <ExternalLink className="ml-2 h-4 w-4" />
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
                     </div>
 
                     {/* View More CTA */}
@@ -643,6 +652,18 @@ export default function Home() {
                     </Link>
                 </div>
             </section>
+
+            {/* ================= ENROLLMENT DIALOG ================= */}
+            <Dialog open={isEnrollmentOpen} onOpenChange={setIsEnrollmentOpen}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold">
+                            Enroll in Introduction to AI
+                        </DialogTitle>
+                    </DialogHeader>
+                    <EnrollmentForm />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
