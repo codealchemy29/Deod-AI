@@ -51,6 +51,7 @@ import {
     RECIPIENT_ADDRESS,
 } from "@/config/env";
 import { switchNetworks } from "@/utils/switchNetwork";
+import useDeodPrice from "@/hooks/use-deodPrice";
 
 /* =======================
     DATA
@@ -187,17 +188,13 @@ export default function Learn() {
     const [enrollOpen, setEnrollOpen] = useState(false);
     const [couponOpen, setCouponOpen] = useState(false);
     const [copied, setCopied] = useState(false);
-
     const { toast } = useToast();
-    const [deodRate, setDeodRate] = useState<number | null>(null);
-
+    const { deodRate, setDeodRate } = useDeodPrice();
     const [plans, setPlans] = useState<any[]>([]);
     const [loadingPlans, setLoadingPlans] = useState(true);
-
     const [couponData, setCouponData] = useState<any>(null);
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
-
     // Check for existing coupons
     const [purchasedPackageIds, setPurchasedPackageIds] = useState<string[]>(
         [],
@@ -229,7 +226,6 @@ export default function Learn() {
                 console.error("Failed to fetch user coupons", err);
             }
         };
-
         fetchUserCoupons();
     }, [open, enrollOpen]); // Re-fetch when modals close/open to refresh state
 
@@ -263,13 +259,14 @@ export default function Learn() {
         }
 
         let txHash = "";
+        // debugger;
 
         try {
             setCouponLoading(true);
-            //  ;
             if (!window.ethereum) throw new Error("No crypto wallet found");
-            await switchNetworks("bnbTestnet");
             // Using ethers v6 BrowserProvider
+            await switchNetworks("bsc"); // FOR MAINNET
+            // await switchNetworks("bnbTestnet"); // FOR TESTNET
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const tokenContract = new ethers.Contract(
@@ -286,11 +283,27 @@ export default function Learn() {
             } catch (e) {
                 console.warn("Could not fetch decimals, defaulting to 18", e);
             }
-
+            // FOR MAINNET
             const amountToSend = ethers.parseUnits(
-                (selectedPlan.discountedPrice * (deodRate || 87.89)).toFixed(6),
+                (selectedPlan.discountedPrice * (deodRate || 187.89)).toFixed(
+                    6,
+                ),
                 decimals,
             );
+            // Check Balance
+            const balance = await tokenContract.balanceOf(
+                await signer.getAddress(),
+            );
+            if (balance < amountToSend) {
+                toast({
+                    variant: "destructive",
+                    title: "Insufficient Balance",
+                    description:
+                        "You do not have enough DEOD tokens to make this purchase.",
+                });
+                setCouponLoading(false);
+                return;
+            }
 
             // Send Transaction
             const tx = await tokenContract.transfer(
@@ -330,7 +343,7 @@ export default function Learn() {
             usdAmount: Number(selectedPlan.discountedPrice),
         };
 
-        console.log("Coupon payload:", payload);
+        // console.log("Coupon payload:", payload);
 
         try {
             // setCouponLoading(true); // Already true
@@ -382,28 +395,6 @@ export default function Learn() {
             setCouponLoading(false);
         }
     };
-
-    // Fetch real-time DEOD price
-    useEffect(() => {
-        const fetchRate = async () => {
-            try {
-                const response = await fetch(
-                    "https://api.paraswap.io/prices/?srcToken=0x55d398326f99059fF775485246999027B3197955&destToken=0x3510FbBC13090F991Ffa523527113A166161683e&amount=1000000000000000000&srcDecimals=18&destDecimals=18&side=SELL&network=56",
-                );
-                const data = await response.json();
-                const rate =
-                    Number(data.priceRoute.destAmount) /
-                    Number(data.priceRoute.srcAmount);
-                setDeodRate(rate);
-            } catch (error) {
-                console.error("Failed to fetch DEOD rate", error);
-            }
-        };
-
-        fetchRate();
-        const interval = setInterval(fetchRate, 60000);
-        return () => clearInterval(interval);
-    }, []);
 
     useEffect(() => {
         const fetchPackages = async () => {

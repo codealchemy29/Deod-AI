@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
+import { ethers } from "ethers";
 import {
     Select,
     SelectContent,
@@ -12,8 +13,18 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CheckCircle2, AlertCircle, Calendar, Clock } from "lucide-react";
+import {
+    Loader2,
+    CheckCircle2,
+    AlertCircle,
+    Calendar,
+    Clock,
+} from "lucide-react";
 import { API_BASE_URL } from "@/config/api";
+import { switchNetworks } from "@/utils/switchNetwork";
+import { ERC20_ABI } from "@/config/abi";
+import { RECIPIENT_ADDRESS, TOKEN_CONTRACT_ADDRESS } from "@/config/env";
+import useDeodPrice from "@/hooks/use-deodPrice";
 
 interface SlotData {
     date: string;
@@ -39,27 +50,34 @@ interface EnrollmentPayload {
 }
 
 export default function EnrollmentForm() {
-    const [weekTypeFilter, setWeekTypeFilter] = useState<"all" | "weekend" | "weekday">("all");
+    const [weekTypeFilter, setWeekTypeFilter] = useState<
+        "all" | "weekend" | "weekday"
+    >("all");
     const [selectedDate, setSelectedDate] = useState<string>("");
     const [selectedSlot, setSelectedSlot] = useState<string>("");
     const { toast } = useToast();
 
     // Fetch available slots
-    const { data: slotsData, isLoading, error } = useQuery<SlotsResponse>({
+    const {
+        data: slotsData,
+        isLoading,
+        error,
+    } = useQuery<SlotsResponse>({
         queryKey: ["/api/v1/intro-ai/slots"],
         queryFn: async () => {
             const token = localStorage.getItem("token");
             const headers: HeadersInit = {
                 "Content-Type": "application/json",
             };
-
             if (token) {
                 headers["Authorization"] = `Bearer ${token}`;
             }
-
-            const response = await fetch(`${API_BASE_URL}/api/v1/intro-ai/slots`, {
-                headers,
-            });
+            const response = await fetch(
+                `${API_BASE_URL}/api/v1/intro-ai/slots`,
+                {
+                    headers,
+                },
+            );
             if (!response.ok) {
                 throw new Error("Failed to fetch slots");
             }
@@ -71,7 +89,9 @@ export default function EnrollmentForm() {
     const filteredSlots = useMemo(() => {
         if (!slotsData?.data) return [];
         if (weekTypeFilter === "all") return slotsData.data;
-        return slotsData.data.filter((slot) => slot.weekType === weekTypeFilter);
+        return slotsData.data.filter(
+            (slot) => slot.weekType === weekTypeFilter,
+        );
     }, [slotsData, weekTypeFilter]);
 
     // Get selected date data
@@ -84,27 +104,15 @@ export default function EnrollmentForm() {
         mutationFn: async (payload: EnrollmentPayload) => {
             // Simulate API delay
             await new Promise((resolve) => setTimeout(resolve, 1500));
-
-            // We're mocking the success because the remote API validates the dummy transactionHash
-            console.log("Mocking API Success for payload:", payload);
-
-            return {
-                status: 200,
-                message: "Successfully enrolled (Simulated)",
-                data: payload
-            };
-
-            /* 
+            
             // Original code that fails due to dummy transaction validation:
             const token = localStorage.getItem("token");
             const headers: HeadersInit = {
                 "Content-Type": "application/json",
             };
-
             if (token) {
                 headers["Authorization"] = `Bearer ${token}`;
             }
-
             const response = await fetch(`${API_BASE_URL}/api/v1/intro-ai`, {
                 method: "POST",
                 headers,
@@ -115,10 +123,9 @@ export default function EnrollmentForm() {
                 throw new Error(errorData.message || "Failed to submit enrollment");
             }
             return response.json();
-            */
         },
         onSuccess: (data) => {
-            console.log("Enrollment successful (Simulated):", data);
+            console.log("Enrollment successful", data);
             toast({
                 title: "Successfully Enrolled! 🎉",
                 description: `You're enrolled for ${selectedDate} at ${selectedSlot}`,
@@ -134,37 +141,113 @@ export default function EnrollmentForm() {
         },
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const [walletAddress, setWalletAddress] = useState<string | null>(null);
+    const [walletError, setWalletError] = useState<string | null>(null);
+    const { deodRate } = useDeodPrice();
 
+    const connectMetaMask = async () => {
+        try {
+            if (!window.ethereum) {
+                toast({
+                    variant: "destructive",
+                    title: "MetaMask Not Found",
+                    description: "Please install MetaMask to continue.",
+                });
+                setWalletError("MetaMask is not installed");
+                return;
+            }
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            setWalletAddress(accounts[0]);
+            setWalletError(null);
+            toast({
+                title: "Wallet Connected",
+                description: `Connected to ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
+            });
+        } catch (err: any) {
+            console.error(err);
+            setWalletError("Wallet connection failed");
+            toast({
+                variant: "destructive",
+                title: "Connection Failed",
+                description: "Could not connect wallet.",
+            });
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         if (!selectedDate || !selectedSlot) {
             return;
         }
-
-        // Hardcoded payment details - for testing only
-        const walletAddress = "0x4c521a1a1f77d0bd19519f2f9b635a3626b619af";
-        const txHash = "0xa276ffaf01bcb58748643373ccbf61a20b2861f07066578b9b0652873b078ec1";
-
-        console.log("=== Enrollment Details ===");
-        console.log("Sender Wallet Address:", walletAddress);
-        console.log("Transaction Hash:", txHash);
-        console.log("Date:", selectedDate);
-        console.log("Time:", selectedSlot);
-        console.log("Week Type:", selectedDateData?.weekType);
-        console.log("USD Amount: $10");
-        console.log("DEOD Amount: 1000");
-        console.log("========================");
+        if (!walletAddress) {
+            toast({
+                variant: "destructive",
+                title: "Wallet Required",
+                description: "Please connect your wallet to proceed.",
+            });
+            return;
+        }
+        let txHash = "";
+        const amount = 0.1;
+        try {
+            if (!window.ethereum) throw new Error("No crypto wallet found");
+            await switchNetworks("bsc");
+            // Using ethers v6 BrowserProvider
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const tokenContract = new ethers.Contract(
+                TOKEN_CONTRACT_ADDRESS,
+                ERC20_ABI,
+                signer,
+            );
+            // Calculate Amount
+            // Determine decimals (default 18 if call fails or just assume 18 for standard tokens)
+            let decimals = 18;
+            try {
+                decimals = await tokenContract.decimals();
+            } catch (e) {
+                console.warn("Could not fetch decimals, defaulting to 18", e);
+            }
+            const amountToSend = ethers.parseUnits(
+                (amount * (deodRate || 187.89)).toFixed(6),
+                decimals,
+            );
+            // Send Transaction
+            const tx = await tokenContract.transfer(
+                RECIPIENT_ADDRESS,
+                amountToSend,
+            );
+            toast({
+                title: "Transaction Sent",
+                description: "Waiting for confirmation...",
+            });
+            const receipt = await tx.wait();
+            txHash = receipt.hash;
+            toast({
+                title: "Transaction Confirmed",
+                description: "Payment successful! Creating coupon...",
+            });
+        } catch (error: any) {
+            console.error("Token Transfer Failed:", error);
+            toast({
+                variant: "destructive",
+                title: "Payment Failed",
+                description: error.message || "User rejected transaction",
+            });
+            return; // Stop execution if transfer fails
+        }
 
         const payload: EnrollmentPayload = {
-            usdAmount: "10",
-            deodAmount: "1000",
+            usdAmount: amount.toString(),
+            deodAmount: (amount * (deodRate || 187.89)).toFixed(6),
             transactionHash: txHash,
             senderWalletAddress: walletAddress,
             date: selectedDate,
             time: selectedSlot,
             weekType: selectedDateData?.weekType || "weekday",
         };
-
         enrollmentMutation.mutate(payload);
     };
 
@@ -193,12 +276,16 @@ export default function EnrollmentForm() {
         return (
             <div className="text-center py-8">
                 <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold mb-2">Enrollment Successful!</h3>
+                <h3 className="text-2xl font-bold mb-2">
+                    Enrollment Successful!
+                </h3>
                 <p className="text-muted-foreground mb-4">
-                    You've successfully enrolled in the Introduction to AI workshop.
+                    You've successfully enrolled in the Introduction to AI
+                    workshop.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                    <strong>Date:</strong> {selectedDate} ({selectedDateData?.day})
+                    <strong>Date:</strong> {selectedDate} (
+                    {selectedDateData?.day})
                     <br />
                     <strong>Time:</strong> {selectedSlot}
                 </p>
@@ -209,13 +296,21 @@ export default function EnrollmentForm() {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Week Type Filter */}
+            <Button variant="outline" size="sm" onClick={connectMetaMask}>
+                {walletAddress
+                    ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+                    : "Connect Wallet"}
+            </Button>
             <div className="space-y-2">
                 <Label>Preferred Day Type</Label>
-                <Select value={weekTypeFilter} onValueChange={(value: any) => {
-                    setWeekTypeFilter(value);
-                    setSelectedDate("");
-                    setSelectedSlot("");
-                }}>
+                <Select
+                    value={weekTypeFilter}
+                    onValueChange={(value: any) => {
+                        setWeekTypeFilter(value);
+                        setSelectedDate("");
+                        setSelectedSlot("");
+                    }}
+                >
                     <SelectTrigger>
                         <SelectValue placeholder="Select day type" />
                     </SelectTrigger>
@@ -266,11 +361,20 @@ export default function EnrollmentForm() {
                         <Clock className="h-4 w-4" />
                         Select Time Slot
                     </Label>
-                    <RadioGroup value={selectedSlot} onValueChange={setSelectedSlot}>
+                    <RadioGroup
+                        value={selectedSlot}
+                        onValueChange={setSelectedSlot}
+                    >
                         {selectedDateData.slots.map((slot) => (
-                            <div key={slot} className="flex items-center space-x-2">
+                            <div
+                                key={slot}
+                                className="flex items-center space-x-2"
+                            >
                                 <RadioGroupItem value={slot} id={slot} />
-                                <Label htmlFor={slot} className="font-normal cursor-pointer">
+                                <Label
+                                    htmlFor={slot}
+                                    className="font-normal cursor-pointer"
+                                >
                                     {slot}
                                 </Label>
                             </div>
@@ -279,6 +383,17 @@ export default function EnrollmentForm() {
                 </div>
             )}
 
+            <div className="flex justify-between">
+                <p className="text-sm font-medium">Total Amount:</p>
+                <div className="flex flex-col items-end justify-between gap-2">
+                    <p className="text-sm font-medium">
+                        1 USDT = {(deodRate || 187.89).toFixed(6)} DEOD
+                    </p>
+                    <p className="text-sm font-medium">
+                        10 USDT = {((10 * (deodRate || 187.89)).toFixed(6))} DEOD
+                    </p>
+                </div>
+            </div>
 
             {/* Submit Button */}
             <Button

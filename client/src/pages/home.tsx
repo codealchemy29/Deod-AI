@@ -656,11 +656,6 @@ export default function Home() {
             {/* ================= ENROLLMENT DIALOG ================= */}
             <Dialog open={isEnrollmentOpen} onOpenChange={setIsEnrollmentOpen}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold">
-                            Enroll in Introduction to AI
-                        </DialogTitle>
-                    </DialogHeader>
                     <EnrollmentForm />
                 </DialogContent>
             </Dialog>
