@@ -204,7 +204,7 @@ export default function EnrollmentForm({
             return;
         }
         let txHash = "";
-        const amount = 0.1;
+        const amount = 10;
         try {
             if (!window.ethereum) throw new Error("No crypto wallet found");
             await switchNetworks("bsc");
