@@ -49,7 +49,11 @@ interface EnrollmentPayload {
     weekType: string;
 }
 
-export default function EnrollmentForm() {
+export default function EnrollmentForm({
+    isEnrolled,
+}: {
+    isEnrolled: boolean;
+}) {
     const [weekTypeFilter, setWeekTypeFilter] = useState<
         "all" | "weekend" | "weekday"
     >("all");
@@ -104,7 +108,7 @@ export default function EnrollmentForm() {
         mutationFn: async (payload: EnrollmentPayload) => {
             // Simulate API delay
             await new Promise((resolve) => setTimeout(resolve, 1500));
-            
+
             // Original code that fails due to dummy transaction validation:
             const token = localStorage.getItem("token");
             const headers: HeadersInit = {
@@ -120,7 +124,9 @@ export default function EnrollmentForm() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to submit enrollment");
+                throw new Error(
+                    errorData.message || "Failed to submit enrollment",
+                );
             }
             return response.json();
         },
@@ -178,7 +184,15 @@ export default function EnrollmentForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedDate || !selectedSlot) {
+        // if (!selectedDate || !selectedSlot) {
+        //     return;
+        // }
+        if (isEnrolled) {
+            toast({
+                variant: "destructive",
+                title: "Already Enrolled",
+                description: "You are already enrolled in the program.",
+            });
             return;
         }
         if (!walletAddress) {
@@ -190,7 +204,7 @@ export default function EnrollmentForm() {
             return;
         }
         let txHash = "";
-        const amount = 10;
+        const amount = 0.1;
         try {
             if (!window.ethereum) throw new Error("No crypto wallet found");
             await switchNetworks("bsc");
@@ -238,21 +252,21 @@ export default function EnrollmentForm() {
             });
             return; // Stop execution if transfer fails
         }
-
         const payload: EnrollmentPayload = {
             usdAmount: amount.toString(),
             deodAmount: (amount * (deodRate || 187.89)).toFixed(6),
             transactionHash: txHash,
             senderWalletAddress: walletAddress,
-            date: selectedDate,
-            time: selectedSlot,
-            weekType: selectedDateData?.weekType || "weekday",
+            date: "2025-02-18",
+            time: "1:00 PM - 2:00 PM",
+            // date: selectedDate,
+            // time: selectedSlot,
+            // weekType: selectedDateData?.weekType || "weekday",
+            weekType: "weekday",
         };
         enrollmentMutation.mutate(payload);
     };
-
     const isFormValid = selectedDate && selectedSlot;
-
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-12">
@@ -283,11 +297,16 @@ export default function EnrollmentForm() {
                     You've successfully enrolled in the Introduction to AI
                     workshop.
                 </p>
-                <p className="text-sm text-muted-foreground">
-                    <strong>Date:</strong> {selectedDate} (
+                {/* <p className="text-sm text-muted-foreground">
+                    <strong>Date:</strong> {selectedDate}(
                     {selectedDateData?.day})
                     <br />
                     <strong>Time:</strong> {selectedSlot}
+                </p> */}
+                <p className="text-sm text-muted-foreground">
+                    <strong>Date:</strong> {"18/02/2025"}
+                    <br />
+                    <strong>Time:</strong> {"1:00 PM - 2:00 PM"}
                 </p>
             </div>
         );
@@ -301,7 +320,7 @@ export default function EnrollmentForm() {
                     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
                     : "Connect Wallet"}
             </Button>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
                 <Label>Preferred Day Type</Label>
                 <Select
                     value={weekTypeFilter}
@@ -320,15 +339,15 @@ export default function EnrollmentForm() {
                         <SelectItem value="weekend">Weekends Only</SelectItem>
                     </SelectContent>
                 </Select>
-            </div>
+            </div> */}
 
             {/* Date Selection */}
             <div className="space-y-2">
                 <Label htmlFor="date" className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    Select Date
+                    Date
                 </Label>
-                <Select
+                {/* <Select
                     value={selectedDate}
                     onValueChange={(value) => {
                         setSelectedDate(value);
@@ -351,11 +370,17 @@ export default function EnrollmentForm() {
                     <p className="text-sm text-muted-foreground">
                         No slots available for the selected filter.
                     </p>
-                )}
+                )} */}
+                <p>{"18/02/2025"}</p>
+                <Label htmlFor="date" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Time
+                </Label>
+                <p>{"01:00 PM - 02:00 PM"}</p>
             </div>
 
             {/* Time Slot Selection */}
-            {selectedDate && selectedDateData && (
+            {/* {selectedDate && selectedDateData && (
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
@@ -381,7 +406,7 @@ export default function EnrollmentForm() {
                         ))}
                     </RadioGroup>
                 </div>
-            )}
+            )} */}
 
             <div className="flex justify-between">
                 <p className="text-sm font-medium">Total Amount:</p>
@@ -390,16 +415,31 @@ export default function EnrollmentForm() {
                         1 USDT = {(deodRate || 187.89).toFixed(6)} DEOD
                     </p>
                     <p className="text-sm font-medium">
-                        10 USDT = {((10 * (deodRate || 187.89)).toFixed(6))} DEOD
+                        10 USDT = {(10 * (deodRate || 187.89)).toFixed(6)} DEOD
                     </p>
                 </div>
             </div>
 
             {/* Submit Button */}
-            <Button
+            {/* <Button
                 type="submit"
                 className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
                 disabled={!isFormValid || enrollmentMutation.isPending}
+            >
+                {enrollmentMutation.isPending ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Enrolling...
+                    </>
+                ) : (
+                    "Complete Enrollment"
+                )}
+            </Button> */}
+
+            <Button
+                type="submit"
+                className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+                disabled={enrollmentMutation.isPending}
             >
                 {enrollmentMutation.isPending ? (
                     <>
