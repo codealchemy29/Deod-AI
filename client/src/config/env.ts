@@ -1,4 +1,4 @@
-export const CLAIM_URL = "https://biz-ai-opal.vercel.app";
+export const CLAIM_URL = "https://bizaiskill.com";
 
 // TESTNET
 // export const TOKEN_CONTRACT_ADDRESS = "0x3fb98B9DaebFdaA06b72Df9704aDe353500e7CFf"

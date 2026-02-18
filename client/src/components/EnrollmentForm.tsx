@@ -147,6 +147,7 @@ export default function EnrollmentForm({
         },
     });
 
+    const [isExecutingTx, setIsExecutingTx] = useState(false);
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [walletError, setWalletError] = useState<string | null>(null);
     const { deodRate } = useDeodPrice();
@@ -203,6 +204,8 @@ export default function EnrollmentForm({
             });
             return;
         }
+
+        setIsExecutingTx(true);
         let txHash = "";
         const amount = 10;
         try {
@@ -228,6 +231,20 @@ export default function EnrollmentForm({
                 (amount * (deodRate || 187.89)).toFixed(6),
                 decimals,
             );
+            // Check Balance
+            const balance = await tokenContract.balanceOf(
+                await signer.getAddress(),
+            );
+            if (balance < amountToSend) {
+                toast({
+                    variant: "destructive",
+                    title: "Insufficient Balance",
+                    description:
+                        "You do not have enough DEOD tokens to make this purchase.",
+                });
+                setIsExecutingTx(false);
+                return;
+            }
             // Send Transaction
             const tx = await tokenContract.transfer(
                 RECIPIENT_ADDRESS,
@@ -250,8 +267,10 @@ export default function EnrollmentForm({
                 title: "Payment Failed",
                 description: error.message || "User rejected transaction",
             });
+            setIsExecutingTx(false);
             return; // Stop execution if transfer fails
         }
+        setIsExecutingTx(false);
         const payload: EnrollmentPayload = {
             usdAmount: amount.toString(),
             deodAmount: (amount * (deodRate || 187.89)).toFixed(6),
@@ -439,12 +458,14 @@ export default function EnrollmentForm({
             <Button
                 type="submit"
                 className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
-                disabled={enrollmentMutation.isPending}
+                disabled={enrollmentMutation.isPending || isExecutingTx}
             >
-                {enrollmentMutation.isPending ? (
+                {enrollmentMutation.isPending || isExecutingTx ? (
                     <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Enrolling...
+                        {isExecutingTx
+                            ? "Processing Payment..."
+                            : "Enrolling..."}
                     </>
                 ) : (
                     "Complete Enrollment"

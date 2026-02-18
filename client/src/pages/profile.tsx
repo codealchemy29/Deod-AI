@@ -106,8 +106,9 @@ export default function Profile() {
                                         </span>
                                         <div className="mt-2">
                                             <p className="text-xs text-muted-foreground">
-                                                Coupon redeem functionality is not
-                                                available yet. we are working on it.
+                                                Coupon redeem functionality is
+                                                not available yet. we are
+                                                working on it.
                                             </p>
                                         </div>
                                     </div>
@@ -130,7 +131,6 @@ export default function Profile() {
                             ))}
                         </div>
                     </CardContent>
-                    
                 </Card>
 
                 {/* Coupon Popup */}
@@ -151,12 +151,17 @@ export default function Profile() {
                                     </p>
                                 </div>
 
-                                <a
+                                {/* <a
                                     href={`${CLAIM_URL}/login?token=${authToken}&coupon=${couponData.redemptionToken}`}
                                     target="_blank"
                                 >
                                     <Button className="w-full bg-[#1e3a8a] text-white">
                                         Claim & Continue Payment
+                                    </Button>
+                                </a> */}
+                                <a href={`${CLAIM_URL}`} target="_blank">
+                                    <Button className="w-full bg-[#1e3a8a] text-white">
+                                        Claim Coupon
                                     </Button>
                                 </a>
                             </>
