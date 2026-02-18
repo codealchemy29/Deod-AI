@@ -162,14 +162,12 @@ export default function Home() {
     const [user, setUser] = useState<any>(null);
     const [, setLocation] = useLocation();
     useEffect(() => {
-        getMe().then((data) => {
-            if (!data) {
-                setLocation("/login");
-            } else {
-                setUser(data);
-            }
-        });
-    }, []);
+    getMe().then((data) => {
+        if (data) {
+            setUser(data);
+        }
+    });
+}, []);
     const tools = [
         {
             name: "Whispr FlowAI",
