@@ -34,6 +34,7 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/profile" component={Profile} />
       <Route path="/register" component={Register} />
+      <Route path="/register/referral/:referralCode" component={Register} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />
     </Switch>

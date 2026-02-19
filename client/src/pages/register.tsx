@@ -3,18 +3,43 @@ import { Link,useLocation  } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useParams } from "wouter";
 import { UserPlus, User, Mail, Phone, Lock, ArrowRight } from "lucide-react";
 import { API_BASE_URL } from "@/config/api";
 
 
 export default function Register() {
-  const [form, setForm] = useState({
+  
+  const { referralCode: referralFromUrl } = useParams();
+
+  const [walletAddress, setWalletAddress] = useState("");
+
+  const [form, setForm] = useState({   
     name: "",
     email: "",
     phone: "",
     password: "",
     confirmPassword: "",
+    referral: referralFromUrl || "",
   });
+
+  const connectWallet = async () => {
+  try {
+    if (!window.ethereum) {
+      alert("Install MetaMask");
+      return;
+    }
+
+    const accounts = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+
+    setWalletAddress(accounts[0]);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,8 +50,19 @@ export default function Register() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const DEFAULT_REF_WALLET =
+  "0x9999999999999999999999999999999999999999";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+console.log("Referral from URL:", referralFromUrl);
+     const refWalletAddress = referralFromUrl ||form.referral ||DEFAULT_REF_WALLET;
+
+ if (!walletAddress) {
+    setError("Please connect your wallet before registering");
+    return;
+  }
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match");
@@ -36,8 +72,10 @@ export default function Register() {
     setError(null);
     setLoading(true);
 
+    
+
     try {
-      const res = await fetch( `${API_BASE_URL}/api/v1/auth/register`, {
+      const res = await fetch( `http://192.168.1.63:3000/api/v1/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -48,6 +86,8 @@ export default function Register() {
           password: form.password,
           phone: form.phone,
           confirmPassword: form.confirmPassword,
+          wallet_address: walletAddress,
+          ref_wallet_address: refWalletAddress || null,
         }),
       });
 
@@ -60,7 +100,22 @@ export default function Register() {
       console.log("Registration success:", data);
 
       if (data.data?.token) {
-  localStorage.setItem("token", data.data.token);
+  const token = data.data.token;
+
+  localStorage.setItem("token", token);
+
+  // 🔥 UPDATE USER PROFILE
+  await fetch(`http://192.168.1.63:3000/api/v1/user`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      wallet_address: walletAddress,
+      ref_wallet_address: refWalletAddress || null,
+    }),
+  });
 }
     setLocation("/login");
     
@@ -95,20 +150,41 @@ export default function Register() {
               Start building, learning, and earning with AI
             </p>
           </div>
+          
+          
+       <div className="absolute top-4 right-4">
+  <Button
+    type="button"
+    onClick={connectWallet}
+    className={`h-8 px-3 text-xs rounded-lg shadow-sm transition-all
+      ${
+        walletAddress
+          ? "bg-green-600 hover:bg-green-700 text-white"
+          : "bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+      }`}
+  >
+    {walletAddress
+      ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+      : "Connect Wallet"}
+  </Button>
+</div>
+
+
+
 
           <form onSubmit={handleSubmit} className="space-y-4">
+          
             <div className="relative">
-              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <input
-                name="name"
-                placeholder="Full name"
-                value={form.name}
-                onChange={handleChange}
-                required
-                className="w-full pl-10 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
-              />
-            </div>
-
+  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+  <input
+    name="name"
+    placeholder="Full name"
+    value={form.name}
+    onChange={handleChange}
+    required
+    className="w-full pl-10 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
+  />
+</div>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <input
@@ -160,6 +236,19 @@ export default function Register() {
                 className="w-full pl-10 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
               />
             </div>
+
+           <div className="relative">
+  <input
+    name="referral"
+    placeholder="Referral Wallet Address (optional)"
+    value={form.referral}
+    onChange={handleChange}
+    disabled={!!referralFromUrl}
+    className={`w-full pl-4 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none ${
+      referralFromUrl ? "opacity-70 cursor-not-allowed" : ""
+    }`}
+  />
+</div>
 
             {error && (
               <p className="text-sm text-red-500 text-center">{error}</p>
