@@ -6,11 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { useParams } from "wouter";
 import { UserPlus, User, Mail, Phone, Lock, ArrowRight } from "lucide-react";
 import { API_BASE_URL } from "@/config/api";
-
+import { Wallet } from "lucide-react";
 
 export default function Register() {
   
-  const { referralCode: referralFromUrl } = useParams();
+  console.log("URL:", window.location.search);
+  const searchParams = new URLSearchParams(window.location.search);
+const referralFromUrl = searchParams.get("ref") || "";
 
   const [walletAddress, setWalletAddress] = useState("");
 
@@ -20,7 +22,7 @@ export default function Register() {
     phone: "",
     password: "",
     confirmPassword: "",
-    referral: referralFromUrl || "",
+   referral: referralFromUrl,
   });
 
   const connectWallet = async () => {
@@ -50,14 +52,14 @@ export default function Register() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const DEFAULT_REF_WALLET =
-  "0x9999999999999999999999999999999999999999";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
 console.log("Referral from URL:", referralFromUrl);
-     const refWalletAddress = referralFromUrl ||form.referral ||DEFAULT_REF_WALLET;
+
+   const refWalletAddress =
+  referralFromUrl || form.referral || null;
 
  if (!walletAddress) {
     setError("Please connect your wallet before registering");
@@ -156,18 +158,20 @@ console.log("Referral from URL:", referralFromUrl);
   <Button
     type="button"
     onClick={connectWallet}
-    className={`h-8 px-3 text-xs rounded-lg shadow-sm transition-all
-      ${
-        walletAddress
-          ? "bg-green-600 hover:bg-green-700 text-white"
-          : "bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
-      }`}
+    className={`h-14 w-14 p-0 rounded-full shadow-md
+      bg-[#1e3a8a] hover:bg-[#1e3a8a]/90
+      text-white transition-all duration-200
+      flex items-center justify-center
+      ${walletAddress ? "ring-2 ring-blue-300" : ""}
+    `}
+    title={walletAddress ? walletAddress : "Connect Wallet"}
   >
-    {walletAddress
-      ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
-      : "Connect Wallet"}
+    <Wallet className="!h-6 !w-6" strokeWidth={2.1} />
   </Button>
 </div>
+
+
+
 
 
 
