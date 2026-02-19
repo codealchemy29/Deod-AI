@@ -7,9 +7,9 @@ import { useParams } from "wouter";
 import { UserPlus, User, Mail, Phone, Lock, ArrowRight } from "lucide-react";
 import { API_BASE_URL } from "@/config/api";
 import { Wallet } from "lucide-react";
-
+import { useToast } from "@/hooks/use-toast";
 export default function Register() {
-  
+  const { toast } = useToast();
   console.log("URL:", window.location.search);
   const searchParams = new URLSearchParams(window.location.search);
 const referralFromUrl = searchParams.get("ref") || "";
@@ -37,6 +37,11 @@ const referralFromUrl = searchParams.get("ref") || "";
     });
 
     setWalletAddress(accounts[0]);
+
+     toast({
+      title: "Wallet Connected 🎉",
+      description: `${accounts[0].slice(0,6)}...${accounts[0].slice(-4)}`,
+    });
   } catch (err) {
     console.error(err);
   }
@@ -158,17 +163,21 @@ console.log("Referral from URL:", referralFromUrl);
   <Button
     type="button"
     onClick={connectWallet}
-    className={`h-14 w-14 p-0 rounded-full shadow-md
+    className={`h-14 w-14 p-0 rounded-full
       bg-[#1e3a8a] hover:bg-[#1e3a8a]/90
-      text-white transition-all duration-200
+      text-white shadow-md
       flex items-center justify-center
+      transition-all duration-300
+      hover:scale-105 hover:shadow-lg
+      active:scale-95
       ${walletAddress ? "ring-2 ring-blue-300" : ""}
     `}
     title={walletAddress ? walletAddress : "Connect Wallet"}
   >
-    <Wallet className="!h-6 !w-6" strokeWidth={2.1} />
+    <Wallet className="!h-6 !w-6 transition-transform duration-300 group-hover:rotate-6" strokeWidth={2.1} />
   </Button>
 </div>
+
 
 
 
