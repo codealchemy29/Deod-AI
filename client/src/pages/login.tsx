@@ -28,7 +28,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   setLoading(true);
   setError(null);
-console.log(API_BASE_URL)
+
   try {
     const res = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
       method: "POST",

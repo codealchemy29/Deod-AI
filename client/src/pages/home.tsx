@@ -162,12 +162,12 @@ export default function Home() {
     const [user, setUser] = useState<any>(null);
     const [, setLocation] = useLocation();
     useEffect(() => {
-    getMe().then((data) => {
-        if (data) {
-            setUser(data);
-        }
-    });
-}, []);
+        getMe().then((data) => {
+            if (data) {
+                setUser(data);
+            }
+        });
+    }, []);
     const tools = [
         {
             name: "Whispr FlowAI",
@@ -463,7 +463,7 @@ export default function Home() {
                     </p>
 
                     <p className="text-xl md:text-2xl text-blue-100 mb-10 max-w-2xl mx-auto font-light">
-                        <span className="font-semibold">18 Feb 2025</span> 
+                        <span className="font-semibold">18 Feb 2025</span>
                         <br />
                         <span className="font-semibold">1:00 PM - 2:00 PM</span>
                     </p>
