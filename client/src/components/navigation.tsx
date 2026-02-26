@@ -140,13 +140,13 @@ export function Navigation() {
                 </Link>
               ))}
               <div className="pt-2 mt-2 border-t border-border/50">
-                <Link href="/submit">
+                <Link href="/login">
                   <Button 
                     className="w-full bg-gradient-to-r from-[#1e3a8a] to-blue-700 text-white border-0"
                     onClick={() => setMobileMenuOpen(false)}
                     data-testid="mobile-button-submit-tool"
                   >
-                    Submit Your Tool
+                    Login
                   </Button>
                 </Link>
               </div>
