@@ -95,12 +95,12 @@ export function Navigation() {
             </Button>
 
             <div className="hidden md:block">
-              <Link href="/submit">
+              <Link href="/login">
                 <Button 
                   className="bg-gradient-to-r from-[#1e3a8a] to-blue-700 text-white border-0 shadow-sm hover:shadow-md transition-all active:scale-95"
                   data-testid="button-submit-tool-nav"
                 >
-                  Submit Your Tool
+                  Login 
                 </Button>
               </Link>
             </div>
