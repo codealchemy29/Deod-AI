@@ -243,7 +243,6 @@ export default function Register() {
                                 placeholder="Phone number"
                                 value={form.phone}
                                 onChange={handleChange}
-                                required
                                 className="w-full pl-10 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
                             />
                         </div>
