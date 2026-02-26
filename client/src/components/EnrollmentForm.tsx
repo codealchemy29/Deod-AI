@@ -22,9 +22,9 @@ import {
 } from "lucide-react";
 import { API_BASE_URL } from "@/config/api";
 import { switchNetworks } from "@/utils/switchNetwork";
-import { ERC20_ABI } from "@/config/abi";
-import { RECIPIENT_ADDRESS, TOKEN_CONTRACT_ADDRESS } from "@/config/env";
+import { DEOD_TOKEN_ABI, TRANSFER_CONTRACT_ABI } from "@/config/abi";
 import useDeodPrice from "@/hooks/use-deodPrice";
+import { DEOD_TOKEN_ADDRESS, TRANSFER_CONTRACT_ADDRESS } from "@/config/env";
 
 interface SlotData {
     date: string;
@@ -205,20 +205,86 @@ export default function EnrollmentForm({
             return;
         }
 
-        setIsExecutingTx(true);
         let txHash = "";
         const amount = 10;
+        debugger;
+        // try {
+        //     if (!window.ethereum) throw new Error("No crypto wallet found");
+        //     await switchNetworks("bsc");
+        //     // Using ethers v6 BrowserProvider
+        //     const provider = new ethers.BrowserProvider(window.ethereum);
+        //     const signer = await provider.getSigner();
+        //     const tokenContract = new ethers.Contract(
+        //         TRANSFER_CONTRACT_ADDRESS,
+        //         TRANSFER_CONTRACT_ABI,
+        //         signer,
+        //     );
+        //     // Calculate Amount
+        //     // Determine decimals (default 18 if call fails or just assume 18 for standard tokens)
+        //     let decimals = 18;
+        //     try {
+        //         decimals = await tokenContract.decimals();
+        //     } catch (e) {
+        //         console.warn("Could not fetch decimals, defaulting to 18", e);
+        //     }
+        //     const amountToSend = ethers.parseUnits(
+        //         (amount * (deodRate || 187.89)).toFixed(6),
+        //         decimals,
+        //     );
+        //     // Check Balance
+        //     const balance = await tokenContract.balanceOf(
+        //         await signer.getAddress(),
+        //     );
+        //     if (balance < amountToSend) {
+        //         toast({
+        //             variant: "destructive",
+        //             title: "Insufficient Balance",
+        //             description:
+        //                 "You do not have enough DEOD tokens to make this purchase.",
+        //         });
+        //         setIsExecutingTx(false);
+        //         return;
+        //     }
+        //     // Send Transaction
+        //     const tx = await tokenContract.transfer(
+        //         DEOD_TOKEN_ADDRESS,
+        //         amountToSend,
+        //     );
+        //     toast({
+        //         title: "Transaction Sent",
+        //         description: "Waiting for confirmation...",
+        //     });
+        //     const receipt = await tx.wait();
+        //     txHash = receipt.hash;
+        //     toast({
+        //         title: "Transaction Confirmed",
+        //         description: "Payment successful! Creating coupon...",
+        //     });
+        // } catch (error: any) {
+        //     console.error("Token Transfer Failed:", error);
+        //     toast({
+        //         variant: "destructive",
+        //         title: "Payment Failed",
+        //         description: error.message || "User rejected transaction",
+        //     });
+        //     setIsExecutingTx(false);
+        //     return; // Stop execution if transfer fails
+        // }
+
         try {
+            setIsExecutingTx(true);
             if (!window.ethereum) throw new Error("No crypto wallet found");
-            await switchNetworks("bsc");
             // Using ethers v6 BrowserProvider
+            // await switchNetworks("bsc"); // FOR MAINNET
+            await switchNetworks("bnbTestnet"); // FOR TESTNET
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const tokenContract = new ethers.Contract(
-                TOKEN_CONTRACT_ADDRESS,
-                ERC20_ABI,
+                DEOD_TOKEN_ADDRESS,
+                DEOD_TOKEN_ABI,
                 signer,
             );
+
             // Calculate Amount
             // Determine decimals (default 18 if call fails or just assume 18 for standard tokens)
             let decimals = 18;
@@ -227,6 +293,7 @@ export default function EnrollmentForm({
             } catch (e) {
                 console.warn("Could not fetch decimals, defaulting to 18", e);
             }
+            // FOR MAINNET
             const amountToSend = ethers.parseUnits(
                 (amount * (deodRate || 187.89)).toFixed(6),
                 decimals,
@@ -245,11 +312,22 @@ export default function EnrollmentForm({
                 setIsExecutingTx(false);
                 return;
             }
-            // Send Transaction
-            const tx = await tokenContract.transfer(
-                RECIPIENT_ADDRESS,
+
+            const approve = await tokenContract.approve(
+                TRANSFER_CONTRACT_ADDRESS,
                 amountToSend,
             );
+            await approve.wait();
+
+            // Transferring DEOD tokens to the transfer contract
+            console.log("AMOUNT TO SEND: >>>", amountToSend);
+            const transferContract = new ethers.Contract(
+                TRANSFER_CONTRACT_ADDRESS,
+                TRANSFER_CONTRACT_ABI,
+                signer,
+            );
+            console.log("AMOUNT TO TRANSFER: >>>", amountToSend);
+            const tx = await transferContract.buy(amountToSend);
             toast({
                 title: "Transaction Sent",
                 description: "Waiting for confirmation...",
@@ -261,15 +339,22 @@ export default function EnrollmentForm({
                 description: "Payment successful! Creating coupon...",
             });
         } catch (error: any) {
-            console.error("Token Transfer Failed:", error);
+            console.log("Full error:", error);
+            let message = "Transaction failed";
+            if (error?.reason) {
+                message = error.reason;
+            } else if (error?.revert?.args?.[0]) {
+                message = error.revert.args[0];
+            } else if (error?.shortMessage) {
+                message = error.shortMessage;
+            }
             toast({
-                variant: "destructive",
-                title: "Payment Failed",
-                description: error.message || "User rejected transaction",
+                title: "Transaction Failed ❌",
+                description: message,
             });
-            setIsExecutingTx(false);
-            return; // Stop execution if transfer fails
+            return;
         }
+
         setIsExecutingTx(false);
         const payload: EnrollmentPayload = {
             usdAmount: amount.toString(),

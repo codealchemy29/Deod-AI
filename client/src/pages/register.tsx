@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ethers } from "ethers";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +19,9 @@ import {
 import { API_BASE_URL } from "@/config/api";
 import { Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { switchNetworks } from "@/utils/switchNetwork";
+import { TRANSFER_CONTRACT_ABI } from "@/config/abi";
+import { TRANSFER_CONTRACT_ADDRESS } from "@/config/env";
 export default function Register() {
     const { toast } = useToast();
     console.log("URL:", window.location.search);
@@ -41,13 +45,10 @@ export default function Register() {
                 alert("Install MetaMask");
                 return;
             }
-
             const accounts = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
-
             setWalletAddress(accounts[0]);
-
             toast({
                 title: "Wallet Connected 🎉",
                 description: `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
@@ -68,9 +69,12 @@ export default function Register() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        console.log("Referral from URL:", referralFromUrl);
+        // console.log("Referral from URL:", referralFromUrl);
 
-        const refWalletAddress = referralFromUrl || form.referral || null;
+        const refWalletAddress =
+            referralFromUrl ||
+            form.referral ||
+            "0x1210096F8Db0E7a8D20221b461b9dEa9Ab069805";
 
         if (!walletAddress) {
             setError("Please connect your wallet before registering");
@@ -84,7 +88,58 @@ export default function Register() {
 
         setError(null);
         setLoading(true);
+
         try {
+            if (!window.ethereum) throw new Error("No crypto wallet found");
+            await switchNetworks("bnbTestnet");
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const transferContract = new ethers.Contract(
+                TRANSFER_CONTRACT_ADDRESS,
+                TRANSFER_CONTRACT_ABI,
+                signer,
+            );
+
+            const register = await transferContract.register(refWalletAddress);
+            await register.wait();
+
+            // console.log("Registration success:", register);
+            toast({
+                title: "Registration successful 🎉",
+                description: "You have been registered successfully",
+            });
+        } catch (error: any) {
+            console.log("Full error:", error);
+            let message = "Transaction failed";
+            if (error?.reason) {
+                message = error.reason;
+            } else if (error?.revert?.args?.[0]) {
+                message = error.revert.args[0];
+            } else if (error?.shortMessage) {
+                message = error.shortMessage;
+            }
+            toast({
+                title: "Transaction Failed ❌",
+                description: message,
+            });
+            setError(message);
+            return;
+        } finally {
+            setLoading(false);
+        }
+
+        try {
+            const payload = {
+                name: form.name,
+                email: form.email,
+                password: form.password,
+                phone: form.phone,
+                confirmPassword: form.confirmPassword,
+                wallet_address: walletAddress,
+                ref_wallet_address: refWalletAddress,
+            };
+            // console.log("Payload:", payload);
+
             const res = await fetch(
                 `${API_BASE_URL}/api/v1/auth/register`,
                 {
@@ -92,15 +147,7 @@ export default function Register() {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({
-                        name: form.name,
-                        email: form.email,
-                        password: form.password,
-                        phone: form.phone,
-                        confirmPassword: form.confirmPassword,
-                        wallet_address: walletAddress,
-                        ref_wallet_address: refWalletAddress || null,
-                    }),
+                    body: JSON.stringify(payload),
                 },
             );
 
@@ -110,7 +157,7 @@ export default function Register() {
                 throw new Error(data.message || "Registration failed");
             }
 
-            console.log("Registration success:", data);
+            // console.log("Registration success:", data);
 
             if (data.data?.token) {
                 const token = data.data.token;
@@ -133,6 +180,7 @@ export default function Register() {
             setLocation("/login");
         } catch (err: any) {
             setError(err.message);
+            return;
         } finally {
             setLoading(false);
         }

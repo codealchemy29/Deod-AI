@@ -10,7 +10,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { CLAIM_URL } from "@/config/env";
+import { CLAIM_URL, TRANSFER_CONTRACT_ADDRESS } from "@/config/env";
+import { Copy } from "lucide-react";
+import { ethers } from "ethers";
+import { TRANSFER_CONTRACT_ABI } from "@/config/abi";
 
 export default function Profile() {
     const [user, setUser] = useState<any>(null);
@@ -18,22 +21,10 @@ export default function Profile() {
     const [coupons, setCoupons] = useState([]);
     const [couponOpen, setCouponOpen] = useState(false);
     const [couponData, setCouponData] = useState<any>(null);
-
-    const authToken = localStorage.getItem("token");
-
-    useEffect(() => {
-        getMe().then((data) => {
-            if (!data) {
-                setLocation("/login");
-            } else {
-                setUser(data);
-            }
-        });
-    }, []);
+    const [hasPurchesedCourse, setHasPurchesedCourse] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-
         fetch(`${API_BASE_URL}/api/v1/coupons/my-coupons`, {
             headers: { Authorization: `Bearer ${token}` },
         })
@@ -46,7 +37,47 @@ export default function Profile() {
             });
     }, []);
 
-    if (!user) return null;
+    const checkHasPurchesedCourse = async (walletAddress: string) => {
+        if (!window.ethereum) return;
+        try {
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const transferContract = new ethers.Contract(
+                TRANSFER_CONTRACT_ADDRESS,
+                TRANSFER_CONTRACT_ABI,
+                provider,
+            );
+
+            const purchased =
+                await transferContract.hasPurchased(walletAddress);
+            setHasPurchesedCourse(purchased);
+        } catch (error) {
+            console.error("Failed to check purchased course:", error);
+        }
+    };
+
+    useEffect(() => {
+        getMe().then((data) => {
+            if (!data) {
+                setLocation("/login");
+            } else {
+                setUser(data);
+                if (data.wallet_address) {
+                    checkHasPurchesedCourse(data.wallet_address);
+                }
+            }
+        });
+    }, []);
+
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-muted/40 py-10 px-4 flex justify-center items-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e3a8a]"></div>
+                <span className="ml-3 text-muted-foreground">
+                    Loading profile...
+                </span>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-muted/40 py-10 px-4 flex justify-center">
@@ -55,13 +86,46 @@ export default function Profile() {
                 <Card className="shadow-lg">
                     <CardContent className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                         <div>
-                            <h1 className="text-2xl font-bold">{user.name}</h1>
+                            <h1 className="text-2xl font-bold">
+                                {user.name}{" "}
+                                <span className="text-sm text-muted-foreground bg-muted/40 p-1.5 rounded-lg border border-border">
+                                    {user.wallet_address.slice(0, 6)}...
+                                    {user.wallet_address.slice(-4)}
+                                </span>
+                            </h1>
                             <p className="text-muted-foreground">
                                 {user.email}
                             </p>
                             <p className="text-muted-foreground text-sm">
                                 {user.phone}
                             </p>
+                            {hasPurchesedCourse ? (
+                                <p className="text-muted-foreground text-sm mt-3">
+                                    Refferal Link:{" "}
+                                    <a
+                                        className="text-blue-600 cursor-pointer flex items-center justify-center  gap-2"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(
+                                                "https://deod.ai/register?ref=" +
+                                                    user.wallet_address,
+                                            );
+                                            alert("Copied to clipboard");
+                                        }}
+                                        title="Copy to clipboard"
+                                    >
+                                        <span className="text-xs">
+                                            {"https://deod.ai/register?ref=" +
+                                                user.wallet_address}
+                                        </span>{" "}
+                                        <Copy className="w-4 h-4" />
+                                    </a>
+                                </p>
+                            ) : (
+                                <p className="text-muted-foreground text-sm mt-3 bg-yellow-100 p-2 rounded border border-yellow-200">
+                                    You have not purchased a course yet. Please
+                                    purchase a course to get a referral link.
+                                </p>
+                            )}
                         </div>
 
                         <Button

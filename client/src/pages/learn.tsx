@@ -1,23 +1,15 @@
 import { Link } from "wouter";
 import { ethers } from "ethers";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
     GraduationCap,
-    BookOpen,
-    Brain,
-    Code,
-    Bot,
-    Zap,
-    Clock,
-    Users,
     Star,
     ArrowRight,
     Play,
     CheckCircle2,
-    Layers,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -37,21 +29,21 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Check } from "lucide-react";
+import { Copy } from "lucide-react";
 declare global {
     interface Window {
         ethereum?: any;
     }
 }
 import { API_BASE_URL } from "@/config/api";
-import { ERC20_ABI } from "@/config/abi";
 import {
     CLAIM_URL,
-    TOKEN_CONTRACT_ADDRESS,
-    RECIPIENT_ADDRESS,
+    DEOD_TOKEN_ADDRESS,
+    TRANSFER_CONTRACT_ADDRESS,
 } from "@/config/env";
 import { switchNetworks } from "@/utils/switchNetwork";
 import useDeodPrice from "@/hooks/use-deodPrice";
+import { DEOD_TOKEN_ABI, TRANSFER_CONTRACT_ABI } from "@/config/abi";
 
 /* =======================
     DATA
@@ -199,6 +191,7 @@ export default function Learn() {
     const [purchasedPackageIds, setPurchasedPackageIds] = useState<string[]>(
         [],
     );
+    const [ammountToTransfer, setAmmountToTransfer] = useState<bigint>(0n);
 
     useEffect(() => {
         const fetchUserCoupons = async () => {
@@ -265,13 +258,13 @@ export default function Learn() {
             setCouponLoading(true);
             if (!window.ethereum) throw new Error("No crypto wallet found");
             // Using ethers v6 BrowserProvider
-            await switchNetworks("bsc"); // FOR MAINNET
-            // await switchNetworks("bnbTestnet"); // FOR TESTNET
+            // await switchNetworks("bsc"); // FOR MAINNET
+            await switchNetworks("bnbTestnet"); // FOR TESTNET
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const tokenContract = new ethers.Contract(
-                TOKEN_CONTRACT_ADDRESS,
-                ERC20_ABI,
+                DEOD_TOKEN_ADDRESS,
+                DEOD_TOKEN_ABI,
                 signer,
             );
 
@@ -305,32 +298,47 @@ export default function Learn() {
                 return;
             }
 
-            // Send Transaction
-            const tx = await tokenContract.transfer(
-                RECIPIENT_ADDRESS,
+            const approve = await tokenContract.approve(
+                TRANSFER_CONTRACT_ADDRESS,
                 amountToSend,
             );
+            await approve.wait();
+
+            // Transferring DEOD tokens to the transfer contract
+            console.log("AMOUNT TO SEND: >>>", amountToSend);
+            const transferContract = new ethers.Contract(
+                TRANSFER_CONTRACT_ADDRESS,
+                TRANSFER_CONTRACT_ABI,
+                signer,
+            );
+            console.log("AMOUNT TO TRANSFER: >>>", amountToSend);
+            const tx = await transferContract.buy(amountToSend);
             toast({
                 title: "Transaction Sent",
                 description: "Waiting for confirmation...",
             });
-
             const receipt = await tx.wait();
             txHash = receipt.hash;
-
             toast({
                 title: "Transaction Confirmed",
                 description: "Payment successful! Creating coupon...",
             });
         } catch (error: any) {
-            console.error("Token Transfer Failed:", error);
+            console.log("Full error:", error);
             setCouponLoading(false);
+            let message = "Transaction failed";
+            if (error?.reason) {
+                message = error.reason;
+            } else if (error?.revert?.args?.[0]) {
+                message = error.revert.args[0];
+            } else if (error?.shortMessage) {
+                message = error.shortMessage;
+            }
             toast({
-                variant: "destructive",
-                title: "Payment Failed",
-                description: error.message || "User rejected transaction",
+                title: "Transaction Failed ❌",
+                description: message,
             });
-            return; // Stop execution if transfer fails
+            return;
         }
 
         const payload = {
@@ -343,10 +351,9 @@ export default function Learn() {
             usdAmount: Number(selectedPlan.discountedPrice),
         };
 
-        // console.log("Coupon payload:", payload);
+        console.log("Coupon payload:", payload);
 
         try {
-            // setCouponLoading(true); // Already true
             setCouponError(null);
             const res = await fetch(`${API_BASE_URL}/api/v1/coupons`, {
                 method: "POST",
@@ -994,6 +1001,10 @@ export default function Learn() {
 
                             <Badge className="mb-4">
                                 Best for: {selectedPlan.bestFor.join(", ")}
+                            </Badge>
+
+                            <Badge className="mb-4">
+                                {selectedPlan.discountedPrice}
                             </Badge>
 
                             <Button
