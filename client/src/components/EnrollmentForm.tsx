@@ -25,6 +25,7 @@ import { switchNetworks } from "@/utils/switchNetwork";
 import { DEOD_TOKEN_ABI, TRANSFER_CONTRACT_ABI } from "@/config/abi";
 import useDeodPrice from "@/hooks/use-deodPrice";
 import { DEOD_TOKEN_ADDRESS, TRANSFER_CONTRACT_ADDRESS } from "@/config/env";
+import { Badge } from "./ui/badge";
 
 interface SlotData {
     date: string;
@@ -207,76 +208,14 @@ export default function EnrollmentForm({
 
         let txHash = "";
         const amount = 10;
-        debugger;
-        // try {
-        //     if (!window.ethereum) throw new Error("No crypto wallet found");
-        //     await switchNetworks("bsc");
-        //     // Using ethers v6 BrowserProvider
-        //     const provider = new ethers.BrowserProvider(window.ethereum);
-        //     const signer = await provider.getSigner();
-        //     const tokenContract = new ethers.Contract(
-        //         TRANSFER_CONTRACT_ADDRESS,
-        //         TRANSFER_CONTRACT_ABI,
-        //         signer,
-        //     );
-        //     // Calculate Amount
-        //     // Determine decimals (default 18 if call fails or just assume 18 for standard tokens)
-        //     let decimals = 18;
-        //     try {
-        //         decimals = await tokenContract.decimals();
-        //     } catch (e) {
-        //         console.warn("Could not fetch decimals, defaulting to 18", e);
-        //     }
-        //     const amountToSend = ethers.parseUnits(
-        //         (amount * (deodRate || 187.89)).toFixed(6),
-        //         decimals,
-        //     );
-        //     // Check Balance
-        //     const balance = await tokenContract.balanceOf(
-        //         await signer.getAddress(),
-        //     );
-        //     if (balance < amountToSend) {
-        //         toast({
-        //             variant: "destructive",
-        //             title: "Insufficient Balance",
-        //             description:
-        //                 "You do not have enough DEOD tokens to make this purchase.",
-        //         });
-        //         setIsExecutingTx(false);
-        //         return;
-        //     }
-        //     // Send Transaction
-        //     const tx = await tokenContract.transfer(
-        //         DEOD_TOKEN_ADDRESS,
-        //         amountToSend,
-        //     );
-        //     toast({
-        //         title: "Transaction Sent",
-        //         description: "Waiting for confirmation...",
-        //     });
-        //     const receipt = await tx.wait();
-        //     txHash = receipt.hash;
-        //     toast({
-        //         title: "Transaction Confirmed",
-        //         description: "Payment successful! Creating coupon...",
-        //     });
-        // } catch (error: any) {
-        //     console.error("Token Transfer Failed:", error);
-        //     toast({
-        //         variant: "destructive",
-        //         title: "Payment Failed",
-        //         description: error.message || "User rejected transaction",
-        //     });
-        //     setIsExecutingTx(false);
-        //     return; // Stop execution if transfer fails
-        // }
+        // debugger;
 
         try {
             setIsExecutingTx(true);
             if (!window.ethereum) throw new Error("No crypto wallet found");
             // Using ethers v6 BrowserProvider
-            // await switchNetworks("bsc"); // FOR MAINNET
-            await switchNetworks("bnbTestnet"); // FOR TESTNET
+            await switchNetworks("bsc"); // FOR MAINNET
+            // await switchNetworks("bnbTestnet"); // FOR TESTNET
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const tokenContract = new ethers.Contract(
@@ -539,6 +478,9 @@ export default function EnrollmentForm({
                     "Complete Enrollment"
                 )}
             </Button> */}
+            <Badge className="mb-4 bg-yellow-600 text-white">
+                Pro Tip: Please connect your registered wallet
+            </Badge>
 
             <Button
                 type="submit"

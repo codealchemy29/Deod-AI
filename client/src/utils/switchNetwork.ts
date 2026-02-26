@@ -36,6 +36,7 @@ const networkData = {
         blockExplorerUrls: ["https://polygonscan.com"],
     },
 };
+
 export const switchNetworks = async (networkName: string | number) => {
     const network = networkData[networkName as keyof typeof networkData];
     try {

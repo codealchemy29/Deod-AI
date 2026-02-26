@@ -91,7 +91,8 @@ export default function Register() {
 
         try {
             if (!window.ethereum) throw new Error("No crypto wallet found");
-            await switchNetworks("bnbTestnet");
+            // await switchNetworks("bnbTestnet");  // FOR TESTNET
+            await switchNetworks("bsc"); // FOR MAINNET
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const transferContract = new ethers.Contract(

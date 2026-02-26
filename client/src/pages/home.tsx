@@ -443,8 +443,8 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ================= REVENUE ================= */}
-            <section className="bg-[#1e3a8a] text-white py-24 relative overflow-hidden">
+            {/* ================= WORKSHOP ANNOUNCEMENT SECTION ================= */}
+            {/* <section className="bg-[#1e3a8a] text-white py-24 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
 
                 <div className="relative max-w-4xl mx-auto px-6 text-center">
@@ -491,7 +491,7 @@ export default function Home() {
                         * Includes certificate of completion
                     </p>
                 </div>
-            </section>
+            </section> */}
 
             {/* ================= UPDATED EXPLORE TOOLS SECTION ================= */}
             <section className="py-28 bg-background border-t border-border">

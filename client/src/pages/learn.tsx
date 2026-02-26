@@ -258,8 +258,8 @@ export default function Learn() {
             setCouponLoading(true);
             if (!window.ethereum) throw new Error("No crypto wallet found");
             // Using ethers v6 BrowserProvider
-            // await switchNetworks("bsc"); // FOR MAINNET
-            await switchNetworks("bnbTestnet"); // FOR TESTNET
+            await switchNetworks("bsc"); // FOR MAINNET
+            // await switchNetworks("bnbTestnet"); // FOR TESTNET
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const tokenContract = new ethers.Contract(
@@ -1003,8 +1003,8 @@ export default function Learn() {
                                 Best for: {selectedPlan.bestFor.join(", ")}
                             </Badge>
 
-                            <Badge className="mb-4">
-                                {selectedPlan.discountedPrice}
+                            <Badge className="mb-4 bg-yellow-600 text-white">
+                                Pro Tip: Please connect your registered wallet
                             </Badge>
 
                             <Button
