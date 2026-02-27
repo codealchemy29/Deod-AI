@@ -22,9 +22,9 @@ import {
 } from "lucide-react";
 import { API_BASE_URL } from "@/config/api";
 import { switchNetworks } from "@/utils/switchNetwork";
-import { DEOD_TOKEN_ABI, TRANSFER_CONTRACT_ABI } from "@/config/abi";
+import { DEOD_TOKEN_ABI, PURCHASE_CONTRACT_ABI } from "@/config/abi";
 import useDeodPrice from "@/hooks/use-deodPrice";
-import { DEOD_TOKEN_ADDRESS, TRANSFER_CONTRACT_ADDRESS } from "@/config/env";
+import { DEOD_TOKEN_ADDRESS, NETWORK, PURCHASE_CONTRACT_ADDRESS } from "@/config/env";
 import { Badge } from "./ui/badge";
 
 interface SlotData {
@@ -207,15 +207,14 @@ export default function EnrollmentForm({
         }
 
         let txHash = "";
-        const amount = 10;
+        const amount = 0.1;
         // debugger;
 
         try {
             setIsExecutingTx(true);
             if (!window.ethereum) throw new Error("No crypto wallet found");
             // Using ethers v6 BrowserProvider
-            await switchNetworks("bsc"); // FOR MAINNET
-            // await switchNetworks("bnbTestnet"); // FOR TESTNET
+            await switchNetworks(NETWORK);
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const tokenContract = new ethers.Contract(
@@ -232,7 +231,7 @@ export default function EnrollmentForm({
             } catch (e) {
                 console.warn("Could not fetch decimals, defaulting to 18", e);
             }
-            // FOR MAINNET
+            // calculated amount to send
             const amountToSend = ethers.parseUnits(
                 (amount * (deodRate || 187.89)).toFixed(6),
                 decimals,
@@ -253,20 +252,23 @@ export default function EnrollmentForm({
             }
 
             const approve = await tokenContract.approve(
-                TRANSFER_CONTRACT_ADDRESS,
+                PURCHASE_CONTRACT_ADDRESS,
                 amountToSend,
             );
+            toast({
+                title: "Action Required",
+                description: "Please approve the transaction in your wallet.",
+            });
+
             await approve.wait();
 
             // Transferring DEOD tokens to the transfer contract
-            console.log("AMOUNT TO SEND: >>>", amountToSend);
-            const transferContract = new ethers.Contract(
-                TRANSFER_CONTRACT_ADDRESS,
-                TRANSFER_CONTRACT_ABI,
+            const purchaseContract = new ethers.Contract(
+                PURCHASE_CONTRACT_ADDRESS,
+                PURCHASE_CONTRACT_ABI,
                 signer,
             );
-            console.log("AMOUNT TO TRANSFER: >>>", amountToSend);
-            const tx = await transferContract.buy(amountToSend);
+            const tx = await purchaseContract.buy(amountToSend);
             toast({
                 title: "Transaction Sent",
                 description: "Waiting for confirmation...",
@@ -358,7 +360,7 @@ export default function EnrollmentForm({
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Week Type Filter */}
-            <Button variant="outline" size="sm" onClick={connectMetaMask}>
+            <Button variant="outline" className="bg-indigo-700 text-white" size="sm" onClick={connectMetaMask}>
                 {walletAddress
                     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
                     : "Connect Wallet"}
@@ -478,6 +480,7 @@ export default function EnrollmentForm({
                     "Complete Enrollment"
                 )}
             </Button> */}
+            <p className="text-sm text-muted-foreground">The amount shown may vary based on the current exchange rate of DEOD.</p>
             <Badge className="mb-4 bg-yellow-600 text-white">
                 Pro Tip: Please connect your registered wallet
             </Badge>

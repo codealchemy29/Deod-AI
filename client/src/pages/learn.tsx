@@ -39,11 +39,17 @@ import { API_BASE_URL } from "@/config/api";
 import {
     CLAIM_URL,
     DEOD_TOKEN_ADDRESS,
-    TRANSFER_CONTRACT_ADDRESS,
+    NETWORK,
+    PURCHASE_CONTRACT_ADDRESS,
+    STAKING_CONTRACT_ADDRESS,
 } from "@/config/env";
 import { switchNetworks } from "@/utils/switchNetwork";
 import useDeodPrice from "@/hooks/use-deodPrice";
-import { DEOD_TOKEN_ABI, TRANSFER_CONTRACT_ABI } from "@/config/abi";
+import {
+    DEOD_TOKEN_ABI,
+    PURCHASE_CONTRACT_ABI,
+    STAKING_CONTRACT_ABI,
+} from "@/config/abi";
 
 /* =======================
     DATA
@@ -191,7 +197,6 @@ export default function Learn() {
     const [purchasedPackageIds, setPurchasedPackageIds] = useState<string[]>(
         [],
     );
-    const [ammountToTransfer, setAmmountToTransfer] = useState<bigint>(0n);
 
     useEffect(() => {
         const fetchUserCoupons = async () => {
@@ -254,12 +259,14 @@ export default function Learn() {
         let txHash = "";
         // debugger;
 
+        const finalAmmountForStakingAndPurchase =
+            selectedPlan.discountedPrice / 2;
+
         try {
             setCouponLoading(true);
             if (!window.ethereum) throw new Error("No crypto wallet found");
             // Using ethers v6 BrowserProvider
-            await switchNetworks("bsc"); // FOR MAINNET
-            // await switchNetworks("bnbTestnet"); // FOR TESTNET
+            await switchNetworks(NETWORK);
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const tokenContract = new ethers.Contract(
@@ -276,11 +283,11 @@ export default function Learn() {
             } catch (e) {
                 console.warn("Could not fetch decimals, defaulting to 18", e);
             }
-            // FOR MAINNET
+            // calculated amount to send
             const amountToSend = ethers.parseUnits(
-                (selectedPlan.discountedPrice * (deodRate || 187.89)).toFixed(
-                    6,
-                ),
+                (
+                    finalAmmountForStakingAndPurchase * (deodRate || 187.89)
+                ).toFixed(6),
                 decimals,
             );
             // Check Balance
@@ -297,22 +304,57 @@ export default function Learn() {
                 setCouponLoading(false);
                 return;
             }
-
-            const approve = await tokenContract.approve(
-                TRANSFER_CONTRACT_ADDRESS,
+            // --- 1. APPROVE STAKING ---
+            toast({
+                title: "Action Required",
+                description:
+                    "Please approve the Staking contract in your wallet.",
+            });
+            const approveForStaking = await tokenContract.approve(
+                STAKING_CONTRACT_ADDRESS,
                 amountToSend,
             );
-            await approve.wait();
+            await approveForStaking.wait();
 
-            // Transferring DEOD tokens to the transfer contract
-            console.log("AMOUNT TO SEND: >>>", amountToSend);
-            const transferContract = new ethers.Contract(
-                TRANSFER_CONTRACT_ADDRESS,
-                TRANSFER_CONTRACT_ABI,
+            // --- 2. STAKING ---
+            toast({
+                title: "Action Required",
+                description:
+                    "Please confirm the Stake transaction in your wallet.",
+            });
+            const stackingContract = new ethers.Contract(
+                STAKING_CONTRACT_ADDRESS,
+                STAKING_CONTRACT_ABI,
                 signer,
             );
-            console.log("AMOUNT TO TRANSFER: >>>", amountToSend);
-            const tx = await transferContract.buy(amountToSend);
+            const stake = await stackingContract.stake(amountToSend);
+            await stake.wait();
+
+            //  ---- 3. Approve Purchase ----
+            toast({
+                title: "Action Required",
+                description:
+                    "Please approve the Purchase contract in your wallet.",
+            });
+            const approveForPurchase = await tokenContract.approve(
+                PURCHASE_CONTRACT_ADDRESS,
+                amountToSend,
+            );
+            await approveForPurchase.wait();
+
+            //  ---- 4. Purchase ----
+            toast({
+                title: "Action Required",
+                description:
+                    "Please confirm the Purchase transaction in your wallet.",
+            });
+            const purchaseContract = new ethers.Contract(
+                PURCHASE_CONTRACT_ADDRESS,
+                PURCHASE_CONTRACT_ABI,
+                signer,
+            );
+            const tx = await purchaseContract.buy(amountToSend);
+
             toast({
                 title: "Transaction Sent",
                 description: "Waiting for confirmation...",
@@ -345,13 +387,15 @@ export default function Learn() {
             packageId: selectedPlan._id,
             senderWalletAddress: walletAddress,
             transactionHash: txHash,
+            stackingDeodAmt: Number(finalAmmountForStakingAndPurchase * (deodRate || 187.89)).toFixed(6),
+            purchaseDeodAmt: Number(finalAmmountForStakingAndPurchase * (deodRate || 187.89)).toFixed(6),
             deodAmount: Number(
-                (selectedPlan.discountedPrice * (deodRate || 87.89)).toFixed(6),
+                (selectedPlan.discountedPrice * (deodRate || 187.89)).toFixed(6),
             ),
             usdAmount: Number(selectedPlan.discountedPrice),
         };
 
-        console.log("Coupon payload:", payload);
+        // console.log("Coupon payload:", payload);
 
         try {
             setCouponError(null);
@@ -707,8 +751,8 @@ export default function Learn() {
                                     }`}
                                 >
                                     {purchasedPackageIds.includes(plan._id)
-                                        ? "Enrolled"
-                                        : "Enroll Now"}
+                                        ? "Subscribed"
+                                        : "Buy Package"}
                                 </button>
                             </motion.div>
                         ))}
@@ -976,7 +1020,7 @@ export default function Learn() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="shrink-0 w-fit"
+                                    className="shrink-0 w-fit bg-indigo-600 text-white"
                                     onClick={connectMetaMask}
                                 >
                                     {walletAddress
@@ -995,17 +1039,39 @@ export default function Learn() {
                             </div>
 
                             {deodRate && (
-                                <p className="text-sm text-muted-foreground mb-6 break-words">
-                                    1 USDT ≈ {deodRate.toFixed(2)} DEOD
-                                </p>
+                                <>
+                                    <p className="text-sm text-muted-foreground break-words">
+                                        1 USDT ≈{" "}
+                                        <span className="font-bold">
+                                            {deodRate.toFixed(2)} DEOD
+                                        </span>
+                                    </p>
+                                    <p className="text-sm text-muted-foreground mb-6 break-words">
+                                        {selectedPlan.discountedPrice} USDT ≈{" "}
+                                        <span className="font-bold">
+                                            {(
+                                                selectedPlan.discountedPrice *
+                                                deodRate
+                                            ).toFixed(2)}{" "}
+                                            DEOD
+                                        </span>
+                                    </p>
+                                </>
                             )}
+
+                            <p className="text-sm text-muted-foreground mb-6">
+                                The amount shown may vary based on the current
+                                exchange rate of DEOD.
+                            </p>
 
                             <div className="flex flex-col gap-3 mb-6">
                                 <Badge className="whitespace-normal h-auto py-2 text-left leading-relaxed">
-                                    <span className="font-bold mr-1">
-                                        Best for:
-                                    </span>{" "}
-                                    {selectedPlan.bestFor.join(", ")}
+                                    {/* <span className="font-bold mr-1">
+                                        
+                                    </span>{" "} */}
+                                    You will be staking 50% of the total amount
+                                    of package, which you can claim from your
+                                    dashboard later.
                                 </Badge>
 
                                 <Badge className="whitespace-normal h-auto py-2 text-left leading-relaxed bg-yellow-600 hover:bg-yellow-700 text-white">
@@ -1023,7 +1089,7 @@ export default function Learn() {
                             >
                                 {couponLoading
                                     ? "Generating Coupon..."
-                                    : "Continue to Payment"}
+                                    : "Buy Now"}
                             </Button>
                         </div>
                     )}

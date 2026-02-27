@@ -10,10 +10,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { CLAIM_URL, TRANSFER_CONTRACT_ADDRESS } from "@/config/env";
+import { CLAIM_URL, PURCHASE_CONTRACT_ADDRESS, } from "@/config/env";
 import { Copy } from "lucide-react";
 import { ethers } from "ethers";
-import { TRANSFER_CONTRACT_ABI } from "@/config/abi";
+import { PURCHASE_CONTRACT_ABI } from "@/config/abi";
 
 export default function Profile() {
     const [user, setUser] = useState<any>(null);
@@ -42,8 +42,8 @@ export default function Profile() {
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const transferContract = new ethers.Contract(
-                TRANSFER_CONTRACT_ADDRESS,
-                TRANSFER_CONTRACT_ABI,
+                PURCHASE_CONTRACT_ADDRESS,
+                PURCHASE_CONTRACT_ABI,
                 provider,
             );
 

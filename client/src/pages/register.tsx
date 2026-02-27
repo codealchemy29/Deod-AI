@@ -20,8 +20,9 @@ import { API_BASE_URL } from "@/config/api";
 import { Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { switchNetworks } from "@/utils/switchNetwork";
-import { TRANSFER_CONTRACT_ABI } from "@/config/abi";
-import { TRANSFER_CONTRACT_ADDRESS } from "@/config/env";
+import { PURCHASE_CONTRACT_ABI } from "@/config/abi";
+import { DEFAULT_REFFERAL_WALLET_ADDRESS, NETWORK, PURCHASE_CONTRACT_ADDRESS } from "@/config/env";
+
 export default function Register() {
     const { toast } = useToast();
     console.log("URL:", window.location.search);
@@ -74,7 +75,7 @@ export default function Register() {
         const refWalletAddress =
             referralFromUrl ||
             form.referral ||
-            "0x31c2c66f56939C94D4BC743363eF4b171f1c17DF"; // DEFAULT REFERRAL Mainnet
+            DEFAULT_REFFERAL_WALLET_ADDRESS; // DEFAULT REFERRAL
 
         if (!walletAddress) {
             setError("Please connect your wallet before registering");
@@ -91,13 +92,12 @@ export default function Register() {
 
         try {
             if (!window.ethereum) throw new Error("No crypto wallet found");
-            // await switchNetworks("bnbTestnet");  // FOR TESTNET
-            await switchNetworks("bsc"); // FOR MAINNET
+            await switchNetworks(NETWORK);
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const transferContract = new ethers.Contract(
-                TRANSFER_CONTRACT_ADDRESS,
-                TRANSFER_CONTRACT_ABI,
+                PURCHASE_CONTRACT_ADDRESS,
+                PURCHASE_CONTRACT_ABI,
                 signer,
             );
 
@@ -139,7 +139,7 @@ export default function Register() {
                 wallet_address: walletAddress,
                 ref_wallet_address: refWalletAddress,
             };
-            // console.log("Payload:", payload);
+            console.log("Payload:", payload);
 
             const res = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
                 method: "POST",
