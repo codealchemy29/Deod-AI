@@ -74,7 +74,7 @@ export default function Register() {
         const refWalletAddress =
             referralFromUrl ||
             form.referral ||
-            "0x1210096F8Db0E7a8D20221b461b9dEa9Ab069805";
+            "0x31c2c66f56939C94D4BC743363eF4b171f1c17DF"; // DEFAULT REFERRAL Mainnet
 
         if (!walletAddress) {
             setError("Please connect your wallet before registering");
@@ -141,16 +141,13 @@ export default function Register() {
             };
             // console.log("Payload:", payload);
 
-            const res = await fetch(
-                `${API_BASE_URL}/api/v1/auth/register`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(payload),
+            const res = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
                 },
-            );
+                body: JSON.stringify(payload),
+            });
 
             const data = await res.json();
 
