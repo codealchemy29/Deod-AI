@@ -963,9 +963,9 @@ export default function Learn() {
                         </div>
                     ) : (
                         <div>
-                            <div className="flex justify-between mb-5">
-                                <div>
-                                    <h2 className="text-2xl font-bold">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-4 sm:gap-2">
+                                <div className="pr-2">
+                                    <h2 className="text-xl sm:text-2xl font-bold break-words">
                                         {selectedPlan.title}
                                     </h2>
                                     <p className="text-indigo-600 capitalize">
@@ -976,6 +976,7 @@ export default function Learn() {
                                 <Button
                                     variant="outline"
                                     size="sm"
+                                    className="shrink-0 w-fit"
                                     onClick={connectMetaMask}
                                 >
                                     {walletAddress
@@ -985,27 +986,35 @@ export default function Learn() {
                             </div>
 
                             <div className="flex items-end gap-3 mb-2">
-                                <span className="line-through text-muted-foreground">
+                                <span className="line-through text-muted-foreground text-lg sm:text-xl">
                                     ${selectedPlan.originalPrice}
                                 </span>
-                                <span className="text-4xl font-bold">
+                                <span className="text-3xl sm:text-4xl font-bold">
                                     ${selectedPlan.discountedPrice}
                                 </span>
                             </div>
 
                             {deodRate && (
-                                <p className="text-sm text-muted-foreground mb-6">
+                                <p className="text-sm text-muted-foreground mb-6 break-words">
                                     1 USDT ≈ {deodRate.toFixed(2)} DEOD
                                 </p>
                             )}
 
-                            <Badge className="mb-4">
-                                Best for: {selectedPlan.bestFor.join(", ")}
-                            </Badge>
+                            <div className="flex flex-col gap-3 mb-6">
+                                <Badge className="whitespace-normal h-auto py-2 text-left leading-relaxed">
+                                    <span className="font-bold mr-1">
+                                        Best for:
+                                    </span>{" "}
+                                    {selectedPlan.bestFor.join(", ")}
+                                </Badge>
 
-                            <Badge className="mb-4 bg-yellow-600 text-white">
-                                Pro Tip: Please connect your registered wallet
-                            </Badge>
+                                <Badge className="whitespace-normal h-auto py-2 text-left leading-relaxed bg-yellow-600 hover:bg-yellow-700 text-white">
+                                    <span className="font-bold mr-1">
+                                        Pro Tip:
+                                    </span>{" "}
+                                    Please connect your registered wallet
+                                </Badge>
+                            </div>
 
                             <Button
                                 className="w-full bg-[#1e3a8a] text-white"
