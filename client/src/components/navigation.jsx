@@ -24,9 +24,9 @@ var navItems = [
     { href: "/about", label: "About", icon: Info },
     { href: "/learn", label: "Learn AI With Tutor", icon: GraduationCap },
     { href: "/explore", label: "Explore Tools", icon: Search },
-    { href: "/create", label: "Create Tools", icon: Wrench },
-    { href: "/submit", label: "Submit Tools", icon: Upload },
-    { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
+    // { href: "/create", label: "Create Tools", icon: Wrench },
+    // { href: "/submit", label: "Submit Tools", icon: Upload },
+    // { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
     { href: "/news", label: "News", icon: Newspaper },
     { href: "/newsletter", label: "Newsletter", icon: Mail },
 ];

@@ -306,7 +306,7 @@ export default function Explore() {
                           variant="outline"
                           className="w-full mt-4 border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white transition-all active:scale-[0.98]"
                         >
-                          View Tool
+                          Coming Soon
                           <ExternalLink className="ml-2 h-4 w-4" />
                         </Button>
                       </CardContent>

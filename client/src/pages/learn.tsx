@@ -544,7 +544,7 @@ export default function Learn() {
                         projects.
                     </p>
 
-                    <div className="flex flex-wrap gap-4">
+                    {/* <div className="flex flex-wrap gap-4">
                         <Button
                             size="lg"
                             onClick={() => setOpen(true)}
@@ -562,7 +562,7 @@ export default function Learn() {
                         >
                             Learn AI With Tutor
                         </Button>
-                    </div>
+                    </div> */}
 
                     <div className="flex flex-wrap gap-6 mt-8 text-sm text-muted-foreground">
                         {[

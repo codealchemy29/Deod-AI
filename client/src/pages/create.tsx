@@ -143,7 +143,7 @@ export default function Create() {
               friendly builder to create, test, and launch your AI products.
             </p>
 
-            <div className="flex flex-wrap items-center gap-4">
+            {/* <div className="flex flex-wrap items-center gap-4">
               <Button size="lg" className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white">
                 Start Building
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -151,7 +151,7 @@ export default function Create() {
               <Button size="lg" variant="outline" className="border-border">
                 View Templates
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>

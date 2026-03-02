@@ -386,25 +386,25 @@ export default function Home() {
                     </h1>
 
                     <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-                        Learn AI, explore powerful tools, and earn
+                        Learn AI, Explore Powerful Tools, 
                         <span className="font-semibold text-foreground">
                             {" "}
-                            90% revenue
+                            Earn 50% back
                         </span>{" "}
-                        as a creator.
+                        on your spendings.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href="/learn">
+                        <Link href="/login">
                             <Button
                                 size="lg"
                                 className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white px-8"
                             >
-                                Get Started Free{" "}
+                                Get Started{" "}
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
-                        <Link href="/submit">
+                        {/* <Link href="/submit">
                             <Button
                                 size="lg"
                                 variant="outline"
@@ -412,7 +412,7 @@ export default function Home() {
                             >
                                 Submit Tool
                             </Button>
-                        </Link>
+                        </Link> */}
                     </div>
                 </div>
             </section>
@@ -618,7 +618,7 @@ export default function Home() {
                                                   variant="outline"
                                                   className="w-full mt-4 border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white"
                                               >
-                                                  View Tool{" "}
+                                                  Coming Soon{" "}
                                                   <ExternalLink className="ml-2 h-4 w-4" />
                                               </Button>
                                           </CardContent>
