@@ -275,11 +275,11 @@ export default function About() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/submit">
+            {/* <Link href="/submit">
               <Button size="lg" variant="outline" className="w-full sm:w-auto hover:border-[#1e3a8a] hover:text-[#1e3a8a]" data-testid="button-about-become-creator">
                 Become a Creator
               </Button>
-            </Link>
+            </Link> */}
           </div>
         </div>
       </section>
