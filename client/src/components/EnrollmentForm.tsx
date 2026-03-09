@@ -303,7 +303,7 @@ export default function EnrollmentForm({
             transactionHash: txHash,
             senderWalletAddress: walletAddress,
             date: "2026-03-10",
-            time: "1:00 PM - 2:00 PM",
+            time: "4:30 PM - 5:30 PM",
             // date: selectedDate,
             // time: selectedSlot,
             // weekType: selectedDateData?.weekType || "weekday",
@@ -351,7 +351,7 @@ export default function EnrollmentForm({
                 <p className="text-sm text-muted-foreground">
                     <strong>Date:</strong> {"10/03/2026"}
                     <br />
-                    <strong>Time:</strong> {"1:00 PM - 2:00 PM"}
+                    <strong>Time:</strong> {"4:30 PM - 5:30 PM"}
                 </p>
             </div>
         );
@@ -421,7 +421,7 @@ export default function EnrollmentForm({
                     <Clock className="h-4 w-4" />
                     Time
                 </Label>
-                <p>{"01:00 PM - 02:00 PM"}</p>
+                <p>{"04:30 PM - 05:30 PM"}</p>
             </div>
 
             {/* Time Slot Selection */}
