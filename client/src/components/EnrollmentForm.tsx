@@ -207,7 +207,7 @@ export default function EnrollmentForm({
         }
 
         let txHash = "";
-        const amount = 0.1;
+        const amount = 10;
         // debugger;
 
         try {
@@ -302,7 +302,7 @@ export default function EnrollmentForm({
             deodAmount: (amount * (deodRate || 187.89)).toFixed(6),
             transactionHash: txHash,
             senderWalletAddress: walletAddress,
-            date: "2025-02-18",
+            date: "2026-03-10",
             time: "1:00 PM - 2:00 PM",
             // date: selectedDate,
             // time: selectedSlot,
@@ -349,7 +349,7 @@ export default function EnrollmentForm({
                     <strong>Time:</strong> {selectedSlot}
                 </p> */}
                 <p className="text-sm text-muted-foreground">
-                    <strong>Date:</strong> {"18/02/2025"}
+                    <strong>Date:</strong> {"10/03/2026"}
                     <br />
                     <strong>Time:</strong> {"1:00 PM - 2:00 PM"}
                 </p>
@@ -416,7 +416,7 @@ export default function EnrollmentForm({
                         No slots available for the selected filter.
                     </p>
                 )} */}
-                <p>{"18/02/2025"}</p>
+                <p>{"10/03/2026"}</p>
                 <Label htmlFor="date" className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     Time
