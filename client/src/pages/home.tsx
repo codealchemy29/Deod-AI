@@ -444,7 +444,7 @@ export default function Home() {
             </section>
 
             {/* ================= WORKSHOP ANNOUNCEMENT SECTION ================= */}
-            {/* <section className="bg-[#1e3a8a] text-white py-24 relative overflow-hidden">
+            <section className="bg-[#1e3a8a] text-white py-24 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
 
                 <div className="relative max-w-4xl mx-auto px-6 text-center">
@@ -463,7 +463,7 @@ export default function Home() {
                     </p>
 
                     <p className="text-xl md:text-2xl text-blue-100 mb-10 max-w-2xl mx-auto font-light">
-                        <span className="font-semibold">18 Feb 2025</span>
+                        <span className="font-semibold">10 March 2026</span>
                         <br />
                         <span className="font-semibold">1:00 PM - 2:00 PM</span>
                     </p>
@@ -491,7 +491,7 @@ export default function Home() {
                         * Includes certificate of completion
                     </p>
                 </div>
-            </section> */}
+            </section>
 
             {/* ================= UPDATED EXPLORE TOOLS SECTION ================= */}
             <section className="py-28 bg-background border-t border-border">
