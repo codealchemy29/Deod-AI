@@ -462,11 +462,11 @@ export default function Home() {
                         comprehensive workshop. Perfect for beginners.
                     </p>
 
-                    <p className="text-xl md:text-2xl text-blue-100 mb-10 max-w-2xl mx-auto font-light">
+                    {/* <p className="text-xl md:text-2xl text-blue-100 mb-10 max-w-2xl mx-auto font-light">
                         <span className="font-semibold">10 March 2026</span>
                         <br />
                         <span className="font-semibold">4:30 PM - 5:30 PM</span>
-                    </p>
+                    </p> */}
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                         <div className="text-center">

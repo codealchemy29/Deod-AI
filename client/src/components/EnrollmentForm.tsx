@@ -211,6 +211,16 @@ export default function EnrollmentForm({
         // debugger;
 
         try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                toast({
+                    variant: "destructive",
+                    title: "Authentication Required",
+                    description: "Please login to continue.",
+                });
+                return;
+            }
+
             setIsExecutingTx(true);
             if (!window.ethereum) throw new Error("No crypto wallet found");
             // Using ethers v6 BrowserProvider
@@ -302,7 +312,7 @@ export default function EnrollmentForm({
             deodAmount: (amount * (deodRate || 187.89)).toFixed(6),
             transactionHash: txHash,
             senderWalletAddress: walletAddress,
-            date: "2026-03-10",
+            date: new Date().toISOString().split('T')[0], // currunt date
             time: "4:30 PM - 5:30 PM",
             // date: selectedDate,
             // time: selectedSlot,
@@ -348,11 +358,11 @@ export default function EnrollmentForm({
                     <br />
                     <strong>Time:</strong> {selectedSlot}
                 </p> */}
-                <p className="text-sm text-muted-foreground">
+                {/*<p className="text-sm text-muted-foreground">
                     <strong>Date:</strong> {"10/03/2026"}
                     <br />
                     <strong>Time:</strong> {"4:30 PM - 5:30 PM"}
-                </p>
+                </p>*/}
             </div>
         );
     }
@@ -388,10 +398,10 @@ export default function EnrollmentForm({
 
             {/* Date Selection */}
             <div className="space-y-2">
-                <Label htmlFor="date" className="flex items-center gap-2">
+                {/* <Label htmlFor="date" className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     Date
-                </Label>
+                </Label> */}
                 {/* <Select
                     value={selectedDate}
                     onValueChange={(value) => {
@@ -416,12 +426,12 @@ export default function EnrollmentForm({
                         No slots available for the selected filter.
                     </p>
                 )} */}
-                <p>{"10/03/2026"}</p>
+                {/* <p>{"10/03/2026"}</p>
                 <Label htmlFor="date" className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     Time
                 </Label>
-                <p>{"04:30 PM - 05:30 PM"}</p>
+                <p>{"04:30 PM - 05:30 PM"}</p> */}
             </div>
 
             {/* Time Slot Selection */}
@@ -454,7 +464,7 @@ export default function EnrollmentForm({
             )} */}
 
             <div className="flex justify-between">
-                <p className="text-sm font-medium">Total Amount:</p>
+                <p className="text-sm font-medium">Total Amount: <span className="text-4xl font-bold">{" $10"}</span></p>
                 <div className="flex flex-col items-end justify-between gap-2">
                     <p className="text-sm font-medium">
                         1 USDT = {(deodRate || 187.89).toFixed(6)} DEOD
