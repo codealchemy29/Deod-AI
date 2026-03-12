@@ -19,6 +19,8 @@ import NotFound from "@/pages/not-found";
 import Register from "./pages/register";
 import Login from "./pages/login";
 import Profile from "./pages/profile";
+import ForgotPassword from "./pages/forgot-password";
+import ResetPassword from "./pages/reset-password";
 
 function Router() {
   return (
@@ -36,6 +38,8 @@ function Router() {
       <Route path="/register" component={Register} />
       {/* <Route path="/register/referral/:referralCode" component={Register} /> */}
       <Route path="/login" component={Login} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route component={NotFound} />
     </Switch>
   );
