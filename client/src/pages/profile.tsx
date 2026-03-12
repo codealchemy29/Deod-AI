@@ -154,7 +154,7 @@ export default function Profile() {
                             {coupons.map((c: any) => (
                                 <div
                                     key={c._id}
-                                    className="border rounded-xl p-4 flex justify-between items-center bg-white shadow-sm"
+                                    className="border rounded-xl p-4 flex justify-between items-center shadow-sm"
                                 >
                                     <div>
                                         <p className="text-xs text-muted-foreground">
