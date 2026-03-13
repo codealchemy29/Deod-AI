@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogIn, Mail, Lock, ArrowRight } from "lucide-react";
+import { LogIn, Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { API_BASE_URL } from "@/config/api";
 
 export default function Login() {
@@ -13,6 +13,7 @@ export default function Login() {
     });
 
     const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
     const [, setLocation] = useLocation();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,14 +100,22 @@ export default function Login() {
                         <div className="relative">
                             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 name="password"
                                 placeholder="Password"
                                 value={form.password}
                                 onChange={handleChange}
                                 required
-                                className="w-full pl-10 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
+                                className="w-full pl-10 pr-10 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((v) => !v)}
+                                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                                tabIndex={-1}
+                            >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
                         </div>
 
                         {error && (

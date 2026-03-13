@@ -15,6 +15,8 @@ import {
     RouteOffIcon,
     UserSearchIcon,
     SquareCode,
+    Eye,
+    EyeOff,
 } from "lucide-react";
 import { API_BASE_URL } from "@/config/api";
 import { Wallet } from "lucide-react";
@@ -61,6 +63,8 @@ export default function Register() {
 
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [, setLocation] = useLocation();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,27 +251,43 @@ export default function Register() {
                         <div className="relative">
                             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 name="password"
                                 placeholder="Password"
                                 value={form.password}
                                 onChange={handleChange}
                                 required
-                                className="w-full pl-10 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
+                                className="w-full pl-10 pr-10 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((v) => !v)}
+                                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                                tabIndex={-1}
+                            >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
                         </div>
 
                         <div className="relative">
                             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                             <input
-                                type="password"
+                                type={showConfirmPassword ? "text" : "password"}
                                 name="confirmPassword"
                                 placeholder="Confirm password"
                                 value={form.confirmPassword}
                                 onChange={handleChange}
                                 required
-                                className="w-full pl-10 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
+                                className="w-full pl-10 pr-10 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword((v) => !v)}
+                                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                                tabIndex={-1}
+                            >
+                                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
                         </div>
                         <div className="relative">
                             <SquareCode className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
