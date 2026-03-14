@@ -137,6 +137,55 @@ export default function Profile() {
                     </CardContent>
                 </Card>
 
+                {/* Referral Earning Section */}
+                <Card className="shadow-lg">
+                    <CardContent className="p-6">
+                        <h2 className="text-xl font-semibold mb-4">
+                            Your Referral Earning
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {/* Total Earned */}
+                            <div className="rounded-xl border bg-muted/30 p-4 flex flex-col gap-1">
+                                <p className="text-xs text-muted-foreground">Total Earned</p>
+                                <p className="text-2xl font-bold text-indigo-600">{(user.total_referral_earned).toFixed(2)} <span className="text-sm font-medium text-muted-foreground">DEOD</span></p>
+                                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-medium w-fit">Lifetime</span>
+                            </div>
+
+                            {/* Total Referrals */}
+                            <div className="rounded-xl border bg-muted/30 p-4 flex flex-col gap-1">
+                                <p className="text-xs text-muted-foreground">Total Referrals</p>
+                                <p className="text-2xl font-bold text-indigo-600">{user.total_referral_count}</p>
+                                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 font-medium w-fit">Users Referred</span>
+                            </div>
+
+                            {/* Total Staked */}
+                            <div
+                                // href="https://staking-bnb.decentrawood.com/"
+                                // target="_blank"
+                                // rel="noopener noreferrer"
+                                className="rounded-xl border bg-muted/30 p-4 flex flex-col gap-1 hover:border-indigo-400 hover:bg-indigo-50/40 transition-colors cursor-pointer group"
+                            >
+                                <p className="text-xs text-muted-foreground">Total Staked</p>
+                                <p className="text-2xl font-bold text-indigo-600">{(user.total_stacking_deod).toFixed(2)} <span className="text-sm font-medium text-muted-foreground">DEOD</span></p>
+                                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-medium w-fit group-hover:bg-indigo-200 transition-colors">Claim Rewards is Coming Soon</span>
+                            </div>
+                        </div>
+
+                        {/* <p className="text-xs text-muted-foreground mt-4">
+                            To claim your staked amount, visit our{" "}
+                            <a
+                                href="https://staking-bnb.decentrawood.com/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-indigo-600 underline hover:text-indigo-800"
+                            >
+                                Staking Portal
+                            </a>{" "}
+                            and connect your registered wallet address.
+                        </p> */}
+                    </CardContent>
+                </Card>
+
                 {/* Coupons Section */}
                 <Card className="shadow-lg">
                     <CardContent className="p-6">
@@ -154,7 +203,7 @@ export default function Profile() {
                             {coupons.map((c: any) => (
                                 <div
                                     key={c._id}
-                                    className="border rounded-xl p-4 flex justify-between items-center shadow-sm"
+                                    className="border bg-muted/30 rounded-xl p-4 flex justify-between items-center shadow-sm"
                                 >
                                     <div>
                                         <p className="text-xs text-muted-foreground">
