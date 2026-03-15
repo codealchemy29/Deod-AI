@@ -36,7 +36,7 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/profile" component={Profile} />
       <Route path="/register" component={Register} />
-      {/* <Route path="/register/referral/:referralCode" component={Register} /> */}
+      <Route path="/register/:ref" component={Register} />
       <Route path="/login" component={Login} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />

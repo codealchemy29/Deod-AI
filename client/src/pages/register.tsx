@@ -27,9 +27,8 @@ import { DEFAULT_REFFERAL_WALLET_ADDRESS, NETWORK, PURCHASE_CONTRACT_ADDRESS } f
 
 export default function Register() {
     const { toast } = useToast();
-    console.log("URL:", window.location.search);
-    const searchParams = new URLSearchParams(window.location.search);
-    const referralFromUrl = searchParams.get("ref") || "";
+    const params = useParams<{ ref?: string }>();
+    const referralFromUrl = params.ref || "";
 
     const [walletAddress, setWalletAddress] = useState("");
 
@@ -44,6 +43,7 @@ export default function Register() {
 
     const connectWallet = async () => {
         try {
+            await switchNetworks(NETWORK);
             if (!window.ethereum) {
                 alert("Install MetaMask");
                 return;
