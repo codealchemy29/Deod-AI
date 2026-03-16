@@ -395,15 +395,27 @@ export default function Home() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href="/login">
-                            <Button
-                                size="lg"
-                                className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white px-8"
-                            >
+                        {user ? (
+                            <Link href="/learn">
+                                <Button
+                                    size="lg"
+                                    className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white px-8"
+                                >
+                                    Learn AI with Tutor{" "}
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                            </Link>
+                        ) : (
+                            <Link href="/login">
+                                <Button
+                                    size="lg"
+                                    className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white px-8"
+                                >
                                 Get Started{" "}
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
+                        )}
                         {/* <Link href="/submit">
                             <Button
                                 size="lg"

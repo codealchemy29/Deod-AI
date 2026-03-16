@@ -10,8 +10,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { CLAIM_URL, PURCHASE_CONTRACT_ADDRESS, } from "@/config/env";
-import { Copy } from "lucide-react";
+import { CLAIM_URL, PURCHASE_CONTRACT_ADDRESS } from "@/config/env";
+import { Copy, Check } from "lucide-react";
 import { ethers } from "ethers";
 import { PURCHASE_CONTRACT_ABI } from "@/config/abi";
 
@@ -22,6 +22,13 @@ export default function Profile() {
     const [couponOpen, setCouponOpen] = useState(false);
     const [couponData, setCouponData] = useState<any>(null);
     const [hasPurchesedCourse, setHasPurchesedCourse] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [adminStats, setAdminStats] = useState<{
+        users: any[];
+        total_users: number;
+        total_created_coupons: number;
+        total_active_coupons: number;
+    } | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -35,6 +42,26 @@ export default function Profile() {
                 );
                 setCoupons(active);
             });
+    }, []);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        fetch(`${API_BASE_URL}/api/v1/user/referrals`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then((r) => r.json())
+            .then((j) => {
+                if (j?.status === 200 && j?.data) {
+                    setAdminStats({
+                        users: j.data.users ?? [],
+                        total_users: j.data.total_users ?? 0,
+                        total_created_coupons: j.data.total_created_coupons ?? 0,
+                        total_active_coupons: j.data.total_active_coupons ?? 0,
+                    });
+                }
+            })
+            .catch((err) => console.error("Failed to fetch admin stats:", err));
     }, []);
 
     const checkHasPurchesedCourse = async (walletAddress: string) => {
@@ -53,6 +80,14 @@ export default function Profile() {
         } catch (error) {
             console.error("Failed to check purchased course:", error);
         }
+    };
+
+    console.log("hasPurchesedCourse", hasPurchesedCourse);
+
+    const copyAddress = (address: string, id: string) => {
+        navigator.clipboard.writeText(address);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 1500);
     };
 
     useEffect(() => {
@@ -144,16 +179,31 @@ export default function Profile() {
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             {/* Total Earned */}
                             <div className="rounded-xl border bg-muted/30 p-4 flex flex-col gap-1">
-                                <p className="text-xs text-muted-foreground">Total Earned</p>
-                                <p className="text-2xl font-bold text-indigo-600">{(user.total_referral_earned).toFixed(2)} <span className="text-sm font-medium text-muted-foreground">DEOD</span></p>
-                                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-medium w-fit">Lifetime</span>
+                                <p className="text-xs text-muted-foreground">
+                                    Total Referral Earnings
+                                </p>
+                                <p className="text-2xl font-bold text-indigo-600">
+                                    {user.total_referral_earned.toFixed(2)}{" "}
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                        DEOD
+                                    </span>
+                                </p>
+                                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-medium w-fit">
+                                    Lifetime
+                                </span>
                             </div>
 
                             {/* Total Referrals */}
                             <div className="rounded-xl border bg-muted/30 p-4 flex flex-col gap-1">
-                                <p className="text-xs text-muted-foreground">Total Referrals</p>
-                                <p className="text-2xl font-bold text-indigo-600">{user.total_referral_count}</p>
-                                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 font-medium w-fit">Users Referred</span>
+                                <p className="text-xs text-muted-foreground">
+                                    Total Referrals
+                                </p>
+                                <p className="text-2xl font-bold text-indigo-600">
+                                    {user.total_referral_count}
+                                </p>
+                                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 font-medium w-fit">
+                                    Users Referred
+                                </span>
                             </div>
 
                             {/* Total Staked */}
@@ -163,9 +213,18 @@ export default function Profile() {
                                 // rel="noopener noreferrer"
                                 className="rounded-xl border bg-muted/30 p-4 flex flex-col gap-1 hover:border-indigo-400 hover:bg-indigo-50/40 transition-colors cursor-pointer group"
                             >
-                                <p className="text-xs text-muted-foreground">Total Staked</p>
-                                <p className="text-2xl font-bold text-indigo-600">{(user.total_stacking_deod).toFixed(2)} <span className="text-sm font-medium text-muted-foreground">DEOD</span></p>
-                                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-medium w-fit group-hover:bg-indigo-200 transition-colors">Claim Rewards is Coming Soon</span>
+                                <p className="text-xs text-muted-foreground">
+                                    Total Staked
+                                </p>
+                                <p className="text-2xl font-bold text-indigo-600">
+                                    {user.total_stacking_deod.toFixed(2)}{" "}
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                        DEOD
+                                    </span>
+                                </p>
+                                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-medium w-fit group-hover:bg-indigo-200 transition-colors">
+                                    Claim Rewards is Coming Soon
+                                </span>
                             </div>
                         </div>
 
@@ -185,64 +244,212 @@ export default function Profile() {
                 </Card>
 
                 {/* Coupons Section */}
-                <Card className="shadow-lg">
-                    <CardContent className="p-6">
-                        <h2 className="text-xl font-semibold mb-4">
-                            Your Active Coupons
-                        </h2>
+                {user.role === "user" && (
+                    <Card className="shadow-lg">
+                        <CardContent className="p-6">
+                            <h2 className="text-xl font-semibold mb-4">
+                                Your Active Coupons
+                            </h2>
 
-                        {coupons.length === 0 && (
-                            <p className="text-muted-foreground text-sm">
-                                No active coupons available
-                            </p>
-                        )}
+                            {coupons.length === 0 && (
+                                <p className="text-muted-foreground text-sm">
+                                    No active coupons available
+                                </p>
+                            )}
 
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {coupons.map((c: any) => (
-                                <div
-                                    key={c._id}
-                                    className="border bg-muted/30 rounded-xl p-4 flex justify-between items-center shadow-sm"
-                                >
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">
-                                            Coupon Code
-                                        </p>
-                                        <p className="font-bold text-lg tracking-widest text-indigo-600">
-                                            {c.code}
-                                        </p>
-
-                                        {/* Status Badge */}
-                                        <span className="inline-block mt-2 px-3 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700 font-medium">
-                                            Active
-                                        </span>
-                                        <div className="mt-2">
+                            <div className="grid md:grid-cols-2 gap-4">
+                                {coupons.map((c: any) => (
+                                    <div
+                                        key={c._id}
+                                        className="border bg-muted/30 rounded-xl p-4 flex justify-between items-center shadow-sm"
+                                    >
+                                        <div>
                                             <p className="text-xs text-muted-foreground">
-                                                Coupon redeem functionality is
-                                                not available yet. we are
-                                                working on it.
+                                                Coupon Code
                                             </p>
-                                        </div>
-                                    </div>
+                                            <p className="font-bold text-lg tracking-widest text-indigo-600">
+                                                {c.code}
+                                            </p>
 
-                                    {/* <a
+                                            {/* Status Badge */}
+                                            <span className="inline-block mt-2 px-3 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700 font-medium">
+                                                Active
+                                            </span>
+                                            <div className="mt-2">
+                                                <p className="text-xs text-muted-foreground">
+                                                    Coupon redeem functionality
+                                                    is not available yet. we are
+                                                    working on it.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* <a
         href={`${CLAIM_URL}/login?token=${authToken}&coupon=${c.redemptionToken}`}
         target="_blank"
         rel="noopener noreferrer"
       > */}
 
-                                    <Button
-                                        size="sm"
-                                        disabled
-                                        className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
-                                    >
-                                        Redeem
-                                    </Button>
-                                    {/* </a> */}
+                                        <Button
+                                            size="sm"
+                                            disabled
+                                            className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+                                        >
+                                            Redeem
+                                        </Button>
+                                        {/* </a> */}
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {user.role === "admin" && (
+                    <>
+                        {/* Admin Stat Cards */}
+                        <Card className="shadow-lg">
+                            <CardContent className="p-6">
+                                <h2 className="text-xl font-semibold mb-4">
+                                    Admin Tools
+                                </h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div className="rounded-xl border bg-muted/30 p-4 flex flex-col gap-1">
+                                        <p className="text-xs text-muted-foreground">
+                                            Total Users
+                                        </p>
+                                        <p className="text-2xl font-bold text-indigo-600">
+                                            {adminStats?.total_users ?? 0}
+                                        </p>
+                                        <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 font-medium w-fit">
+                                            Registered
+                                        </span>
+                                    </div>
+                                    <div className="rounded-xl border bg-muted/30 p-4 flex flex-col gap-1">
+                                        <p className="text-xs text-muted-foreground">
+                                            Total Coupons Created
+                                        </p>
+                                        <p className="text-2xl font-bold text-indigo-600">
+                                            {adminStats?.total_created_coupons ?? 0}
+                                        </p>
+                                        <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-medium w-fit">
+                                            Issued
+                                        </span>
+                                    </div>
+                                    <div className="rounded-xl border bg-muted/30 p-4 flex flex-col gap-1">
+                                        <p className="text-xs text-muted-foreground">
+                                            Total Active Coupons
+                                        </p>
+                                        <p className="text-2xl font-bold text-indigo-600">
+                                            {adminStats?.total_active_coupons ?? 0}
+                                        </p>
+                                        <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-orange-100 text-green-700 font-medium w-fit">
+                                            Active
+                                        </span>
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                            </CardContent>
+                        </Card>
+
+                        {/* Admin Users Table */}
+                        <Card className="shadow-lg">
+                            <CardContent className="p-6">
+                                <h2 className="text-xl font-semibold mb-4">
+                                    All Users
+                                </h2>
+                                <div className="overflow-x-auto rounded-xl border">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="bg-muted/50 text-left text-muted-foreground">
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">#</th>
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">Name</th>
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">Email</th>
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">Phone</th>
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">Role</th>
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">Wallet Address</th>
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">Ref Wallet</th>
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">Total Referral Earnings</th>
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">Referrals</th>
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">Staked (DEOD)</th>
+                                                <th className="px-4 py-3 font-medium whitespace-nowrap">Joined</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border">
+                                            {adminStats?.users.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={11} className="px-4 py-6 text-center text-muted-foreground text-sm">
+                                                        No users found
+                                                    </td>
+                                                </tr>
+                                            )}
+                                            {(adminStats?.users ?? []).map((u: any, i: number) => (
+                                                <tr key={u._id} className="hover:bg-muted/30 transition-colors">
+                                                    <td className="px-4 py-3 text-muted-foreground">{i + 1}</td>
+                                                    <td className="px-4 py-3 font-medium capitalize">{u.name}</td>
+                                                    <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
+                                                    <td className="px-4 py-3">{u.phone ?? "—"}</td>
+                                                    <td className="px-4 py-3">
+                                                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                            u.role === "admin"
+                                                                ? "bg-orange-100 text-orange-700"
+                                                                : "bg-blue-100 text-blue-700"
+                                                        }`}>
+                                                            {u.role}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                                                        {u.wallet_address ? (
+                                                            <span className="flex items-center gap-1.5">
+                                                                {`${u.wallet_address.slice(0, 6)}...${u.wallet_address.slice(-4)}`}
+                                                                <button
+                                                                    onClick={() => copyAddress(u.wallet_address, `w-${u._id}`)}
+                                                                    className="text-muted-foreground hover:text-indigo-600 transition-colors"
+                                                                    title="Copy wallet address"
+                                                                >
+                                                                    {copiedId === `w-${u._id}` ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                                                                </button>
+                                                            </span>
+                                                        ) : "—"}
+                                                    </td>
+                                                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                                                        {u.ref_wallet_address ? (
+                                                            <span className="flex items-center gap-1.5">
+                                                                {`${u.ref_wallet_address.slice(0, 6)}...${u.ref_wallet_address.slice(-4)}`}
+                                                                <button
+                                                                    onClick={() => copyAddress(u.ref_wallet_address, `r-${u._id}`)}
+                                                                    className="text-muted-foreground hover:text-indigo-600 transition-colors"
+                                                                    title="Copy ref wallet address"
+                                                                >
+                                                                    {copiedId === `r-${u._id}` ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                                                                </button>
+                                                            </span>
+                                                        ) : "—"}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-indigo-600 font-semibold">
+                                                        {(u.total_referral_earned ?? 0).toFixed(2)}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-center">{u.total_referral_count ?? 0}</td>
+                                                    <td className="px-4 py-3 text-indigo-600 font-semibold">
+                                                        {(u.total_stacking_deod ?? 0).toFixed(2)}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                                                        {new Date(u.createdAt).toLocaleDateString("en-IN", {
+                                                            day: "2-digit",
+                                                            month: "short",
+                                                            year: "numeric",
+                                                        })}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </>
+                )}
+
+                
 
                 {/* Coupon Popup */}
                 <Dialog open={couponOpen} onOpenChange={setCouponOpen}>
