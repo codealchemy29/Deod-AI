@@ -141,14 +141,14 @@ export default function Profile() {
                                         className="text-blue-600 cursor-pointer flex items-center justify-center  gap-2"
                                         onClick={() => {
                                             navigator.clipboard.writeText(
-                                               "https://deod.ai/register?ref=" + user.wallet_address,
+                                               "https://front.deod.ai/register?ref=" + user.wallet_address,
                                             );
                                             alert("Copied to clipboard");
                                         }}
                                         title="Copy to clipboard"
                                     >
                                         <span className="text-xs">
-                                            {"https://deod.ai/register?ref=" + user.wallet_address}
+                                            {"https://front.deod.ai/register?ref=" + user.wallet_address}
                                         </span>{" "}
                                         <Copy className="w-4 h-4" />
                                     </a>
