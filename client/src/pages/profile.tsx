@@ -84,6 +84,7 @@ export default function Profile() {
     };
 
     console.log("hasPurchesedCourse", hasPurchesedCourse);
+    console.log("isReferalActive", user?.isReferalActive);
 
     const copyAddress = (address: string, id: string) => {
         navigator.clipboard.writeText(address);
@@ -135,7 +136,7 @@ export default function Profile() {
                             <p className="text-muted-foreground text-sm">
                                 {user.phone}
                             </p>
-                            {hasPurchesedCourse ? (
+                            {hasPurchesedCourse || user.isReferalActive ? (
                                 <p className="text-muted-foreground text-sm mt-3">
                                     Refferal Link:{" "}
                                     <a
