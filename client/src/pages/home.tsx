@@ -499,9 +499,9 @@ export default function Home() {
                         </Button>
                     </div>
 
-                    <p className="mt-6 text-sm text-blue-200">
+                    {/* <p className="mt-6 text-sm text-blue-200">
                         * Includes certificate of completion
-                    </p>
+                    </p> */}
                 </div>
             </section>
 

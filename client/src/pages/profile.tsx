@@ -11,7 +11,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { CLAIM_URL, PURCHASE_CONTRACT_ADDRESS } from "@/config/env";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Search } from "lucide-react";
 import { ethers } from "ethers";
 import { PURCHASE_CONTRACT_ABI } from "@/config/abi";
 
@@ -23,6 +23,7 @@ export default function Profile() {
     const [couponData, setCouponData] = useState<any>(null);
     const [hasPurchesedCourse, setHasPurchesedCourse] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [userSearch, setUserSearch] = useState("");
     const [adminStats, setAdminStats] = useState<{
         users: any[];
         total_users: number;
@@ -141,14 +142,14 @@ export default function Profile() {
                                         className="text-blue-600 cursor-pointer flex items-center justify-center  gap-2"
                                         onClick={() => {
                                             navigator.clipboard.writeText(
-                                               "https://front.deod.ai/register?ref=" + user.wallet_address,
+                                               "https://deod.ai/register?ref=" + user.wallet_address,
                                             );
                                             alert("Copied to clipboard");
                                         }}
                                         title="Copy to clipboard"
                                     >
                                         <span className="text-xs">
-                                            {"https://front.deod.ai/register?ref=" + user.wallet_address}
+                                            {"https://deod.ai/register?ref=" + user.wallet_address}
                                         </span>{" "}
                                         <Copy className="w-4 h-4" />
                                     </a>
@@ -354,9 +355,19 @@ export default function Profile() {
                         {/* Admin Users Table */}
                         <Card className="shadow-lg">
                             <CardContent className="p-6">
-                                <h2 className="text-xl font-semibold mb-4">
-                                    All Users
-                                </h2>
+                                <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+                                    <h2 className="text-xl font-semibold">All Users</h2>
+                                    <div className="relative w-full sm:w-72">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search by name, email, phone, wallet..."
+                                            value={userSearch}
+                                            onChange={(e) => setUserSearch(e.target.value)}
+                                            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                        />
+                                    </div>
+                                </div>
                                 <div className="overflow-x-auto rounded-xl border">
                                     <table className="w-full text-sm">
                                         <thead>
@@ -382,7 +393,18 @@ export default function Profile() {
                                                     </td>
                                                 </tr>
                                             )}
-                                            {(adminStats?.users ?? []).map((u: any, i: number) => (
+                                            {(adminStats?.users ?? [])
+                                                .filter((u: any) => {
+                                                    const q = userSearch.toLowerCase().trim();
+                                                    if (!q) return true;
+                                                    return (
+                                                        u.name?.toLowerCase().includes(q) ||
+                                                        u.email?.toLowerCase().includes(q) ||
+                                                        u.phone?.toLowerCase().includes(q) ||
+                                                        u.wallet_address?.toLowerCase().includes(q)
+                                                    );
+                                                })
+                                                .map((u: any, i: number) => (
                                                 <tr key={u._id} className="hover:bg-muted/30 transition-colors">
                                                     <td className="px-4 py-3 text-muted-foreground">{i + 1}</td>
                                                     <td className="px-4 py-3 font-medium capitalize">{u.name}</td>
