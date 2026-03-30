@@ -41,6 +41,7 @@ import {
     DEOD_TOKEN_ADDRESS,
     NETWORK,
     PURCHASE_CONTRACT_ADDRESS,
+    RAZOR_PAY_API_KEY,
     STAKING_CONTRACT_ADDRESS,
 } from "@/config/env";
 import { switchNetworks } from "@/utils/switchNetwork";
@@ -127,6 +128,12 @@ const cardVariants = {
     }),
 };
 
+declare global {
+    interface Window {
+        Razorpay: any;
+    }
+}
+
 const featuredCourses = [
     {
         title: "Build Your First AI Chatbot",
@@ -181,6 +188,9 @@ function getLevelColor(level: string) {
 export default function Learn() {
     const [open, setOpen] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("");
+    const [enrollPaymentMethod, setEnrollPaymentMethod] = useState<
+        "DEOD" | "INR"
+    >("DEOD");
     // const couponCode = "DEOD50";
     const [selectedPlan, setSelectedPlan] = useState<any>(null);
     const [enrollOpen, setEnrollOpen] = useState(false);
@@ -193,6 +203,7 @@ export default function Learn() {
     const [couponData, setCouponData] = useState<any>(null);
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
+    const [processing, setProcessing] = useState(false);
     // Check for existing coupons
     const [purchasedPackageIds, setPurchasedPackageIds] = useState<string[]>(
         [],
@@ -226,6 +237,8 @@ export default function Learn() {
         };
         fetchUserCoupons();
     }, [open, enrollOpen]); // Re-fetch when modals close/open to refresh state
+
+    // DEOD payment method
 
     const createCoupon = async () => {
         if (!selectedPlan || !selectedPlan._id) {
@@ -387,10 +400,16 @@ export default function Learn() {
             packageId: selectedPlan._id,
             senderWalletAddress: walletAddress,
             transactionHash: txHash,
-            stackingDeodAmt: Number(finalAmmountForStakingAndPurchase * (deodRate || 187.89)).toFixed(6),
-            purchaseDeodAmt: Number(finalAmmountForStakingAndPurchase * (deodRate || 187.89)).toFixed(6),
+            stackingDeodAmt: Number(
+                finalAmmountForStakingAndPurchase * (deodRate || 187.89),
+            ).toFixed(6),
+            purchaseDeodAmt: Number(
+                finalAmmountForStakingAndPurchase * (deodRate || 187.89),
+            ).toFixed(6),
             deodAmount: Number(
-                (selectedPlan.discountedPrice * (deodRate || 187.89)).toFixed(6),
+                (selectedPlan.discountedPrice * (deodRate || 187.89)).toFixed(
+                    6,
+                ),
             ),
             usdAmount: Number(selectedPlan.discountedPrice),
         };
@@ -445,6 +464,118 @@ export default function Learn() {
         } finally {
             setCouponLoading(false);
         }
+    };
+
+    // Razorpay payment method
+    const handleInitiatePaymentWithRazorpay = async (
+        selectedPlanId: string,
+        amount: number,
+    ) => {
+        if (!selectedPlan) return;
+        const token = localStorage.getItem("token");
+        if (!token) {
+            toast({
+                variant: "destructive",
+                title: "Not Authenticated",
+                description: "Please login to continue",
+            });
+            return;
+        }
+
+        // const data = {
+        //     invoiceId: invoiceId,
+        //     amount: amount,
+        // };
+        // console.log(data);
+        // const response = await initiatePayment(token, data);
+        // if (response.status) {
+        //     console.log(response);
+        //     setLoading(false);
+        //     // Pass orderId directly to avoid state update delay issues
+        handleProcessPayment(amount, selectedPlanId);
+        // } else {
+        //     setError(response.message);
+        // }
+    };
+
+    const handleProcessPayment = async (amount: number, rzpOrderId: string) => {
+        if (!selectedPlan) return;
+        setProcessing(true);
+        const options: any = {
+            key: RAZOR_PAY_API_KEY,
+            amount: Math.round(amount * 100), // Razorpay expects amount in paise (multiply by 100)
+            currency: "USD",
+            name: "Deod AI",
+            description: `Payment for ${selectedPlan.title}`,
+            image: "https://billing.biztechnologies.in/images/logo.png",
+            // Omit order_id in test mode since there is no backend generating an order starting with 'order_'.
+            // Passing a MongoDB ObjectId will cause 'Invalid order_id' error.
+            // order_id: rzpOrderId,
+            handler: async function (rzpResponse: any) {
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    toast({
+                        variant: "destructive",
+                        title: "Not Authenticated",
+                        description: "Please login to continue",
+                    });
+                    return;
+                }
+
+                // Show success toast for test environment
+                toast({
+                    title: "Payment Successful",
+                    description: "Payment captured successfully in test mode.",
+                });
+
+                // console.log("Payment Successful:", rzpResponse);
+                // console.log("Payment ID:", rzpResponse.razorpay_payment_id);
+                // console.log("Order ID:", rzpResponse.razorpay_order_id);
+                // console.log("Signature:", rzpResponse.razorpay_signature);
+                const data = {
+                    invoiceId: "invoiceId",
+                    razorpay_payment_id: rzpResponse.razorpay_payment_id,
+                    razorpay_order_id: rzpOrderId,
+                    razorpay_signature: rzpResponse.razorpay_signature,
+                };
+                // const res = await verifyPayment(token, data);
+                // console.log("Payment Response:", res);
+                // if (res.status) {
+                //     setPaymentResult("success");
+                //     fetchInvoice();
+                //     if (res.data?.pdfUrl) {
+                //         setPdfUrl(res.data.pdfUrl);
+                //     }
+                // } else {
+                //     setPaymentResult("failed");
+                //     setError(res.message || "Payment verification failed");
+                // }
+                setProcessing(false);
+            },
+            prefill: {
+                name: "[CLIENT_NAME]",
+                email: "[EMAIL_ADDRESS]",
+                contact: "[CLIENT_PHONE]",
+            },
+            notes: {
+                address: "[CLIENT_ADDRESS]",
+            },
+            theme: {
+                color: "#2563eb",
+            },
+            modal: {
+                ondismiss: function () {
+                    setProcessing(false);
+                },
+            },
+        };
+        const rzp1 = new window.Razorpay(options);
+        rzp1.on("payment.failed", function (response: any) {
+            console.error("Payment Failed:", response.error);
+            setProcessing(false);
+            alert(`Payment Failed: ${response.error.description}`);
+        });
+        rzp1.open();
     };
 
     useEffect(() => {
@@ -674,86 +805,101 @@ export default function Learn() {
             ${plan.isPopular ? "border-indigo-600" : "border-border"}
           `}
                             >
-                                {plan.isPopular && (
-                                    <span
-                                        className="absolute -top-3 left-1/2 -translate-x-1/2
-              bg-indigo-600 text-white text-sm px-4 py-1 rounded-full"
-                                    >
-                                        Most Popular
-                                    </span>
-                                )}
-
-                                {/* Title */}
-                                {/* Title */}
-                                <h2 className="text-2xl font-bold">
-                                    {plan.title}
-                                </h2>
-
-                                <p className="text-indigo-600 font-medium capitalize">
-                                    {plan.level} level
-                                </p>
-
-                                {/* Price */}
-                                <div className="mt-6 flex items-end justify-center gap-2">
-                                    <span className="line-through text-muted-foreground">
-                                        ${plan.originalPrice}
-                                    </span>
-
-                                    <span className="text-4xl font-bold">
-                                        ${plan.discountedPrice}
-                                    </span>
-
-                                    <span className="text-sm text-muted-foreground">
-                                        {plan.currency}
-                                    </span>
-                                </div>
-
-                                {/* Features */}
-                                <div className="mt-6 text-left">
-                                    <h4 className="font-semibold mb-2">
-                                        What you’ll get:
-                                    </h4>
-                                    <ul className="space-y-2 text-sm text-muted-foreground">
-                                        {plan.features.map(
-                                            (feature: string, i: number) => (
-                                                <li
-                                                    key={i}
-                                                    className="flex gap-2"
-                                                >
-                                                    <CheckCircle2 className="h-4 w-4 text-indigo-600 mt-0.5" />
-                                                    <span>{feature}</span>
-                                                </li>
-                                            ),
+                                <div className="flex flex-col h-full justify-between">
+                                    <div className="flex-1">
+                                        {plan.isPopular && (
+                                            <span
+                                                className="absolute -top-3 left-1/2 -translate-x-1/2
+                                            bg-indigo-600 text-white text-sm px-4 py-1 rounded-full"
+                                            >
+                                                Most Popular
+                                            </span>
                                         )}
-                                    </ul>
+
+                                        {/* Title */}
+                                        <h2 className="text-2xl font-bold">
+                                            {plan.title}
+                                        </h2>
+
+                                        <p className="text-indigo-600 font-medium capitalize">
+                                            {plan.level} level
+                                        </p>
+
+                                        {/* Price */}
+                                        <div className="mt-6 flex items-end justify-center gap-2">
+                                            <span className="line-through text-muted-foreground">
+                                                ${plan.originalPrice}
+                                            </span>
+
+                                            <span className="text-4xl font-bold">
+                                                ${plan.discountedPrice}
+                                            </span>
+
+                                            <span className="text-sm text-muted-foreground">
+                                                {plan.currency}
+                                            </span>
+                                        </div>
+
+                                        {/* Features */}
+                                        <div className="mt-6 text-left">
+                                            <h4 className="font-semibold mb-2">
+                                                What you’ll get:
+                                            </h4>
+                                            <ul className="space-y-2 text-sm text-muted-foreground">
+                                                {plan.features.map(
+                                                    (
+                                                        feature: string,
+                                                        i: number,
+                                                    ) => (
+                                                        <li
+                                                            key={i}
+                                                            className="flex gap-2"
+                                                        >
+                                                            <CheckCircle2 className="h-4 w-4 text-indigo-600 mt-0.5" />
+                                                            <span>
+                                                                {feature}
+                                                            </span>
+                                                        </li>
+                                                    ),
+                                                )}
+                                            </ul>
+                                        </div>
+
+                                        {/* Best For */}
+                                        <p className="mt-4 text-sm text-muted-foreground">
+                                            <strong className="text-foreground">
+                                                Best for:
+                                            </strong>{" "}
+                                            {plan.bestFor.join(", ")}
+                                        </p>
+                                    </div>
+                                    <div className="mt-auto">
+                                        {/* CTA */}
+                                        <button
+                                            onClick={() =>
+                                                handleEnrollClick(plan)
+                                            }
+                                            disabled={purchasedPackageIds.includes(
+                                                plan._id,
+                                            )}
+                                            className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
+                                                purchasedPackageIds.includes(
+                                                    plan._id,
+                                                )
+                                                    ? "bg-green-600 text-white cursor-not-allowed opacity-80"
+                                                    : plan.isPopular
+                                                      ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                                                      : "bg-gray-900 text-white hover:bg-gray-800"
+                                            }`}
+                                        >
+                                            {purchasedPackageIds.includes(
+                                                plan._id,
+                                            )
+                                                ? "Subscribed"
+                                                : "Buy Package"}
+                                        </button>
+                                    </div>
                                 </div>
-
-                                {/* Best For */}
-                                <p className="mt-4 text-sm text-muted-foreground">
-                                    <strong className="text-foreground">
-                                        Best for:
-                                    </strong>{" "}
-                                    {plan.bestFor.join(", ")}
-                                </p>
-
-                                {/* CTA */}
-                                <button
-                                    onClick={() => handleEnrollClick(plan)}
-                                    disabled={purchasedPackageIds.includes(
-                                        plan._id,
-                                    )}
-                                    className={`mt-6 w-full py-3 rounded-xl font-semibold transition ${
-                                        purchasedPackageIds.includes(plan._id)
-                                            ? "bg-green-600 text-white cursor-not-allowed opacity-80"
-                                            : plan.isPopular
-                                              ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                                              : "bg-gray-900 text-white hover:bg-gray-800"
-                                    }`}
-                                >
-                                    {purchasedPackageIds.includes(plan._id)
-                                        ? "Subscribed"
-                                        : "Buy Package"}
-                                </button>
                             </motion.div>
                         ))}
                     </div>
@@ -1007,6 +1153,34 @@ export default function Learn() {
                         </div>
                     ) : (
                         <div>
+                            {/* Payment Toggle */}
+                            <div className="flex bg-muted p-1 rounded-lg mb-6 max-w-fit mx-auto w-full justify-center">
+                                <button
+                                    className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                                        enrollPaymentMethod === "DEOD"
+                                            ? "bg-background shadow text-foreground"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    }`}
+                                    onClick={() =>
+                                        setEnrollPaymentMethod("DEOD")
+                                    }
+                                >
+                                    Pay with DEOD
+                                </button>
+                                <button
+                                    className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                                        enrollPaymentMethod === "INR"
+                                            ? "bg-background shadow text-foreground"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    }`}
+                                    onClick={() =>
+                                        setEnrollPaymentMethod("INR")
+                                    }
+                                >
+                                    Pay In INR
+                                </button>
+                            </div>
+
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-4 sm:gap-2">
                                 <div className="pr-2">
                                     <h2 className="text-xl sm:text-2xl font-bold break-words">
@@ -1017,16 +1191,18 @@ export default function Learn() {
                                     </p>
                                 </div>
 
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="shrink-0 w-fit bg-indigo-600 text-white"
-                                    onClick={connectMetaMask}
-                                >
-                                    {walletAddress
-                                        ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
-                                        : "Connect Wallet"}
-                                </Button>
+                                {enrollPaymentMethod === "DEOD" && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="shrink-0 w-fit bg-indigo-600 text-white"
+                                        onClick={connectMetaMask}
+                                    >
+                                        {walletAddress
+                                            ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+                                            : "Connect Wallet"}
+                                    </Button>
+                                )}
                             </div>
 
                             <div className="flex items-end gap-3 mb-2">
@@ -1038,7 +1214,7 @@ export default function Learn() {
                                 </span>
                             </div>
 
-                            {deodRate && (
+                            {enrollPaymentMethod === "DEOD" && deodRate && (
                                 <>
                                     <p className="text-sm text-muted-foreground break-words">
                                         1 USDT ≈{" "}
@@ -1059,38 +1235,58 @@ export default function Learn() {
                                 </>
                             )}
 
-                            <p className="text-sm text-muted-foreground mb-6">
-                                The amount shown may vary based on the current
-                                exchange rate of DEOD.
-                            </p>
+                            {enrollPaymentMethod === "DEOD" && (
+                                <p className="text-sm text-muted-foreground mb-6">
+                                    The amount shown may vary based on the
+                                    current exchange rate of DEOD.
+                                </p>
+                            )}
 
-                            <div className="flex flex-col gap-3 mb-6">
-                                <Badge className="whitespace-normal h-auto py-2 text-left leading-relaxed">
-                                    {/* <span className="font-bold mr-1">
-                                        
-                                    </span>{" "} */}
-                                    You will be staking 50% of the total amount
-                                    of package, which you can claim from your
-                                    dashboard later.
-                                </Badge>
+                            {enrollPaymentMethod === "DEOD" && (
+                                <div className="flex flex-col gap-3 mb-6">
+                                    <Badge className="whitespace-normal h-auto py-2 text-left leading-relaxed">
+                                        {/* <span className="font-bold mr-1">
+                                            
+                                        </span>{" "} */}
+                                        You will be staking 50% of the total
+                                        amount of package, which you can claim
+                                        from your dashboard later.
+                                    </Badge>
 
-                                <Badge className="whitespace-normal h-auto py-2 text-left leading-relaxed bg-yellow-600 hover:bg-yellow-700 text-white">
-                                    <span className="font-bold mr-1">
-                                        Pro Tip:
-                                    </span>{" "}
-                                    Please connect your registered wallet
-                                </Badge>
-                            </div>
+                                    <Badge className="whitespace-normal h-auto py-2 text-left leading-relaxed bg-yellow-600 hover:bg-yellow-700 text-white">
+                                        <span className="font-bold mr-1">
+                                            Pro Tip:
+                                        </span>{" "}
+                                        Please connect your registered wallet
+                                    </Badge>
+                                </div>
+                            )}
 
-                            <Button
-                                className="w-full bg-[#1e3a8a] text-white"
-                                disabled={couponLoading}
-                                onClick={createCoupon}
-                            >
-                                {couponLoading
-                                    ? "Generating Coupon..."
-                                    : "Buy Now"}
-                            </Button>
+                            {enrollPaymentMethod === "DEOD" ? (
+                                <Button
+                                    className="w-full bg-[#1e3a8a] text-white"
+                                    disabled={couponLoading}
+                                    onClick={createCoupon}
+                                >
+                                    {couponLoading
+                                        ? "Generating Coupon..."
+                                        : "Buy Now"}
+                                </Button>
+                            ) : (
+                                <Button
+                                    className="w-full bg-[#1e3a8a] text-white mt-4"
+                                    onClick={() =>
+                                        handleInitiatePaymentWithRazorpay(
+                                            selectedPlan._id,
+                                            selectedPlan.discountedPrice,
+                                        )
+                                    }
+                                >
+                                    {processing
+                                        ? "Processing..."
+                                        : "Pay with Razorpay"}
+                                </Button>
+                            )}
                         </div>
                     )}
                 </DialogContent>

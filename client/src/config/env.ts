@@ -10,6 +10,7 @@
 // export const DEOD_TOKEN_ADDRESS = "0x3fb98B9DaebFdaA06b72Df9704aDe353500e7CFf";
 // export const STAKING_CONTRACT_ADDRESS = "0x7696Bd4E85f38115a1F258bF4613D269bEa00EcD";
 // export const NETWORK = "bnbTestnet";
+export const RAZOR_PAY_API_KEY="rzp_test_Rz0imSQNZLfeTj"; 
 
 
 
