@@ -69,6 +69,95 @@ export default function Register() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [, setLocation] = useLocation();
 
+    // OTP related state
+    const [isOtpSent, setIsOtpSent] = useState(false);
+    const [isEmailVerified, setIsEmailVerified] = useState(false);
+    const [otp, setOtp] = useState("");
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [verifyLoading, setVerifyLoading] = useState(false);
+
+    const handleSendOtp = async () => {
+        if (!form.email) {
+            toast({
+                title: "Error ❌",
+                description: "Email is required to send OTP",
+                variant: "destructive",
+            });
+            return;
+        }
+        setOtpLoading(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/v1/auth/send-otp`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email: form.email }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || (data.status && data.status !== 200)) {
+                throw new Error(data.message || "Failed to send OTP");
+            }
+
+            setIsOtpSent(true);
+            toast({
+                title: "OTP Sent! 🎉",
+                description: data.message || "Verification email sent successfully!",
+            });
+        } catch (err: any) {
+            toast({
+                title: "Error ❌",
+                description: err.message || "Something went wrong while sending OTP",
+                variant: "destructive",
+            });
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async () => {
+        if (!otp) {
+            toast({
+                title: "Error ❌",
+                description: "Please enter the OTP",
+                variant: "destructive",
+            });
+            return;
+        }
+        setVerifyLoading(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/v1/auth/verify-email`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email: form.email, otp }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || (data.status && data.status !== 200)) {
+                throw new Error(data.message || "Failed to verify OTP");
+            }
+
+            setIsEmailVerified(true);
+            toast({
+                title: "Email Verified ✅",
+                description: data.message || "Your email has been verified successfully.",
+            });
+        } catch (err: any) {
+            toast({
+                title: "Error ❌",
+                description: err.message || "Something went wrong while verifying OTP",
+                variant: "destructive",
+            });
+        } finally {
+            setVerifyLoading(false);
+        }
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
@@ -233,13 +322,63 @@ export default function Register() {
                                 placeholder="Email address"
                                 value={form.email}
                                 onChange={handleChange}
+                                disabled={isOtpSent || isEmailVerified}
                                 required
-                                className="w-full pl-10 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
+                                className={`w-full pl-10 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none ${isOtpSent || isEmailVerified ? "opacity-70 cursor-not-allowed" : ""}`}
                             />
                         </div>
 
-                        <div className="relative">
-                            <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        {!isEmailVerified && !isOtpSent && (
+                            <Button
+                                type="button"
+                                size="lg"
+                                disabled={otpLoading}
+                                onClick={handleSendOtp}
+                                className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+                            >
+                                {otpLoading ? "Sending OTP..." : "Send OTP"}
+                            </Button>
+                        )}
+
+                        {!isEmailVerified && isOtpSent && (
+                            <>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <input
+                                        type="text"
+                                        name="otp"
+                                        placeholder="Enter OTP"
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2 rounded-xl border bg-background focus:ring-2 focus:ring-[#1e3a8a] outline-none"
+                                    />
+                                </div>
+                                <Button
+                                    type="button"
+                                    size="lg"
+                                    disabled={verifyLoading}
+                                    onClick={handleVerifyOtp}
+                                    className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white"
+                                >
+                                    {verifyLoading ? "Verifying..." : "Verify Email"}
+                                </Button>
+                                <div className="text-center mt-2">
+                                    <button
+                                        type="button"
+                                        disabled={otpLoading}
+                                        onClick={handleSendOtp}
+                                        className="text-sm font-medium text-[#1e3a8a] hover:underline disabled:opacity-50"
+                                    >
+                                        {otpLoading ? "Resending..." : "Didn't receive code? Resend"}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
+                        {isEmailVerified && (
+                            <>
+                                <div className="relative">
+                                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                             <input
                                 type="tel"
                                 name="phone"
@@ -335,6 +474,8 @@ export default function Register() {
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             )}
                         </Button>
+                            </>
+                        )}
                     </form>
 
                     <p className="text-sm text-center text-muted-foreground mt-6">
