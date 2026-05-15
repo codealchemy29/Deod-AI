@@ -192,9 +192,9 @@ export default function Create() {
             </Badge>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Create Your Own{" "}
+              Know Your{" "}
               <span className="bg-gradient-to-r from-[#1e3a8a] via-blue-700 to-teal-500 dark:from-blue-400 dark:to-teal-400 bg-clip-text text-transparent">
-                AI Agent
+                Agent
               </span>
             </h1>
 
@@ -252,7 +252,7 @@ export default function Create() {
       </section>
 
       {/* ================= BUILDER PREVIEW ================= */}
-      <section className="py-16 md:py-24 bg-muted/30">
+      {/* <section className="py-16 md:py-24 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
 
@@ -377,14 +377,14 @@ export default function Create() {
 
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ================= VERIFY & DEPLOY ================= */}
       <section className="py-16 md:py-24 bg-background border-t border-border">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Deploy & Validate Your Agent
+              Verify Your Agent
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               After configuration, your agent seamlessly moves through the Decentrawood deployment and verification pipeline.

@@ -234,9 +234,9 @@ export default function Submit() {
         className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight"
         data-testid="text-submit-title"
       >
-        Deploy, Interact & Monetize{" "}
+        Use Your{" "}
         <span className="bg-gradient-to-r from-[#1e3a8a] via-blue-700 to-teal-500 dark:from-blue-400 dark:to-teal-400 bg-clip-text text-transparent">
-          Autonomous AI Agents
+          Agent
         </span>
       </h1>
 
