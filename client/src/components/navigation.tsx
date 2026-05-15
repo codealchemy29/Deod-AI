@@ -46,7 +46,7 @@ export function Navigation() {
     <div className="relative rounded-lg p-2 flex items-center justify-center">
       {/* Light Theme Logo (Visible by default, hidden in dark mode) */}
       <img 
-        src="/image-removebg-preview.png"  
+        src="/bizaiskilllogo.png"  
         alt="Logo" 
         className="h-20 w-[130px] md:h-28 md:w-[180px] object-contain dark:hidden" 
       />

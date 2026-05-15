@@ -38,6 +38,16 @@ import {
   Send,
   PieChart,
   Loader2,
+  Gamepad2,
+  Map,
+  Image as ImageIcon,
+  Video,
+  Heart,
+  Network,
+  Cpu,
+  Coins,
+  ShoppingCart,
+  Bot
 } from "lucide-react";
 
 const categories = [
@@ -93,6 +103,61 @@ const mockEarnings = {
   ],
 };
 
+const useCases = [
+  {
+    title: "Gaming Agents",
+    icon: Gamepad2,
+    features: ["Generate quests", "Coach players", "Manage tournaments", "Detect cheating", "Adapt NPC behavior"],
+    description: "The CREATE → TRAIN → DEPLOY → MONETIZE lifecycle enables continuous learning from gameplay interactions.",
+    color: "from-[#1e3a8a] to-blue-500"
+  },
+  {
+    title: "LAND Management Agents",
+    icon: Map,
+    features: ["Handle rentals", "Manage commerce", "Schedule events", "Analyze traffic", "Optimize LAND profitability"],
+    description: "LAND Intelligence Agents autonomously manage your virtual real estate. All activities generate DEOD flows automatically.",
+    color: "from-teal-600 to-cyan-500"
+  },
+  {
+    title: "NFT Marketplace Agents",
+    icon: ImageIcon,
+    features: ["Fraud detection", "Rarity analysis", "Price prediction", "Automated listings", "Portfolio advisory"],
+    description: "These systems create intelligent marketplace infrastructure for your NFT assets.",
+    color: "from-cyan-600 to-teal-600"
+  },
+  {
+    title: "Creator & Media Agents",
+    icon: Video,
+    features: ["Generate music", "Create videos", "Produce films", "Mint NFTs", "Manage streaming royalties"],
+    description: "All creator assets remain fully owned by the user through smart contracts.",
+    color: "from-[#1e3a8a] to-indigo-600"
+  },
+  {
+    title: "Avatar & Companion Agents",
+    icon: Heart,
+    features: ["Autonomous interactions", "Attending virtual events", "Managing user tasks", "Maintaining long-term memory"],
+    description: "Companion Agents maintain emotional continuity and relationship context through semantic memory systems.",
+    color: "from-pink-600 to-rose-500"
+  }
+];
+
+const infrastructure = [
+  "Multi-LLM orchestration",
+  "DAI Agent SDK",
+  "Polygon blockchain",
+  "PostgreSQL + Redis + Pinecone memory stack",
+  "Kubernetes-based scaling",
+  "IPFS decentralized storage"
+];
+
+const monetization = [
+  "Monthly subscriptions",
+  "Usage-based payments",
+  "Licensing fees",
+  "Marketplace royalties",
+  "Revenue-share agreements"
+];
+
 const formSchema = insertToolSubmissionSchema.extend({
   toolName: z.string().min(2, "Tool name must be at least 2 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -105,7 +170,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function Submit() {
   const { toast } = useToast();
-  
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -145,35 +210,70 @@ export default function Submit() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-16 md:py-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-teal-900/10 to-blue-900/20" />
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-72 h-72 bg-teal-500/20 rounded-full blur-3xl" />
+      <section className="relative overflow-hidden py-16 md:py-20 border-b border-border">
+
+  {/* background */}
+  <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a]/5 via-background to-teal-500/5 dark:from-[#1e3a8a]/10 dark:via-background dark:to-teal-500/10" />
+
+  {/* glow effects */}
+  <div className="absolute top-10 right-10 w-64 h-64 bg-[#1e3a8a]/10 rounded-full blur-3xl" />
+  <div className="absolute bottom-10 left-10 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl" />
+
+  <div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+
+    <div className="max-w-4xl">
+
+      {/* badge */}
+      <Badge className="mb-5 bg-[#1e3a8a]/10 text-[#1e3a8a] dark:text-blue-300 border-[#1e3a8a]/20">
+        <Upload className="w-3 h-3 mr-1" />
+        Decentrawood AI Infrastructure
+      </Badge>
+
+      {/* heading */}
+      <h1
+        className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight"
+        data-testid="text-submit-title"
+      >
+        Deploy, Interact & Monetize{" "}
+        <span className="bg-gradient-to-r from-[#1e3a8a] via-blue-700 to-teal-500 dark:from-blue-400 dark:to-teal-400 bg-clip-text text-transparent">
+          Autonomous AI Agents
+        </span>
+      </h1>
+
+      {/* subtitle */}
+      <p
+        className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed max-w-3xl"
+        data-testid="text-submit-subtitle"
+      >
+        Once deployed, your AI agents become active participants inside the
+        Decentrawood ecosystem — powering intelligent gameplay, virtual commerce,
+        AI-generated media, autonomous interactions, and DEOD-powered revenue
+        systems across the metaverse.
+      </p>
+
+      {/* quick feature pills */}
+      <div className="flex flex-wrap gap-3">
+
+        <div className="px-4 py-2 rounded-full border border-border bg-background/80 backdrop-blur-sm text-sm font-medium text-foreground shadow-sm">
+          11+ AI Agent Categories
         </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <Badge variant="secondary" className="mb-4 bg-blue-100 text-blue-700 hover:bg-blue-100" data-testid="badge-submit-hero">
-              <Upload className="w-3 h-3 mr-1" />
-              Submit Your Tool
-            </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6" data-testid="text-submit-title">
-              Submit Your AI Tool &{" "}
-              <span className="bg-gradient-to-r from-blue-600 via-teal-600 to-blue-500 bg-clip-text text-transparent">
-                Earn 90% Revenue
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed" data-testid="text-submit-subtitle">
-              Join thousands of creators earning with DEODAI. Submit your tool, 
-              get verified, and start earning 90% of every sale.
-            </p>
-          </div>
+
+        <div className="px-4 py-2 rounded-full border border-border bg-background/80 backdrop-blur-sm text-sm font-medium text-foreground shadow-sm">
+          Multi-LLM Infrastructure
         </div>
-      </section>
+
+        <div className="px-4 py-2 rounded-full border border-border bg-background/80 backdrop-blur-sm text-sm font-medium text-foreground shadow-sm">
+          Polygon + Web3 Powered
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
 
       {/* Revenue Highlight */}
-      <section className="relative overflow-hidden py-16 md:py-20">
+      {/* <section className="relative overflow-hidden py-16 md:py-20">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-teal-900/90 to-blue-900/90" />
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-64 h-64 bg-blue-500/30 rounded-full blur-3xl" />
@@ -216,7 +316,7 @@ export default function Submit() {
               </div>
             </div>
             
-            {/* Revenue Split Visual */}
+        
             <div className="flex justify-center">
               <div className="relative">
                 <div className="w-64 h-64 md:w-80 md:h-80 relative" data-testid="visual-revenue-split">
@@ -267,13 +367,13 @@ export default function Submit() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Submission Form & Benefits */}
-      <section className="py-16 md:py-24">
+      {/* <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12">
-            {/* Submission Form */}
+            
             <div>
               <h2 className="text-3xl font-bold mb-6" data-testid="text-form-title">
                 Submit Your Tool
@@ -300,7 +400,7 @@ export default function Submit() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name="description"
@@ -320,7 +420,7 @@ export default function Submit() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name="category"
@@ -345,7 +445,7 @@ export default function Submit() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name="websiteUrl"
@@ -365,7 +465,7 @@ export default function Submit() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name="creatorEmail"
@@ -385,11 +485,11 @@ export default function Submit() {
                           </FormItem>
                         )}
                       />
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-gradient-to-r from-blue-600 to-teal-500 text-white border-0 hover:opacity-90 transition-opacity" 
-                        size="lg" 
+
+                      <Button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-blue-600 to-teal-500 text-white border-0 hover:opacity-90 transition-opacity"
+                        size="lg"
                         disabled={submitMutation.isPending}
                         data-testid="button-submit-form"
                       >
@@ -405,7 +505,7 @@ export default function Submit() {
                           </>
                         )}
                       </Button>
-                      
+
                       <p className="text-muted-foreground text-sm text-center">
                         By submitting, you agree to our terms of service and creator guidelines.
                       </p>
@@ -414,8 +514,8 @@ export default function Submit() {
                 </CardContent>
               </Card>
             </div>
-            
-            {/* Benefits */}
+
+           
             <div>
               <h2 className="text-3xl font-bold mb-6" data-testid="text-benefits-title">
                 Why Submit to DEODAI?
@@ -438,10 +538,11 @@ export default function Submit() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
+
 
       {/* Earnings Dashboard Preview */}
-      <section className="py-16 md:py-24 bg-card/30">
+      {/* <section className="py-16 md:py-24 bg-card/30">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4 bg-teal-100 text-teal-700" data-testid="badge-dashboard">
@@ -455,7 +556,7 @@ export default function Submit() {
               Get full visibility into your sales, revenue, and payouts with our creator dashboard.
             </p>
           </div>
-          
+
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm max-w-4xl mx-auto" data-testid="card-dashboard-preview">
             <CardHeader className="border-b border-border/50">
               <CardTitle>Earnings Overview</CardTitle>
@@ -475,7 +576,7 @@ export default function Submit() {
                   <div className="text-muted-foreground text-sm">Pending Payout</div>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <h3 className="font-semibold">Your Tools</h3>
                 {mockEarnings.tools.map((tool, index) => (
@@ -493,6 +594,130 @@ export default function Submit() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </section> */}
+
+      {/* ================= USE YOUR AGENT ================= */}
+      <section className="py-16 md:py-24 bg-background border-t border-border">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-[#1e3a8a]/10 text-[#1e3a8a] dark:text-blue-300 border-[#1e3a8a]/20">
+              <Bot className="w-3 h-3 mr-1" />
+              Use Your Agent
+            </Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
+              Active Participants in Decentrawood
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Once deployed, agents become active participants in the Decentrawood ecosystem.
+              Discover how users interact with agents across various verticals.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {useCases.map((useCase, index) => (
+              <Card key={index} className="bg-card border-border hover:shadow-xl transition-all duration-300 group overflow-hidden relative">
+                <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${useCase.color}`} />
+                <CardContent className="p-8">
+                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${useCase.color} flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition-transform`}>
+                    <useCase.icon className="h-7 w-7 text-white" />
+                  </div>
+                  <h3 className="font-bold text-2xl mb-4">{useCase.title}</h3>
+
+                  <div className="space-y-3 mb-6">
+                    {useCase.features.map((feature, i) => (
+                      <div key={i} className="flex items-center text-sm font-medium">
+                        <CheckCircle2 className="h-4 w-4 mr-2 text-teal-500 shrink-0" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-muted-foreground text-sm leading-relaxed p-4 bg-muted/50 rounded-lg border border-border/50">
+                    {useCase.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= MARKETPLACE & INFRASTRUCTURE ================= */}
+      <section className="py-16 md:py-24 bg-muted/30 border-t border-border overflow-hidden relative">
+        <div className="absolute top-1/2 left-0 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl -translate-y-1/2" />
+        <div className="absolute top-1/2 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2" />
+
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
+
+            {/* Marketplace */}
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+                  <ShoppingCart className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 className="text-3xl font-bold">Agent Marketplace & Monetization</h2>
+              </div>
+              <p className="text-muted-foreground text-lg mb-8">
+                The Decentrawood AI Agent Marketplace enables users to interact, trade, and license agents securely using DEOD tokens through smart contracts.
+              </p>
+
+              <Card className="bg-background border-border shadow-sm mb-8">
+                <CardContent className="p-6">
+                  <h4 className="font-semibold text-lg mb-4 flex items-center">
+                    <Coins className="h-5 w-5 mr-2 text-teal-500" />
+                    Marketplace Capabilities
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    {["Buy agents", "Sell agents", "Rent agents", "License agents", "Fractionalize ownership"].map((action, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm font-medium bg-muted/50 p-2 rounded-md">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        {action}
+                      </div>
+                    ))}
+                  </div>
+
+                  <h4 className="font-semibold text-lg mb-4 mt-6 border-t border-border pt-6">Revenue Models</h4>
+                  <div className="space-y-3">
+                    {monetization.map((model, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors">
+                        <span className="font-medium">{model}</span>
+                        <Badge variant="outline" className="bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 hover:bg-teal-100">Active</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Infrastructure */}
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-teal-100 dark:bg-teal-900/40 rounded-lg">
+                  <Network className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+                </div>
+                <h2 className="text-3xl font-bold">Core Infrastructure</h2>
+              </div>
+              <p className="text-muted-foreground text-lg mb-8">
+                This powerful framework runs behind the system to orchestrate all seven Decentrawood verticals from gaming to entertainment and AI commerce.
+              </p>
+
+              <div className="grid gap-4">
+                {infrastructure.map((tech, i) => (
+                  <Card key={i} className="bg-background border-border hover:border-teal-500/50 transition-colors group">
+                    <CardContent className="p-5 flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center group-hover:bg-teal-50 dark:group-hover:bg-teal-900/20 transition-colors">
+                        <Cpu className="h-5 w-5 text-muted-foreground group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors" />
+                      </div>
+                      <span className="font-semibold text-lg">{tech}</span>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+          </div>
         </div>
       </section>
     </div>
